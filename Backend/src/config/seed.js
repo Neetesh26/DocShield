@@ -1,0 +1,575 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+import mongoose from 'mongoose';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import User from '../models/User.js';
+import Department from '../models/Department.js';
+import DocumentType from '../models/DocumentType.js';
+import StorageLocation from '../models/StorageLocation.js';
+import Document from '../models/Document.js';
+import DocumentVersion from '../models/DocumentVersion.js';
+import DocumentRequest from '../models/DocumentRequest.js';
+import Approval from '../models/Approval.js';
+import Handover from '../models/Handover.js';
+import CheckoutRecord from '../models/CheckoutRecord.js';
+import PhysicalAudit from '../models/PhysicalAudit.js';
+import AuditLog from '../models/AuditLog.js';
+import Notification from '../models/Notification.js';
+
+import { generateDocumentQR } from '../services/qrService.js';
+import { ROLES, DOCUMENT_STATUSES, PHYSICAL_STATUSES, AUDIT_ACTIONS, REQUEST_TYPES, REQUEST_STATUSES } from '../constants/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsDir = path.resolve(__dirname, '../uploads');
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Generate a valid minimal PDF file buffer for sample documents
+const createSamplePdf = (filename, title, docNum) => {
+  const filePath = path.join(uploadsDir, filename);
+  if (!fs.existsSync(filePath)) {
+    // Standard minimal valid PDF header & structure containing readable text for pdf-parse
+    const content = `%PDF-1.4
+1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
+2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >> endobj
+4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+5 0 obj << /Length 300 >> stream
+BT
+/F1 16 Tf
+50 720 Td
+(DocuShield GxP Regulated Document: ${docNum}) Tj
+/F1 12 Tf
+0 -30 Td
+(Document Title: ${title}) Tj
+0 -25 Td
+(Department: Quality Assurance / GxP Operations) Tj
+0 -25 Td
+(Effective Date: 2026-01-15 | Next Review: 2027-01-15) Tj
+0 -25 Td
+(Document No: ${docNum}) Tj
+0 -25 Td
+(Version: 1.0) Tj
+0 -25 Td
+(Standard Operating Procedure - Compliance: 21 CFR Part 11) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000224 00000 n 
+0000000305 00000 n 
+trailer << /Size 6 /Root 1 0 R >>
+startxref
+650
+%%EOF`;
+    fs.writeFileSync(filePath, content);
+  }
+  return filePath;
+};
+
+export const seedDatabase = async () => {
+  try {
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/docushield';
+    console.log(`[Seed] Connecting to MongoDB: ${mongoUri}`);
+    await mongoose.connect(mongoUri);
+
+    console.log('[Seed] Clearing existing collections...');
+    await Promise.all([
+      User.deleteMany({}),
+      Department.deleteMany({}),
+      DocumentType.deleteMany({}),
+      StorageLocation.deleteMany({}),
+      Document.deleteMany({}),
+      DocumentVersion.deleteMany({}),
+      DocumentRequest.deleteMany({}),
+      Approval.deleteMany({}),
+      Handover.deleteMany({}),
+      CheckoutRecord.deleteMany({}),
+      PhysicalAudit.deleteMany({}),
+      AuditLog.deleteMany({}),
+      Notification.deleteMany({})
+    ]);
+
+    console.log('[Seed] Creating demo users...');
+    const demoPassword = 'DocuShield@2026';
+
+    const users = await User.create([
+      {
+        name: 'Dr. Sarah Jenkins',
+        email: 'admin@docushield.com',
+        password: demoPassword,
+        role: ROLES.ADMIN,
+        department: 'Quality Assurance',
+        employeeId: 'EMP-ADM-001',
+        designation: 'Head of Quality & Compliance',
+        phone: '+1 (555) 019-2831'
+      },
+      {
+        name: 'Michael Chang',
+        email: 'qa@docushield.com',
+        password: demoPassword,
+        role: ROLES.QA,
+        department: 'Quality Assurance',
+        employeeId: 'EMP-QA-002',
+        designation: 'QA Manager & Lead Auditor',
+        phone: '+1 (555) 019-2832'
+      },
+      {
+        name: 'Elena Rostova',
+        email: 'doccontrol@docushield.com',
+        password: demoPassword,
+        role: ROLES.DOCUMENT_CONTROLLER,
+        department: 'Document Control',
+        employeeId: 'EMP-DC-003',
+        designation: 'Senior Document Controller',
+        phone: '+1 (555) 019-2833'
+      },
+      {
+        name: 'Dr. Rajesh Patel',
+        email: 'depthead@docushield.com',
+        password: demoPassword,
+        role: ROLES.DEPARTMENT_HEAD,
+        department: 'Production',
+        employeeId: 'EMP-PRD-004',
+        designation: 'Director of Pharmaceutical Manufacturing',
+        phone: '+1 (555) 019-2834'
+      },
+      {
+        name: 'Emily Davis',
+        email: 'analyst@docushield.com',
+        password: demoPassword,
+        role: ROLES.EMPLOYEE,
+        department: 'Quality Control',
+        employeeId: 'EMP-QC-005',
+        designation: 'Senior QC Analyst',
+        phone: '+1 (555) 019-2835'
+      }
+    ]);
+
+    const [adminUser, qaUser, docCtrlUser, deptHeadUser, analystUser] = users;
+
+    console.log('[Seed] Creating master departments...');
+    const departments = await Department.create([
+      { name: 'Quality Assurance', code: 'QA', description: 'Overall GxP compliance, validation, audit & document governance', headName: 'Dr. Sarah Jenkins' },
+      { name: 'Quality Control', code: 'QC', description: 'Raw material, in-process, finished product analytical testing', headName: 'Emily Davis' },
+      { name: 'Production', code: 'PROD', description: 'Solid oral dosage, sterile injectable formulation and packaging', headName: 'Dr. Rajesh Patel' },
+      { name: 'Regulatory Affairs', code: 'RA', description: 'FDA/EMA submissions, dossiers, and compliance filings', headName: 'Victoria Price' },
+      { name: 'Research & Development', code: 'RND', description: 'Pre-formulation, analytical method development', headName: 'Dr. Alan Vance' },
+      { name: 'Warehouse & Logistics', code: 'WHS', description: 'Raw material dispensing and controlled cold chain storage', headName: 'Robert Vance' }
+    ]);
+
+    console.log('[Seed] Creating master document types...');
+    const docTypes = await DocumentType.create([
+      { name: 'Standard Operating Procedure (SOP)', code: 'SOP', prefix: 'SOP', retentionYears: 7, reviewIntervalMonths: 12, requiresPhysicalTracking: true },
+      { name: 'Batch Manufacturing Record (BMR)', code: 'BMR', prefix: 'BMR', retentionYears: 10, reviewIntervalMonths: 24, requiresPhysicalTracking: true },
+      { name: 'Batch Packaging Record (BPR)', code: 'BPR', prefix: 'BPR', retentionYears: 10, reviewIntervalMonths: 24, requiresPhysicalTracking: true },
+      { name: 'Validation Protocol / Report', code: 'VAL', prefix: 'VAL', retentionYears: 10, reviewIntervalMonths: 24, requiresPhysicalTracking: true },
+      { name: 'Specification (SPEC)', code: 'SPEC', prefix: 'SPEC', retentionYears: 7, reviewIntervalMonths: 12, requiresPhysicalTracking: true },
+      { name: 'Analytical Method (ATM)', code: 'ATM', prefix: 'ATM', retentionYears: 7, reviewIntervalMonths: 12, requiresPhysicalTracking: true }
+    ]);
+
+    console.log('[Seed] Creating hierarchical physical storage locations...');
+    const locations = await StorageLocation.create([
+      {
+        building: 'Building A',
+        area: 'Central Archive Vault 1',
+        room: '101',
+        rack: '01',
+        shelf: '01',
+        bin: '01',
+        box: 'BX-01',
+        code: 'BLD-A/V1/R101/RK-01/SH-01/BIN-01',
+        capacity: 50,
+        currentOccupancy: 0,
+        department: 'Quality Assurance',
+        status: 'Available',
+        remarks: 'Fire-resistant climate-controlled vault for master QA documents'
+      },
+      {
+        building: 'Building A',
+        area: 'Central Archive Vault 1',
+        room: '101',
+        rack: '01',
+        shelf: '02',
+        bin: '02',
+        code: 'BLD-A/V1/R101/RK-01/SH-02/BIN-02',
+        capacity: 40,
+        currentOccupancy: 0,
+        department: 'Quality Assurance',
+        status: 'Available',
+        remarks: 'Active SOP controlled copy binders'
+      },
+      {
+        building: 'Building B',
+        area: 'Production Records Room',
+        room: '201',
+        rack: '02',
+        shelf: '01',
+        bin: '01',
+        code: 'BLD-B/PRD/R201/RK-02/SH-01/BIN-01',
+        capacity: 60,
+        currentOccupancy: 0,
+        department: 'Production',
+        status: 'Available',
+        remarks: 'Batch manufacturing records archive with biometric access'
+      },
+      {
+        building: 'Building B',
+        area: 'Production Records Room',
+        room: '201',
+        rack: '02',
+        shelf: '02',
+        bin: '02',
+        code: 'BLD-B/PRD/R201/RK-02/SH-02/BIN-02',
+        capacity: 50,
+        currentOccupancy: 0,
+        department: 'Production',
+        status: 'Available',
+        remarks: 'Secondary packaging records storage'
+      },
+      {
+        building: 'Building C',
+        area: 'QC Testing Documentation',
+        room: '301',
+        rack: '03',
+        shelf: '01',
+        bin: '01',
+        code: 'BLD-C/QC/R301/RK-03/SH-01/BIN-01',
+        capacity: 45,
+        currentOccupancy: 0,
+        department: 'Quality Control',
+        status: 'Available',
+        remarks: 'Analytical method validations and raw data logs'
+      }
+    ]);
+
+    const [loc1, loc2, loc3, loc4, loc5] = locations;
+
+    console.log('[Seed] Generating sample documents and PDF files...');
+    const sampleFiles = [
+      {
+        filename: 'sample_sop_qa_0042.pdf',
+        docNum: 'SOP-QA-0042',
+        title: 'Operation, Calibration, and Maintenance of HPLC System (Shimadzu Prominence)',
+        version: '3.0',
+        type: 'Standard Operating Procedure (SOP)',
+        dept: 'Quality Control',
+        product: 'General Analytical Equipment',
+        batch: 'N/A',
+        loc: loc5,
+        custodian: analystUser
+      },
+      {
+        filename: 'sample_bmr_tb_2024.pdf',
+        docNum: 'BMR-TB-2024',
+        title: 'Master Batch Manufacturing Record for Paracetamol 500mg Film-Coated Tablets',
+        version: '1.0',
+        type: 'Batch Manufacturing Record (BMR)',
+        dept: 'Production',
+        product: 'Paracetamol 500mg Tablets',
+        batch: 'BTH-2026-089',
+        loc: loc3,
+        custodian: deptHeadUser
+      },
+      {
+        filename: 'sample_sop_pr_0105.pdf',
+        docNum: 'SOP-PR-0105',
+        title: 'Aseptic Media Fill Qualification and Environmental Monitoring Protocol',
+        version: '2.1',
+        type: 'Standard Operating Procedure (SOP)',
+        dept: 'Quality Assurance',
+        product: 'Sterile Injectable Line 1',
+        batch: 'MF-2026-01',
+        loc: loc1,
+        custodian: qaUser
+      },
+      {
+        filename: 'sample_val_pr_0012.pdf',
+        docNum: 'VAL-PR-0012',
+        title: 'Cleaning Validation Protocol for Fluid Bed Dryer (Glatt FBD-02)',
+        version: '1.0',
+        type: 'Validation Protocol / Report',
+        dept: 'Production',
+        product: 'Solid Oral Granulation Equipment',
+        batch: 'VAL-CLN-2026',
+        loc: loc4,
+        custodian: deptHeadUser
+      },
+      {
+        filename: 'sample_spec_qc_0089.pdf',
+        docNum: 'SPEC-QC-0089',
+        title: 'Finished Product Specification for Metformin Hydrochloride Tablets 850mg',
+        version: '4.0',
+        type: 'Specification (SPEC)',
+        dept: 'Quality Control',
+        product: 'Metformin Hydrochloride 850mg',
+        batch: 'MET-FP-SPEC',
+        loc: loc5,
+        custodian: analystUser
+      }
+    ];
+
+    const createdDocs = [];
+
+    for (const item of sampleFiles) {
+      createSamplePdf(item.filename, item.title, item.docNum);
+
+      const newDoc = new Document({
+        documentNumber: item.docNum,
+        title: item.title,
+        version: item.version,
+        documentType: item.type,
+        department: item.dept,
+        product: item.product,
+        batchNumber: item.batch,
+        effectiveDate: new Date('2026-01-10'),
+        reviewDate: new Date('2027-01-10'),
+        expiryDate: new Date('2031-01-10'),
+        status: DOCUMENT_STATUSES.EFFECTIVE,
+        physicalStatus: PHYSICAL_STATUSES.STORED,
+        preparedBy: 'Dr. Rajesh Patel',
+        reviewedBy: 'Michael Chang',
+        approvedBy: 'Dr. Sarah Jenkins',
+        uploadedBy: adminUser._id,
+        currentCustodian: item.custodian._id,
+        storageLocation: item.loc._id,
+        boxNumber: 'BX-01',
+        fileNumber: `${item.docNum}-F1`,
+        physicalCopiesCount: 2,
+        fileUrl: `/uploads/${item.filename}`,
+        fileName: item.filename,
+        fileSize: 12450,
+        fileMimeType: 'application/pdf',
+        fileHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        tags: ['GxP', 'Validated', item.dept.replace(/\s+/g, ''), 'Regulatory-Ready'],
+        folder: 'Controlled Procedures',
+        description: `Official approved document for ${item.title}. Governed under 21 CFR Part 11.`,
+        qrCodeData: `DOCUSHIELD:${item.docNum}`,
+        legalHold: false,
+        retentionYears: 7
+      });
+
+      const qr = await generateDocumentQR(item.docNum, newDoc._id);
+      newDoc.qrCodeData = qr.payload;
+      newDoc.qrCodeImage = qr.dataUrl;
+
+      await newDoc.save();
+      createdDocs.push(newDoc);
+
+      // Increment occupancy
+      await StorageLocation.findByIdAndUpdate(item.loc._id, { $inc: { currentOccupancy: 1 } });
+
+      // Create Version 1.0 record
+      await DocumentVersion.create({
+        document: newDoc._id,
+        version: item.version,
+        fileUrl: newDoc.fileUrl,
+        fileName: newDoc.fileName,
+        fileSize: newDoc.fileSize,
+        changesDescription: 'Initial effective baseline version',
+        status: DOCUMENT_STATUSES.EFFECTIVE,
+        uploadedBy: adminUser._id
+      });
+    }
+
+    console.log('[Seed] Creating sample requests and approvals...');
+    const req1 = await DocumentRequest.create({
+      requestNumber: 'REQ-2026-0001',
+      requestType: REQUEST_TYPES.PRINT,
+      document: createdDocs[0]._id,
+      requester: analystUser._id,
+      department: 'Quality Control',
+      reason: 'Physical copy needed for routine HPLC line qualification run in QC Lab 3',
+      purpose: 'Operational Testing',
+      urgency: 'Normal',
+      copiesRequested: 1,
+      status: REQUEST_STATUSES.PENDING
+    });
+
+    await Approval.create({
+      request: req1._id,
+      document: createdDocs[0]._id,
+      type: 'Print Request',
+      approver: qaUser._id,
+      status: 'Pending',
+      comments: 'Pending QA verification of controlled copy distribution quota'
+    });
+
+    const req2 = await DocumentRequest.create({
+      requestNumber: 'REQ-2026-0002',
+      requestType: REQUEST_TYPES.CHECKOUT,
+      document: createdDocs[1]._id,
+      requester: deptHeadUser._id,
+      department: 'Production',
+      reason: 'Physical batch record binder required on production floor for batch release packaging',
+      purpose: 'Production Execution',
+      urgency: 'Urgent',
+      expectedReturnDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      status: REQUEST_STATUSES.APPROVED,
+      approvedBy: qaUser._id,
+      approvalDate: new Date()
+    });
+
+    await Approval.create({
+      request: req2._id,
+      document: createdDocs[1]._id,
+      type: 'Checkout Request',
+      approver: qaUser._id,
+      status: 'Approved',
+      comments: 'Approved for production batch execution. Expected return in 5 days.',
+      electronicSignature: {
+        signedBy: 'Michael Chang (EMP-QA-002)',
+        signedAt: new Date(),
+        meaning: 'I approve this record in compliance with 21 CFR Part 11 requirements.'
+      },
+      actionDate: new Date()
+    });
+
+    console.log('[Seed] Creating sample checkout record...');
+    await CheckoutRecord.create({
+      checkoutNumber: 'CHK-2026-0001',
+      document: createdDocs[1]._id,
+      user: deptHeadUser._id,
+      department: 'Production',
+      purpose: 'Production Execution for Paracetamol Batch',
+      checkoutDate: new Date(),
+      expectedReturnDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+      status: 'Active',
+      approvedBy: qaUser._id,
+      conditionOnCheckout: 'Good'
+    });
+
+    await Document.findByIdAndUpdate(createdDocs[1]._id, { physicalStatus: PHYSICAL_STATUSES.CHECKED_OUT });
+
+    console.log('[Seed] Creating sample custody handover...');
+    await Handover.create({
+      handoverNumber: 'HND-2026-0001',
+      documents: [createdDocs[2]._id],
+      previousCustodian: qaUser._id,
+      newCustodian: docCtrlUser._id,
+      initiatedBy: qaUser._id,
+      reason: 'Custody transfer for annual archiving and microfiche scanning',
+      remarks: 'Binder inspected and intact',
+      status: 'Pending Acceptance'
+    });
+
+    console.log('[Seed] Creating sample physical inventory audit...');
+    await PhysicalAudit.create({
+      auditNumber: 'AUD-2026-0001',
+      title: 'Q1 2026 Central Archive Vault 1 Physical Inventory Reconciliation',
+      scheduledDate: new Date(),
+      conductedDate: null,
+      auditor: qaUser._id,
+      storageLocation: loc1._id,
+      status: 'In Progress',
+      summary: {
+        expectedCount: 1,
+        foundCount: 1,
+        missingCount: 0,
+        misplacedCount: 0
+      },
+      items: [
+        {
+          document: createdDocs[2]._id,
+          expectedLocation: loc1.code,
+          actualLocation: loc1.code,
+          status: 'Found',
+          qrVerified: true,
+          condition: 'Good',
+          notes: 'QR scanned and confirmed. Spine label intact.'
+        }
+      ],
+      findings: 'Initial sample audit in progress. Rack 01 conforms with records.'
+    });
+
+    console.log('[Seed] Creating sample notifications...');
+    await Notification.create([
+      {
+        recipient: qaUser._id,
+        title: 'New Print Request REQ-2026-0001',
+        message: 'Emily Davis requested 1 controlled print copy of SOP-QA-0042.',
+        type: 'info',
+        link: '/workflow/approvals'
+      },
+      {
+        recipient: docCtrlUser._id,
+        title: 'Pending Custody Handover HND-2026-0001',
+        message: 'Michael Chang transferred custody of SOP-PR-0105 to you.',
+        type: 'warning',
+        link: '/physical/custody'
+      },
+      {
+        recipient: adminUser._id,
+        title: 'System Initialized in GxP Compliance Mode',
+        message: 'DocuShield repository successfully initialized and seeded with 21 CFR Part 11 audit logging enabled.',
+        type: 'success',
+        link: '/workspace/dashboard'
+      }
+    ]);
+
+    console.log('[Seed] Creating initial GxP Audit Logs...');
+    await AuditLog.create([
+      {
+        userName: adminUser.name,
+        userRole: adminUser.role,
+        action: AUDIT_ACTIONS.LOGIN,
+        entity: 'Authentication',
+        entityId: String(adminUser._id),
+        details: `User ${adminUser.name} logged in with Administrative privileges.`,
+        ipAddress: '127.0.0.1',
+        timestamp: new Date(Date.now() - 3600 * 1000)
+      },
+      {
+        userName: adminUser.name,
+        userRole: adminUser.role,
+        action: AUDIT_ACTIONS.UPLOAD,
+        entity: 'Document',
+        entityId: String(createdDocs[0]._id),
+        details: `Ingested GxP Document SOP-QA-0042 into repository at ${loc5.code}.`,
+        ipAddress: '127.0.0.1',
+        timestamp: new Date(Date.now() - 3000 * 1000)
+      },
+      {
+        userName: qaUser.name,
+        userRole: qaUser.role,
+        action: AUDIT_ACTIONS.APPROVE,
+        entity: 'Approval',
+        entityId: String(createdDocs[1]._id),
+        details: 'Approved physical checkout request CHK-2026-0001 under 21 CFR Part 11.',
+        ipAddress: '127.0.0.1',
+        timestamp: new Date(Date.now() - 1500 * 1000)
+      }
+    ]);
+
+    console.log('[Seed] Database seeding successfully completed!');
+    console.log('Demo Login Credentials:');
+    console.log('1. Admin: admin@docushield.com / DocuShield@2026');
+    console.log('2. QA Lead: qa@docushield.com / DocuShield@2026');
+    console.log('3. Document Controller: doccontrol@docushield.com / DocuShield@2026');
+    console.log('4. Department Head: depthead@docushield.com / DocuShield@2026');
+    console.log('5. Analyst / Employee: analyst@docushield.com / DocuShield@2026');
+
+    process.exit(0);
+  } catch (error) {
+    console.error('[Seed Error]', error);
+    process.exit(1);
+  }
+};
+
+// Run if called directly
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  seedDatabase();
+}
+
