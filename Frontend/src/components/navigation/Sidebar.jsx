@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -20,8 +20,10 @@ import {
   History,
   Settings,
   Shield,
-  FileCheck2,
-  Lock
+  ChevronLeft,
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
@@ -72,7 +74,6 @@ export const isRouteAllowedForRole = (itemPath, role) => {
   if (!role || role === 'Admin') return true;
 
   if (role === 'QA Manager' || role === 'QA') {
-    // QA Manager: Approvals, audit trail, reports, review & retention, repository, tasks, requests
     const allowed = [
       '/workspace/dashboard',
       '/workspace/search',
@@ -88,7 +89,6 @@ export const isRouteAllowedForRole = (itemPath, role) => {
   }
 
   if (role === 'Document Controller') {
-    // Document Controller: Upload, issue/receive, physical audits, storage map, custody, checkouts
     const allowed = [
       '/workspace/dashboard',
       '/workspace/search',
@@ -107,7 +107,6 @@ export const isRouteAllowedForRole = (itemPath, role) => {
   }
 
   if (role === 'Custodian') {
-    // Custodian: Owns department documents, handovers, checkouts, storage map view
     const allowed = [
       '/workspace/dashboard',
       '/workspace/search',
@@ -123,7 +122,6 @@ export const isRouteAllowedForRole = (itemPath, role) => {
   }
 
   if (role === 'User / Viewer' || role === 'Viewer' || role === 'Employee') {
-    // User / Viewer: Search, view, chat, raise requests
     const allowed = [
       '/workspace/dashboard',
       '/workspace/search',
@@ -142,6 +140,19 @@ export const Sidebar = () => {
   const { unreadCount } = useNotifications();
   const userRole = user?.role || 'User / Viewer';
 
+  // Toggle Collapse State (persists in localStorage)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem('vidyagxp_sidebar_collapsed') === 'true';
+  });
+
+  const toggleSidebar = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('vidyagxp_sidebar_collapsed', String(next));
+      return next;
+    });
+  };
+
   // Filter navigation groups according to active persona's RBAC permissions
   const filteredGroups = navigationGroups
     .map(group => ({
@@ -151,49 +162,72 @@ export const Sidebar = () => {
     .filter(group => group.items.length > 0);
 
   return (
-    <aside className="w-64 bg-white text-slate-700 flex flex-col h-screen select-none border-r border-slate-200 shrink-0 shadow-xs">
-      {/* Brand Header: Deep Slate (#0F172A) + Bhagwa Orange Accent */}
-      <div className="h-16 px-5 flex items-center justify-between border-b border-slate-200/80 bg-white">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 shadow-xs">
-            <Shield className="w-5 h-5 text-orange-500" />
-          </div>
-          <div>
-            <div className="font-bold text-slate-900 tracking-tight text-base flex items-center gap-1.5">
-              VidyaGxP
-              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
-                GxP
-              </span>
+    <aside
+      className={`bg-white text-slate-700 flex flex-col h-screen select-none border-r border-slate-200 shrink-0 shadow-xs transition-all duration-300 ease-in-out ${
+        isCollapsed ? 'w-20' : 'w-64'
+      }`}
+    >
+      {/* Brand Header */}
+      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200/80 bg-white">
+        {!isCollapsed ? (
+          <>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 shadow-xs shrink-0">
+                <Shield className="w-5 h-5 text-orange-500" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-bold text-slate-900 tracking-tight text-base flex items-center gap-1.5 truncate">
+                  VidyaGxP
+                  <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
+                    GxP
+                  </span>
+                </div>
+                <div className="text-[11px] text-orange-600 font-semibold tracking-tight truncate">
+                  Pharma Vault
+                </div>
+              </div>
             </div>
-            <div className="text-[11px] text-orange-600 font-semibold tracking-tight">
-              Pharma Vault
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* User Persona Profile Pill in Sidebar */}
-      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
-        <div className="min-w-0 pr-2">
-          <div className="text-xs font-bold text-slate-900 truncate">
-            {user?.name || 'Authorized User'}
+            {/* Collapse Button Symbol */}
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              title="Collapse Sidebar (Symbols Only)"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 transition cursor-pointer shrink-0"
+            >
+              <PanelLeftClose className="w-4 h-4" />
+            </button>
+          </>
+        ) : (
+          /* Collapsed Header with Click to Expand */
+          <div className="w-full flex items-center justify-center">
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              title="Expand Sidebar"
+              className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 shadow-xs hover:bg-slate-800 transition cursor-pointer relative group"
+            >
+              <Shield className="w-5 h-5 text-orange-500" />
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white flex items-center justify-center text-[9px] shadow-xs">
+                <PanelLeftOpen className="w-2.5 h-2.5" />
+              </span>
+            </button>
           </div>
-          <div className="text-[10px] text-slate-500 font-medium truncate">
-            {user?.department || 'GxP Operations'}
-          </div>
-        </div>
-        <span className="shrink-0 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">
-          {userRole}
-        </span>
+        )}
       </div>
 
       {/* Nav List - Strictly Filtered by Role Access */}
-      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+      <div className="flex-1 overflow-y-auto py-4 px-2 space-y-5">
         {filteredGroups.map((group) => (
           <div key={group.title}>
-            <div className="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">
-              {group.title}
-            </div>
+            {!isCollapsed ? (
+              <div className="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">
+                {group.title}
+              </div>
+            ) : (
+              <div className="h-px bg-slate-200 my-2.5 mx-2" title={group.title} />
+            )}
+
             <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
@@ -201,22 +235,31 @@ export const Sidebar = () => {
                   <NavLink
                     key={item.path}
                     to={item.path}
+                    title={isCollapsed ? item.name : undefined}
                     className={({ isActive }) => `
-                      flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium transition-all
-                      ${isActive
-                        ? 'bg-orange-50 text-orange-950 font-bold border-l-4 border-orange-600 shadow-2xs'
-                        : 'text-slate-600 hover:text-orange-900 hover:bg-orange-50/40'}
+                      flex items-center transition-all rounded-xl
+                      ${isCollapsed ? 'justify-center w-12 h-10 mx-auto' : 'justify-between px-3 py-2 text-[13px] font-medium'}
+                      ${
+                        isActive
+                          ? 'bg-orange-50 text-orange-950 font-bold border-l-4 border-orange-600 shadow-2xs'
+                          : 'text-slate-600 hover:text-orange-900 hover:bg-orange-50/40'
+                      }
                       ${item.highlight ? 'text-orange-600 font-semibold' : ''}
                     `}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
                       <Icon className="w-4 h-4 shrink-0" />
-                      <span>{item.name}</span>
+                      {!isCollapsed && <span>{item.name}</span>}
                     </div>
+
                     {item.hasBadge && unreadCount > 0 && (
-                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white">
-                        {unreadCount}
-                      </span>
+                      !isCollapsed ? (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+                          {unreadCount}
+                        </span>
+                      ) : (
+                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white" />
+                      )
                     )}
                   </NavLink>
                 );
@@ -226,13 +269,25 @@ export const Sidebar = () => {
         ))}
       </div>
 
-      {/* Footer GxP Status */}
-      <div className="p-3.5 border-t border-slate-200 bg-slate-50/70 text-xs text-slate-500 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></div>
-          <span className="font-semibold text-slate-700">21 CFR Part 11</span>
-        </div>
-        <span className="text-[11px] text-slate-400 font-mono">v1.0.4-PROD</span>
+      {/* Bottom Quick Toggle Control */}
+      <div className="p-2.5 border-t border-slate-200 bg-slate-50/70 flex items-center justify-center">
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          className={`flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-orange-900 hover:bg-orange-50 border border-slate-200 transition cursor-pointer ${
+            isCollapsed ? 'w-10 h-9' : 'w-full px-3'
+          }`}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="w-4 h-4 text-orange-600" />
+          ) : (
+            <>
+              <ChevronLeft className="w-4 h-4 text-orange-600" />
+              <span>Collapse</span>
+            </>
+          )}
+        </button>
       </div>
     </aside>
   );

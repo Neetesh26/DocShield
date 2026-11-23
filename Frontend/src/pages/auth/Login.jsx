@@ -54,7 +54,7 @@ export const Login = () => {
       className="min-h-screen relative flex items-center justify-center p-4 md:p-8 bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: `
-          linear-gradient(135deg, rgba(255, 247, 237, 0.96), rgba(254, 243, 199, 0.92)),
+          linear-gradient(135deg, rgba(195, 157, 137, 0.25), rgba(254, 243, 199, 0.92)),
           url('https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=2000&auto=format&fit=crop')
         `
       }}
@@ -102,7 +102,7 @@ export const Login = () => {
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Authorized Corporate Email
+              Corporate Email
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
@@ -120,7 +120,7 @@ export const Login = () => {
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-semibold text-slate-700">
-                Security Password
+                Password
               </label>
             </div>
             <div className="relative">
@@ -161,10 +161,10 @@ export const Login = () => {
         </form>
 
         {/* Regulatory Notice */}
-        <div className="pt-2 text-[10px] text-slate-400 text-center flex items-center justify-center gap-1.5 border-t border-slate-100">
+        {/* <div className="pt-2 text-[10px] text-slate-400 text-center flex items-center justify-center gap-1.5 border-t border-slate-100">
           <ShieldCheck className="w-3.5 h-3.5 text-orange-600" />
           <span>Regulated by US FDA 21 CFR Part 11 & EU Annex 11</span>
-        </div>
+        </div> */}
       </div>
     </div>
   );
