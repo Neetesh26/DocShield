@@ -16,7 +16,7 @@ export const extractPdfMetadata = async (filePath) => {
       const rawStr = dataBuffer.toString('latin1');
       const textMatches = rawStr.match(/\(([^()]+)\)\s*Tj/g);
       if (textMatches) {
-        text = textMatches.map(m => m.replace(/^\(|\)\s*Tj$/g, '')).join(' ');
+        text = textMatches.map(m => m.replace(/^\(|\)\s*Tj$/g, '')).join('\n');
       } else {
         const streamMatches = rawStr.match(/stream([\s\S]*?)endstream/);
         if (streamMatches) text = streamMatches[1];
@@ -24,20 +24,20 @@ export const extractPdfMetadata = async (filePath) => {
       }
     }
 
-    // Pattern extractors
+    // Pattern extractors (requires colon ':' or tabs to prevent word false positives)
     const patterns = {
-      documentNumber: /(?:Document\s*(?:No|Number|#|ID)|Doc\s*#)[:\s]*([A-Z0-9-_/]{4,25})/i,
-      title: /(?:Document\s*Title|Standard\s*Operating\s*Procedure|Title)[:\s]*([^\n\r]{4,80})/i,
-      version: /(?:Version|Rev(?:ision)?|Ver)[:\s]*([0-9]+(?:\.[0-9]+)?)/i,
-      effectiveDate: /(?:Effective\s*Date|Date\s*Effective)[:\s]*([0-9]{1,4}[-/][0-9]{1,2}[-/][0-9]{1,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})/i,
-      reviewDate: /(?:Review\s*Date|Next\s*Review)[:\s]*([0-9]{1,4}[-/][0-9]{1,2}[-/][0-9]{1,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})/i,
-      expiryDate: /(?:Expiry\s*Date|Expiration\s*Date|Valid\s*Through)[:\s]*([0-9]{1,4}[-/][0-9]{1,2}[-/][0-9]{1,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})/i,
-      department: /(?:Department|Dept)[:\s]*([A-Za-z0-9\s&]{2,35})/i,
-      product: /(?:Product\s*(?:Name)?|Material)[:\s]*([A-Za-z0-9\s-_]{3,40})/i,
-      batchNumber: /(?:Batch\s*(?:No|Number|#)|Lot\s*(?:No|Number|#))[:\s]*([A-Z0-9-_]{3,20})/i,
-      preparedBy: /(?:Prepared\s*By|Author)[:\s]*([A-Za-z\s.]{3,35})/i,
-      reviewedBy: /(?:Reviewed\s*By|Checker)[:\s]*([A-Za-z\s.]{3,35})/i,
-      approvedBy: /(?:Approved\s*By|Approver)[:\s]*([A-Za-z\s.]{3,35})/i,
+      documentNumber: /(?:Document\s*(?:No|Number|#|ID)|Doc\s*#)\s*[:\t]\s*([A-Z0-9-_/]{4,25})/i,
+      title: /(?:Document\s*Title|Standard\s*Operating\s*Procedure|Title)\s*[:\t]\s*([^\r\n]{4,80})/i,
+      version: /(?:Version|Rev(?:ision)?|Ver)\s*[:\t]\s*([0-9]+(?:\.[0-9]+)?)/i,
+      effectiveDate: /(?:Effective\s*Date|Date\s*Effective)\s*[:\t]\s*([0-9]{1,4}[-/][0-9]{1,2}[-/][0-9]{1,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})/i,
+      reviewDate: /(?:Review\s*Date|Next\s*Review)\s*[:\t]\s*([0-9]{1,4}[-/][0-9]{1,2}[-/][0-9]{1,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})/i,
+      expiryDate: /(?:Expiry\s*Date|Expiration\s*Date|Valid\s*Through)\s*[:\t]\s*([0-9]{1,4}[-/][0-9]{1,2}[-/][0-9]{1,4}|[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})/i,
+      department: /(?:Department|Dept)\s*[:\t]\s*([^\r\n]{2,35})/i,
+      product: /(?:Product\s*(?:Name)?|Material)\s*[:\t]\s*([^\r\n]{3,40})/i,
+      batchNumber: /(?:Batch\s*(?:No|Number|#)|Lot\s*(?:No|Number|#))\s*[:\t]\s*([A-Z0-9-_]{3,20})/i,
+      preparedBy: /(?:Prepared\s*By|Author)\s*[:\t]\s*([^\r\n]{3,35})/i,
+      reviewedBy: /(?:Reviewed\s*By|Checker)\s*[:\t]\s*([^\r\n]{3,35})/i,
+      approvedBy: /(?:Approved\s*By|Approver)\s*[:\t]\s*([^\r\n]{3,35})/i,
     };
 
     const extracted = {};

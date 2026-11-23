@@ -51,8 +51,9 @@ const ProtectedRoute = ({ children }) => {
 export const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Route */}
+      {/* Public Routes */}
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Login initialRegister={true} />} />
 
       {/* Protected Routes inside MainLayout */}
       <Route

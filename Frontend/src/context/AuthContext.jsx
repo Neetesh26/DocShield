@@ -43,6 +43,18 @@ export const AuthProvider = ({ children }) => {
     return { success: false, message: res.message || 'Login failed' };
   };
 
+  const register = async (userData) => {
+    const res = await authService.register(userData);
+    if (res.success && res.data) {
+      setUser(res.data.user);
+      setToken(res.data.token);
+      localStorage.setItem('docushield_token', res.data.token);
+      localStorage.setItem('docushield_user', JSON.stringify(res.data.user));
+      return { success: true };
+    }
+    return { success: false, message: res.message || 'Registration failed' };
+  };
+
   const logout = async () => {
     try {
       await authService.logout();
@@ -69,6 +81,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated: !!token && !!user,
         login,
+        register,
         logout,
         hasRole
       }}
