@@ -42,9 +42,9 @@ export const UploadWizard = () => {
   const [metadata, setMetadata] = useState({
     documentNumber: '',
     title: '',
-    version: '1.0',
-    documentType: 'Standard Operating Procedure (SOP)',
-    department: 'Quality Assurance',
+    version: '',
+    documentType: '',
+    department: '',
     product: '',
     batchNumber: '',
     effectiveDate: '',
@@ -53,10 +53,10 @@ export const UploadWizard = () => {
     preparedBy: '',
     reviewedBy: '',
     approvedBy: '',
-    folder: 'Controlled Procedures',
+    folder: '',
     tags: '',
     description: '',
-    category: 'Procedure'
+    category: ''
   });
 
   const [confidenceScores, setConfidenceScores] = useState({});
@@ -144,21 +144,21 @@ export const UploadWizard = () => {
 
         setMetadata(prev => ({
           ...prev,
-          documentNumber: ext.documentNumber || prev.documentNumber || `SOP-QA-${Math.floor(1000 + Math.random() * 9000)}`,
+          documentNumber: ext.documentNumber || prev.documentNumber || '',
           title: ext.title || selectedFile.name.replace(/\.pdf$/i, ''),
-          version: ext.version || '1.0',
-          documentType: cls.documentType || ext.documentType || prev.documentType,
-          department: ext.department || cls.department || prev.department,
+          version: ext.version || prev.version || '1.0',
+          documentType: cls.documentType || ext.documentType || prev.documentType || '',
+          department: ext.department || cls.department || prev.department || '',
           product: ext.product || '',
           batchNumber: ext.batchNumber || '',
-          effectiveDate: ext.effectiveDate || new Date().toISOString().split('T')[0],
-          reviewDate: ext.reviewDate || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          effectiveDate: ext.effectiveDate || '',
+          reviewDate: ext.reviewDate || '',
           expiryDate: ext.expiryDate || '',
           preparedBy: ext.preparedBy || user?.name || '',
           reviewedBy: ext.reviewedBy || '',
           approvedBy: ext.approvedBy || '',
-          folder: cls.folder || prev.folder,
-          tags: (cls.suggestedTags || ['GxP']).join(', ')
+          folder: cls.folder || prev.folder || '',
+          tags: (cls.suggestedTags || []).join(', ')
         }));
 
         if (res.data.storageRecommendation?.locationId) {
@@ -277,7 +277,7 @@ export const UploadWizard = () => {
         <div>
           <h2 className="text-xl font-bold text-slate-900">Document Successfully Ingested & Stored</h2>
           <p className="text-xs text-slate-500 mt-1">
-            Registered into DocuShield GxP Archive under strict regulatory compliance.
+            Registered into VidyaGxP Archive under strict regulatory compliance.
           </p>
         </div>
 
@@ -476,29 +476,6 @@ export const UploadWizard = () => {
       {/* STEP 2: HEADER EXTRACTION */}
       {currentStep === 2 && (
         <div className="space-y-6">
-          {/* Duplicate Detection Warning Banner */}
-          {duplicateWarning?.detected && (
-            <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl text-amber-900 flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-              <div className="text-xs space-y-1">
-                <div className="font-bold flex items-center gap-2">
-                  Potential Duplicate Document Detected ({duplicateWarning.matchType})
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                    duplicateWarning.isEffective ? 'bg-orange-100 text-orange-800' : 'bg-slate-200 text-slate-800'
-                  }`}>
-                    Current Status: {duplicateWarning.status}
-                  </span>
-                </div>
-                <p>
-                  A record with Document Number <span className="font-mono font-bold">{duplicateWarning.documentNumber}</span> titled "{duplicateWarning.title}" (Version {duplicateWarning.version}) already exists in the repository.
-                </p>
-                <p className="text-amber-800 text-[11px]">
-                  Ensure you update the Version or verify if you intend to revise an existing procedure.
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* Auto-Classification Pill */}
           {classification && (
             <div className="p-3 bg-orange-50 border border-orange-200 rounded-xl flex items-center justify-between text-xs">

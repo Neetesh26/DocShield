@@ -248,28 +248,17 @@ export const Dashboard = () => {
   // Strictly Real API Data for Recent Ingestions
   const recentDocs = widgets?.recentDocuments || [];
 
-  // AI Suggestion Chips: Clean Curated GxP Queries + Live Database Document Identifiers
-  const curatedGxPChips = [
-    { label: 'HPLC Calibration SOP', query: 'HPLC calibration SOP in Quality Control', badge: 'QC' },
-    { label: 'Paracetamol BMR', query: 'Paracetamol Master Batch Manufacturing Record', badge: 'BMR' },
-    { label: 'Cleaning Validation', query: 'Cleaning Validation Protocol for Fluid Bed Dryer', badge: 'VAL' },
-    { label: '21 CFR Part 11 CSV', query: 'Computerized System Validation 21 CFR Part 11', badge: 'CSV' },
-    { label: 'Metformin Spec', query: 'Finished Product Specification for Metformin', badge: 'SPEC' }
-  ];
-
-  const recentDocChips = recentDocs.slice(0, 3).map(d => ({
+  // Suggestion Chips strictly derived from live MongoDB documents (NO static/hardcoded dummy queries)
+  const aiSuggestionChips = recentDocs.slice(0, 6).map(d => ({
     label: d.documentNumber,
     query: d.documentNumber,
     title: d.title,
-    badge: d.version ? `v${d.version}` : 'Vault'
+    badge: d.department || (d.version ? `v${d.version}` : 'Vault')
   }));
-
-  const aiSuggestionChips = [...curatedGxPChips, ...recentDocChips];
 
   // Dynamic Typeahead matches in dashboard search against live database documents
   const typeaheadMatches = dashboardAiQuery.trim().length >= 1
     ? recentDocs.filter(d =>
-        (d.documentNumber || '').toLowerCase().includes(dashboardAiQuery.toLowerCase()) ||
         (d.title || '').toLowerCase().includes(dashboardAiQuery.toLowerCase()) ||
         (d.department || '').toLowerCase().includes(dashboardAiQuery.toLowerCase())
       ).slice(0, 5)
@@ -288,10 +277,10 @@ export const Dashboard = () => {
             <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
               {user?.role || 'Admin'}
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-900 text-orange-400 border border-slate-800 shadow-2xs">
+            {/* <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-900 text-orange-400 border border-slate-800 shadow-2xs">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
               Repository Active
-            </span>
+            </span> */}
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             {todayStr} • GxP Document Repository Active • Facility: Main Campus Vault
@@ -307,8 +296,8 @@ export const Dashboard = () => {
             disabled={refreshing}
             title="Re-fetch live KPIs from API"
           >
-            <RotateCw className={`w-3.5 h-3.5 text-orange-700 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
-            <span>{refreshing ? 'Syncing...' : 'Refresh Live API'}</span>
+            <RotateCw className={`w-3.5 h-3.5 text-orange-700 mr-1.5 inline ${refreshing ? 'animate-spin' : ''}`} />
+            <span>{refreshing ? 'Syncing...' : 'Refresh'}</span>
           </Button3D>
 
           {/* Upload Button (Only if authorized for upload) */}
@@ -318,8 +307,8 @@ export const Dashboard = () => {
               variant="primary"
               size="md"
             >
-              <UploadCloud className="w-4 h-4 mr-1.5" />
-              Upload Document
+              <UploadCloud className="w-4 h-4 mr-1.5 inline" />
+              Upload
             </Button3D>
           )}
         </div>
@@ -349,7 +338,7 @@ export const Dashboard = () => {
                 variant="primary"
                 size="sm"
               >
-                <Search className="w-3.5 h-3.5 mr-1" />
+                <Search className="w-3.5 h-3.5 mr-1 inline" />
                 <span>Search</span>
               </Button3D>
             </div>
@@ -397,31 +386,33 @@ export const Dashboard = () => {
           )}
 
           {/* 1-Click Fast Inquiries & Database Document Identifiers */}
-          <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-0.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
-              <Compass className="w-3 h-3 text-orange-600" /> Quick Inquiries:
-            </span>
-            {aiSuggestionChips.map((chip, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => {
-                  setDashboardAiQuery(chip.query);
-                  handleDashboardAiSearch(null, chip.query);
-                }}
-                className="shrink-0 px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-800 hover:bg-orange-50 hover:border-orange-300 transition text-[11px] font-medium shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                title={chip.title || chip.query}
-              >
-                <Zap className="w-2.5 h-2.5 text-orange-600 shrink-0" />
-                <span className="font-semibold text-slate-800">{chip.label}</span>
-                {chip.badge && (
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-orange-50 text-orange-700 font-mono font-semibold">
-                    {chip.badge}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+          {aiSuggestionChips.length > 0 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-0.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
+                <Compass className="w-3 h-3 text-orange-600" /> Quick Inquiries:
+              </span>
+              {aiSuggestionChips.map((chip, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setDashboardAiQuery(chip.query);
+                    handleDashboardAiSearch(null, chip.query);
+                  }}
+                  className="shrink-0 px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-800 hover:bg-orange-50 hover:border-orange-300 transition text-[11px] font-medium shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                  title={chip.title || chip.query}
+                >
+                  <Zap className="w-2.5 h-2.5 text-orange-600 shrink-0" />
+                  <span className="font-semibold text-slate-800">{chip.label}</span>
+                  {chip.badge && (
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-orange-50 text-orange-700 font-mono font-semibold">
+                      {chip.badge}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </form>
       </div>
 

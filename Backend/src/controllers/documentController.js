@@ -548,12 +548,7 @@ export const aiSearchDocuments = async (req, res, next) => {
         total: allMapped.length,
         availableCategories,
         suggestedQueries: dynamicSuggestedQueries,
-        suggestedFollowUps: [
-          'Verify custodian chain of custody',
-          'Review physical vault coordinate assignment',
-          'Inspect 21 CFR Part 11 electronic signature trail',
-          'Request controlled physical copy'
-        ]
+        suggestedFollowUps: []
       });
     }
 
@@ -790,12 +785,7 @@ export const aiSearchDocuments = async (req, res, next) => {
       isFallback,
       availableCategories,
       suggestedQueries: dynamicSuggestedQueries,
-      suggestedFollowUps: [
-        'Check physical vault coordinates',
-        'Request controlled hard copy',
-        'Verify 21 CFR Part 11 audit history',
-        'Inspect custodian chain of custody'
-      ]
+      suggestedFollowUps: []
     });
   } catch (error) {
     next(error);

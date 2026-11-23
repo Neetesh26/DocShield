@@ -160,7 +160,7 @@ export const Sidebar = () => {
           </div>
           <div>
             <div className="font-bold text-slate-900 tracking-tight text-base flex items-center gap-1.5">
-              DocuShield
+              VidyaGxP
               <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
                 GxP
               </span>
