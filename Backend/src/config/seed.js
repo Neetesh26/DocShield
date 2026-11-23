@@ -269,7 +269,8 @@ export const seedDatabase = async () => {
         product: 'General Analytical Equipment',
         batch: 'N/A',
         loc: loc5,
-        custodian: analystUser
+        custodian: analystUser,
+        description: 'Standard operating procedure for the startup, routine calibration, column maintenance, and shutdown of Shimadzu Prominence HPLC systems in QC analytical laboratory.'
       },
       {
         filename: 'sample_bmr_tb_2024.pdf',
@@ -281,7 +282,8 @@ export const seedDatabase = async () => {
         product: 'Paracetamol 500mg Tablets',
         batch: 'BTH-2026-089',
         loc: loc3,
-        custodian: deptHeadUser
+        custodian: deptHeadUser,
+        description: 'Comprehensive batch production steps, dispensing verification, dry granulation, compression parameters, and yield reconciliation for Paracetamol 500mg tablets.'
       },
       {
         filename: 'sample_sop_pr_0105.pdf',
@@ -293,7 +295,8 @@ export const seedDatabase = async () => {
         product: 'Sterile Injectable Line 1',
         batch: 'MF-2026-01',
         loc: loc1,
-        custodian: qaUser
+        custodian: qaUser,
+        description: 'Mandatory standard testing procedure for aseptic media fill simulations, viable surface sampling, and non-viable particulate monitoring in ISO Class 5 cleanrooms.'
       },
       {
         filename: 'sample_val_pr_0012.pdf',
@@ -305,7 +308,8 @@ export const seedDatabase = async () => {
         product: 'Solid Oral Granulation Equipment',
         batch: 'VAL-CLN-2026',
         loc: loc4,
-        custodian: deptHeadUser
+        custodian: deptHeadUser,
+        description: 'Validation protocol evaluating clean-in-place rinse efficiency, swab recovery limits, and worst-case active residue limits for the Glatt Fluid Bed Dryer.'
       },
       {
         filename: 'sample_spec_qc_0089.pdf',
@@ -317,7 +321,151 @@ export const seedDatabase = async () => {
         product: 'Metformin Hydrochloride 850mg',
         batch: 'MET-FP-SPEC',
         loc: loc5,
-        custodian: analystUser
+        custodian: analystUser,
+        description: 'Official monograph specifications covering assay, dissolution profiles, related substances, uniformity of dosage units, and microbial limits for Metformin 850mg.'
+      },
+      {
+        filename: 'sample_sop_qa_0018.pdf',
+        docNum: 'SOP-QA-0018',
+        title: 'Good Documentation Practices (GDP) and Data Integrity Governance',
+        version: '5.0',
+        type: 'Standard Operating Procedure (SOP)',
+        dept: 'Quality Assurance',
+        product: 'Site-wide Compliance Governance',
+        batch: 'N/A',
+        loc: loc1,
+        custodian: qaUser,
+        description: 'Universal site guidelines covering real-time contemporaneous recording, ALCOA+ principles, audit trail reviews, and physical logbook issuance controls.'
+      },
+      {
+        filename: 'sample_sop_qc_0033.pdf',
+        docNum: 'SOP-QC-0033',
+        title: 'Out-of-Specification (OOS) and Out-of-Trend (OOT) Investigation Procedure',
+        version: '2.0',
+        type: 'Standard Operating Procedure (SOP)',
+        dept: 'Quality Control',
+        product: 'Analytical Chemistry and Microbiology',
+        batch: 'N/A',
+        loc: loc5,
+        custodian: analystUser,
+        description: 'Step-by-step procedure for Phase 1 laboratory investigation, hypothesis testing, analyst interview, Phase 2 manufacturing investigation, and final QA disposition.'
+      },
+      {
+        filename: 'sample_bmr_tb_3100.pdf',
+        docNum: 'BMR-TB-3100',
+        title: 'Batch Manufacturing Record for Amoxicillin 250mg Dispersible Tablets',
+        version: '2.0',
+        type: 'Batch Manufacturing Record (BMR)',
+        dept: 'Production',
+        product: 'Amoxicillin 250mg Dispersible Tablets',
+        batch: 'BTH-AMX-2026-04',
+        loc: loc3,
+        custodian: deptHeadUser,
+        description: 'Dedicated beta-lactam manufacturing facility batch execution document including double-check material dispensing, blending, compression, and in-process controls.'
+      },
+      {
+        filename: 'sample_bpr_pkg_1022.pdf',
+        docNum: 'BPR-PKG-1022',
+        title: 'Master Packaging Record for Ibuprofen 400mg Blister Packaging Line 2',
+        version: '1.2',
+        type: 'Batch Production Record (BPR)',
+        dept: 'Production',
+        product: 'Ibuprofen 400mg Blister Packs',
+        batch: 'BTH-IBU-PKG-09',
+        loc: loc4,
+        custodian: deptHeadUser,
+        description: 'Secondary and tertiary packaging execution instructions: foil printing, barcode verification, cartoning, blister seal integrity testing, and serialization coding.'
+      },
+      {
+        filename: 'sample_val_pr_0045.pdf',
+        docNum: 'VAL-PR-0045',
+        title: 'Purified Water System Generation and Loop Distribution Qualification Protocol',
+        version: '3.0',
+        type: 'Validation Protocol / Report',
+        dept: 'Quality Assurance',
+        product: 'Pharmaceutical Water Generation Plant',
+        batch: 'VAL-WTR-2026',
+        loc: loc2,
+        custodian: adminUser,
+        description: 'Phase 1, 2, and 3 water system performance qualification protocol evaluating microbial bioburden, total organic carbon (TOC), and conductivity at user points.'
+      },
+      {
+        filename: 'sample_dev_qa_2026_04.pdf',
+        docNum: 'DEV-QA-2026-04',
+        title: 'Critical Deviation Investigation: HVAC Differential Pressure Excursion in Grade B Filling Suite',
+        version: '1.0',
+        type: 'Deviation',
+        dept: 'Quality Assurance',
+        product: 'Sterile Filling Area A',
+        batch: 'DEV-HVAC-04',
+        loc: loc1,
+        custodian: qaUser,
+        description: 'Root cause analysis, environmental impact assessment, product risk evaluation, and immediate containment for an unexpected 25-minute differential pressure drop.'
+      },
+      {
+        filename: 'sample_capa_2026_0012.pdf',
+        docNum: 'CAPA-2026-0012',
+        title: 'Corrective and Preventive Action: Elimination of Particulate Contamination in Vials',
+        version: '1.0',
+        type: 'CAPA',
+        dept: 'Quality Assurance',
+        product: 'Sterile Injectable Line 1',
+        batch: 'CAPA-VIAL-012',
+        loc: loc2,
+        custodian: qaUser,
+        description: 'CAPA plan incorporating ultrasonic washing temperature upgrades, HEPA filter laminar flow re-balancing, and revised quarterly particulate inspection SOP.'
+      },
+      {
+        filename: 'sample_cc_qa_2026_008.pdf',
+        docNum: 'CC-QA-2026-008',
+        title: 'Change Control: Replacement of Primary Packaging Optical Character Recognition (OCR) Cameras',
+        version: '1.0',
+        type: 'Change Control',
+        dept: 'Quality Assurance',
+        product: 'High-speed Blister Packaging Machine',
+        batch: 'CC-OCR-2026',
+        loc: loc2,
+        custodian: adminUser,
+        description: 'Technical evaluation, computerized system validation re-challenge, and operator training requirements for high-resolution 2D barcode and expiry date verification.'
+      },
+      {
+        filename: 'sample_log_pr_2026_01.pdf',
+        docNum: 'LOG-PR-2026-01',
+        title: 'Autoclave Steam Sterilizer Operation & Biological Indicator Incubation Logbook',
+        version: '1.0',
+        type: 'Logbook',
+        dept: 'Production',
+        product: 'Terminal Sterilization Equipment AUT-01',
+        batch: 'LOG-AUT-2026',
+        loc: loc3,
+        custodian: deptHeadUser,
+        description: 'Daily operational run logs, vacuum leak rate testing, F0 lethality calculation sheets, and Geobacillus stearothermophilus biological indicator incubation records.'
+      },
+      {
+        filename: 'sample_spec_rm_0042.pdf',
+        docNum: 'SPEC-RM-0042',
+        title: 'Raw Material Analytical Specification for Microcrystalline Cellulose (Avicel PH-101)',
+        version: '3.0',
+        type: 'Specification (SPEC)',
+        dept: 'Quality Control',
+        product: 'Direct Compression Excipients',
+        batch: 'RM-MCC-SPEC',
+        loc: loc5,
+        custodian: analystUser,
+        description: 'USP / Ph. Eur. compendial specification detailing loss on drying, particle size distribution, bulk and tapped density, heavy metals, and infrared identification test.'
+      },
+      {
+        filename: 'sample_sop_it_0005.pdf',
+        docNum: 'SOP-IT-0005',
+        title: 'Computerized System Validation (CSV) and Electronic Records Compliance (21 CFR Part 11)',
+        version: '4.0',
+        type: 'Standard Operating Procedure (SOP)',
+        dept: 'Quality Assurance',
+        product: 'DocuShield GxP Electronic DMS Platform',
+        batch: 'N/A',
+        loc: loc1,
+        custodian: adminUser,
+        description: 'Policies on system life cycle, GAMP 5 risk assessment, automated backup integrity, time-stamped audit trails, user account deprovisioning, and disaster recovery.'
       }
     ];
 
@@ -355,7 +503,7 @@ export const seedDatabase = async () => {
         fileHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         tags: ['GxP', 'Validated', item.dept.replace(/\s+/g, ''), 'Regulatory-Ready'],
         folder: 'Controlled Procedures',
-        description: `Official approved document for ${item.title}. Governed under 21 CFR Part 11.`,
+        description: item.description || `Official approved document for ${item.title}. Governed under 21 CFR Part 11.`,
         qrCodeData: `DOCUSHIELD:${item.docNum}`,
         legalHold: false,
         retentionYears: 7
