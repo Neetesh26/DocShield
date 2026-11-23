@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Lock, Mail, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { Button3D } from '../../components/common/Button3D';
 
 export const Login = () => {
   const { login } = useAuth();
@@ -46,50 +47,50 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#090D16] via-[#0F172A] to-[#1E293B] flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50">
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
         
-        {/* Left Side: GxP Brand & Compliance Context */}
-        <div className="bg-[#0F172A] p-8 md:p-10 text-white flex flex-col justify-between border-r border-slate-800">
+        {/* Left Side: GxP Brand & Compliance Context (Light Violet Style) */}
+        <div className="bg-gradient-to-br from-purple-50 via-violet-50/70 to-white p-8 md:p-10 text-slate-800 flex flex-col justify-between border-r border-purple-100">
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center text-slate-900 font-bold shadow-lg shadow-teal-500/20">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-purple-700 to-violet-500 flex items-center justify-center text-white font-bold shadow-lg shadow-purple-600/20">
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
                   DocuShield
-                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-teal-900/80 text-teal-300 border border-teal-700">GxP</span>
+                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">GxP</span>
                 </h1>
-                <p className="text-xs text-slate-400">Enterprise Physical & Electronic Document Management</p>
+                <p className="text-xs text-purple-700 font-medium">Enterprise Physical & Electronic Document Management</p>
               </div>
             </div>
 
             <div className="space-y-4 my-8">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  <span className="font-semibold text-white">FDA 21 CFR Part 11 Compliant:</span> Enforces electronic signatures, immutable audit trails, and strict role permissions.
+              <div className="flex items-start gap-3 bg-white/70 p-3 rounded-xl border border-purple-100 shadow-sm">
+                <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <span className="font-semibold text-slate-900">FDA 21 CFR Part 11 Compliant:</span> Enforces electronic signatures, immutable audit trails, and strict role permissions.
                 </p>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  <span className="font-semibold text-white">Hierarchical Physical Tracking:</span> Coordinate records down to Building, Room, Rack, Shelf, and Bin with secure QR tracking.
+              <div className="flex items-start gap-3 bg-white/70 p-3 rounded-xl border border-purple-100 shadow-sm">
+                <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <span className="font-semibold text-slate-900">Hierarchical Physical Tracking:</span> Coordinate records down to Building, Room, Rack, Shelf, and Bin with secure QR tracking.
                 </p>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  <span className="font-semibold text-white">Intelligent Header Extraction:</span> Automated metadata extraction, confidence scores, and duplicate detection.
+              <div className="flex items-start gap-3 bg-white/70 p-3 rounded-xl border border-purple-100 shadow-sm">
+                <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <span className="font-semibold text-slate-900">Intelligent Header Extraction:</span> Automated metadata extraction, confidence scores, and duplicate detection.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="pt-6 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between">
-            <span>Powered by VidyaGxP Suite</span>
-            <span className="font-mono text-slate-500">v1.0.4-PROD</span>
+          <div className="pt-6 border-t border-purple-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span className="font-medium text-purple-800">Powered by VidyaGxP Suite</span>
+            <span className="font-mono text-slate-400">v1.0.4-PROD</span>
           </div>
         </div>
 
@@ -119,7 +120,7 @@ export const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@docushield.com"
-                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition"
+                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
                   />
                 </div>
               </div>
@@ -134,19 +135,21 @@ export const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition"
+                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
                   />
                 </div>
               </div>
 
-              <button
+              <Button3D
                 type="submit"
+                variant="primary"
+                size="md"
                 disabled={loading}
-                className="w-full py-2.5 px-4 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm shadow-teal-600/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full mt-2"
               >
                 {loading ? 'Authenticating...' : 'Sign In with 21 CFR Credentials'}
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+                <ArrowRight className="w-4 h-4" />
+              </Button3D>
             </form>
 
             {/* Quick Demo Switcher */}
@@ -160,9 +163,9 @@ export const Login = () => {
                     key={acc.email}
                     type="button"
                     onClick={() => handleSelectDemo(acc)}
-                    className={`text-left p-2 rounded border text-[11px] transition ${
+                    className={`text-left p-2 rounded-lg border text-[11px] transition ${
                       email === acc.email
-                        ? 'border-teal-500 bg-teal-50/60 text-teal-900 font-semibold'
+                        ? 'border-purple-500 bg-purple-50/80 text-purple-900 font-semibold shadow-sm'
                         : 'border-slate-200 hover:bg-slate-50 text-slate-700'
                     }`}
                   >

@@ -8,6 +8,77 @@
   }
 }
 
+/* 3D Button Utility Classes */
+.btn-3d {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  cursor: pointer;
+  letter-spacing: 0.025em;
+}
+
+.btn-3d:active {
+  transform: translateY(3px);
+}
+
+.btn-3d-primary {
+  background: linear-gradient(180deg, #9333ea 0%, #7e22ce 100%);
+  color: #ffffff;
+  border: 1px solid #6b21a8;
+  box-shadow: 0 4px 0 #581c87, 0 6px 12px rgba(126, 34, 206, 0.25);
+}
+.btn-3d-primary:hover {
+  background: linear-gradient(180deg, #a855f7 0%, #9333ea 100%);
+}
+.btn-3d-primary:active {
+  box-shadow: 0 1px 0 #581c87, 0 2px 4px rgba(126, 34, 206, 0.2);
+}
+
+.btn-3d-amber {
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  border: 1px solid #b45309;
+  box-shadow: 0 4px 0 #78350f, 0 6px 12px rgba(217, 119, 6, 0.25);
+}
+.btn-3d-amber:hover {
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+}
+.btn-3d-amber:active {
+  box-shadow: 0 1px 0 #78350f, 0 2px 4px rgba(217, 119, 6, 0.2);
+}
+
+.btn-3d-rose {
+  background: linear-gradient(180deg, #f43f5e 0%, #e11d48 100%);
+  color: #ffffff;
+  border: 1px solid #be123c;
+  box-shadow: 0 4px 0 #881337, 0 6px 12px rgba(225, 29, 72, 0.25);
+}
+.btn-3d-rose:hover {
+  background: linear-gradient(180deg, #fb7185 0%, #f43f5e 100%);
+}
+.btn-3d-rose:active {
+  box-shadow: 0 1px 0 #881337, 0 2px 4px rgba(225, 29, 72, 0.2);
+}
+
+.btn-3d-light {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 0 #94a3b8, 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+.btn-3d-light:hover {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #1e293b;
+}
+.btn-3d-light:active {
+  box-shadow: 0 1px 0 #94a3b8, 0 2px 3px rgba(0, 0, 0, 0.05);
+}
+
 /* Custom subtle enterprise scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

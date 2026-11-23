@@ -1,7 +1,71 @@
 import User from '../models/User.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 import { logAuditEvent } from '../services/auditService.js';
-import { AUDIT_ACTIONS } from '../constants/index.js';
+import { AUDIT_ACTIONS, ROLES } from '../constants/index.js';
+
+export const register = async (req, res, next) => {
+  try {
+    const { name, email, password, role, department, employeeId, designation, phone } = req.body;
+
+    if (!name || !email || !password || !department || !employeeId) {
+      return sendError(res, 'Name, email, password, department, and employee ID are required', 400);
+    }
+
+    const existingEmail = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmail) {
+      return sendError(res, `User with email '${email}' already exists`, 409);
+    }
+
+    const existingEmpId = await User.findOne({ employeeId });
+    if (existingEmpId) {
+      return sendError(res, `User with employee ID '${employeeId}' already exists`, 409);
+    }
+
+    const validRoles = Object.values(ROLES);
+    const assignedRole = role && validRoles.includes(role) ? role : ROLES.EMPLOYEE;
+
+    const user = new User({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password,
+      role: assignedRole,
+      department: department.trim(),
+      employeeId: employeeId.trim(),
+      designation: designation?.trim() || 'Staff',
+      phone: phone?.trim() || '',
+      isActive: true
+    });
+
+    await user.save();
+
+    await logAuditEvent({
+      user,
+      action: AUDIT_ACTIONS.LOGIN,
+      entity: 'Authentication',
+      entityId: user._id,
+      details: `User registered: ${user.name} (${user.email}) with role [${user.role}].`,
+      ipAddress: req.ip || '127.0.0.1'
+    });
+
+    const token = user.generateAuthToken();
+
+    return sendSuccess(res, 'User registered successfully', {
+      token,
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department: user.department,
+        employeeId: user.employeeId,
+        designation: user.designation
+      }
+    }, 201);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const login = async (req, res, next) => {
   try {
@@ -44,6 +108,7 @@ export const login = async (req, res, next) => {
       token,
       user: {
         id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -61,6 +126,7 @@ export const getMe = async (req, res) => {
   return sendSuccess(res, 'Current user profile retrieved', {
     user: {
       id: req.user._id,
+      _id: req.user._id,
       name: req.user.name,
       email: req.user.email,
       role: req.user.role,
@@ -84,4 +150,3 @@ export const logout = async (req, res) => {
   }
   return sendSuccess(res, 'Logged out successfully');
 };
-

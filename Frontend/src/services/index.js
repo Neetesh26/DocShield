@@ -171,5 +171,13 @@ export const masterDataService = {
   getUsers: async (params = {}) => {
     const res = await api.get('/users', { params });
     return res.data;
+  },
+  createUser: async (data) => {
+    const res = await api.post('/users', data);
+    return res.data;
+  },
+  updateUser: async (id, data) => {
+    const res = await api.put(`/users/${id}`, data);
+    return res.data;
   }
 };
