@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Database, Building, FolderKanban, Users, Plus, CheckCircle, ShieldCheck } from 'lucide-react';
 import { masterDataService } from '../../services';
+import { Button3D } from '../../components/common/Button3D';
 
 export const MasterData = () => {
   const [activeTab, setActiveTab] = useState('departments');
@@ -24,6 +25,17 @@ export const MasterData = () => {
   const [typeCode, setTypeCode] = useState('');
   const [typePrefix, setTypePrefix] = useState('');
   const [retention, setRetention] = useState(5);
+
+  // New User Form
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPassword, setUserPassword] = useState('DocuShield@2026');
+  const [userRole, setUserRole] = useState('Employee');
+  const [userDepartment, setUserDepartment] = useState('Quality Assurance');
+  const [userEmployeeId, setUserEmployeeId] = useState('');
+  const [userDesignation, setUserDesignation] = useState('');
+  const [userPhone, setUserPhone] = useState('');
 
   const fetchData = async () => {
     try {
@@ -80,6 +92,34 @@ export const MasterData = () => {
       }
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to create document type');
+    }
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await masterDataService.createUser({
+        name: userName,
+        email: userEmail,
+        password: userPassword,
+        role: userRole,
+        department: userDepartment,
+        employeeId: userEmployeeId,
+        designation: userDesignation,
+        phone: userPhone
+      });
+      if (res.success) {
+        setShowUserModal(false);
+        setUserName('');
+        setUserEmail('');
+        setUserPassword('DocuShield@2026');
+        setUserEmployeeId('');
+        setUserDesignation('');
+        setUserPhone('');
+        fetchData();
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to create user');
     }
   };
 
@@ -260,9 +300,19 @@ export const MasterData = () => {
       {/* TAB 4: USERS DIRECTORY */}
       {activeTab === 'users' && (
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-            GxP Authorized Personnel Directory
-          </h2>
+          <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+            <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              GxP Authorized Personnel Directory
+            </h2>
+            <Button3D
+              onClick={() => setShowUserModal(true)}
+              variant="primary"
+              size="sm"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" />
+              <span>Add User</span>
+            </Button3D>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
@@ -425,6 +475,149 @@ export const MasterData = () => {
                 >
                   Save Document Type
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: New User */}
+      {showUserModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-slate-900">Add GxP Authorized User</h3>
+              <button onClick={() => setShowUserModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <form onSubmit={handleCreateUser} className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="e.g. Dr. Rajesh Kumar"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Corporate Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    placeholder="rajesh.kumar@docushield.com"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Employee ID *</label>
+                  <input
+                    type="text"
+                    required
+                    value={userEmployeeId}
+                    onChange={(e) => setUserEmployeeId(e.target.value.toUpperCase())}
+                    placeholder="EMP-QA-006"
+                    className="w-full px-3 py-1.5 font-mono uppercase border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Temporary Password *</label>
+                  <input
+                    type="password"
+                    required
+                    value={userPassword}
+                    onChange={(e) => setUserPassword(e.target.value)}
+                    placeholder="Min 6 characters"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">GxP Role *</label>
+                  <select
+                    value={userRole}
+                    onChange={(e) => setUserRole(e.target.value)}
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg bg-white"
+                  >
+                    <option value="Admin">Admin</option>
+                    <option value="QA">QA</option>
+                    <option value="Document Controller">Document Controller</option>
+                    <option value="Department Head">Department Head</option>
+                    <option value="Employee">Employee</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Department *</label>
+                  <select
+                    value={userDepartment}
+                    onChange={(e) => setUserDepartment(e.target.value)}
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg bg-white"
+                  >
+                    {data.departments?.length > 0 ? (
+                      data.departments.map((d) => (
+                        <option key={d._id} value={d.name}>{d.name} ({d.code})</option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Quality Assurance">Quality Assurance</option>
+                        <option value="Quality Control">Quality Control</option>
+                        <option value="Production">Production</option>
+                        <option value="Document Control">Document Control</option>
+                        <option value="Warehouse & Logistics">Warehouse & Logistics</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Designation</label>
+                  <input
+                    type="text"
+                    value={userDesignation}
+                    onChange={(e) => setUserDesignation(e.target.value)}
+                    placeholder="e.g. Senior QC Executive"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Contact Phone</label>
+                  <input
+                    type="text"
+                    value={userPhone}
+                    onChange={(e) => setUserPhone(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button3D
+                  type="button"
+                  variant="light"
+                  size="sm"
+                  onClick={() => setShowUserModal(false)}
+                >
+                  Cancel
+                </Button3D>
+                <Button3D
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                >
+                  Store User in Database
+                </Button3D>
               </div>
             </form>
           </div>

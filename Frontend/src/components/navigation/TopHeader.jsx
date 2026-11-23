@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { Button3D } from '../common/Button3D';
 
 export const TopHeader = ({ onOpenScanner }) => {
   const { user, logout } = useAuth();
@@ -81,15 +82,16 @@ export const TopHeader = ({ onOpenScanner }) => {
 
       {/* Right Actions */}
       <div className="flex items-center gap-3">
-        {/* Quick QR Scanner Trigger */}
-        <button
+        {/* Quick QR Scanner Trigger with 3D Button */}
+        <Button3D
           onClick={() => navigate('/workspace/scan-qr')}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition"
+          variant="light"
+          size="sm"
           title="Scan Document QR Code"
         >
-          <QrCode className="w-4 h-4 text-teal-600" />
+          <QrCode className="w-3.5 h-3.5 text-purple-600" />
           <span>Scan QR</span>
-        </button>
+        </Button3D>
 
         {/* Notifications */}
         <div className="relative" ref={notifRef}>

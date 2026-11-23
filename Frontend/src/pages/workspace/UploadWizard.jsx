@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { documentService, storageService, masterDataService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import { Button3D } from '../../components/common/Button3D';
 
 export const UploadWizard = () => {
   const { user } = useAuth();
@@ -983,22 +984,24 @@ export const UploadWizard = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-            <button
+            <Button3D
               type="button"
+              variant="light"
+              size="md"
               onClick={() => setCurrentStep(3)}
-              className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1.5"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to Storage
-            </button>
-            <button
+              <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back to Storage
+            </Button3D>
+            <Button3D
               type="button"
+              variant="primary"
+              size="md"
               disabled={!signatureChecked || loading}
               onClick={handleFinalSubmit}
-              className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-lg shadow-md shadow-teal-600/30 flex items-center gap-2 disabled:opacity-50 transition"
             >
               {loading ? 'Committing 21 CFR Transaction...' : 'Complete Ingestion & Generate QR Code'}
-              <Check className="w-4 h-4" />
-            </button>
+              <Check className="w-4 h-4 ml-1.5" />
+            </Button3D>
           </div>
         </div>
       )}

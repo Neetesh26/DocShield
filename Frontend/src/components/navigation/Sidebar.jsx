@@ -69,19 +69,19 @@ export const Sidebar = () => {
   const { unreadCount } = useNotifications();
 
   return (
-    <aside className="w-64 bg-[#0F172A] text-slate-300 flex flex-col h-screen select-none border-r border-slate-800 shrink-0">
+    <aside className="w-64 bg-white text-slate-700 flex flex-col h-screen select-none border-r border-slate-200 shrink-0 shadow-sm">
       {/* Brand Header */}
-      <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800 bg-[#090D16]">
+      <div className="h-16 px-5 flex items-center justify-between border-b border-purple-100 bg-purple-50/40">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-teal-900/30">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-purple-700 to-violet-500 flex items-center justify-center text-white shadow-md shadow-purple-600/20">
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <div className="font-bold text-white tracking-wide text-base flex items-center gap-1.5">
+            <div className="font-bold text-slate-900 tracking-wide text-base flex items-center gap-1.5">
               DocuShield
-              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-teal-950 text-teal-400 border border-teal-800">GxP</span>
+              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">GxP</span>
             </div>
-            <div className="text-[11px] text-slate-400 font-medium tracking-tight">by VidyaGxP</div>
+            <div className="text-[11px] text-purple-600 font-medium tracking-tight">by VidyaGxP</div>
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ export const Sidebar = () => {
       <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
         {navigationGroups.map((group) => (
           <div key={group.title}>
-            <div className="px-3 text-[11px] font-semibold text-slate-400 tracking-wider uppercase mb-2">
+            <div className="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">
               {group.title}
             </div>
             <div className="space-y-1">
@@ -101,11 +101,11 @@ export const Sidebar = () => {
                     key={item.path}
                     to={item.path}
                     className={({ isActive }) => `
-                      flex items-center justify-between px-3 py-2 rounded-lg text-[13px] font-medium transition-colors
+                      flex items-center justify-between px-3 py-2 rounded-lg text-[13px] font-medium transition-all
                       ${isActive
-                        ? 'bg-teal-600/15 text-teal-300 font-semibold border-l-4 border-teal-400'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}
-                      ${item.highlight ? 'text-teal-400' : ''}
+                        ? 'bg-purple-100/70 text-purple-800 font-semibold border-l-4 border-purple-600 shadow-sm'
+                        : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50/60'}
+                      ${item.highlight ? 'text-purple-600 font-semibold' : ''}
                     `}
                   >
                     <div className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export const Sidebar = () => {
                       <span>{item.name}</span>
                     </div>
                     {item.hasBadge && unreadCount > 0 && (
-                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-slate-900">
+                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white">
                         {unreadCount}
                       </span>
                     )}
@@ -126,12 +126,12 @@ export const Sidebar = () => {
       </div>
 
       {/* Footer GxP Status */}
-      <div className="p-3.5 border-t border-slate-800/80 bg-[#090D16]/60 text-xs text-slate-400 flex items-center justify-between">
+      <div className="p-3.5 border-t border-purple-100 bg-purple-50/30 text-xs text-slate-500 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span className="font-medium text-slate-300">21 CFR Part 11</span>
+          <div className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></div>
+          <span className="font-medium text-slate-700">21 CFR Part 11</span>
         </div>
-        <span className="text-[11px] text-slate-500 font-mono">v1.0.4-PROD</span>
+        <span className="text-[11px] text-slate-400 font-mono">v1.0.4-PROD</span>
       </div>
     </aside>
   );
