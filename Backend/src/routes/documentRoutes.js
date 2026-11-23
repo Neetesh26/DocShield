@@ -6,7 +6,8 @@ import {
   getDocuments,
   getDocumentById,
   updateDocumentMetadata,
-  getDocumentQR
+  getDocumentQR,
+  aiSearchDocuments
 } from '../controllers/documentController.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
@@ -21,6 +22,8 @@ router.post('/extract', upload.single('file'), extractDocumentMetadata);
 router.post('/check-duplicate', checkDuplicate);
 
 // Document CRUD & Listing
+router.post('/ai-search', aiSearchDocuments);
+router.get('/ai-search', aiSearchDocuments);
 router.post('/', createDocument);
 router.get('/', getDocuments);
 router.get('/:id', getDocumentById);

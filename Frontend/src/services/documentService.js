@@ -42,6 +42,11 @@ export const documentService = {
     return response.data;
   },
 
+  aiSearch: async (query) => {
+    const response = await api.post('/documents/ai-search', { query });
+    return response.data;
+  },
+
   askAssistant: async (documentId, prompt, mode = 'qa') => {
     const response = await api.post('/assistant/chat', { documentId, prompt, mode });
     return response.data;

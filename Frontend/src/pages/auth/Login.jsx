@@ -89,8 +89,22 @@ export const Login = ({ initialRegister = false }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+    <div
+      className="min-h-screen relative flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `
+          linear-gradient(135deg, rgba(250, 245, 255, 0.90), rgba(243, 232, 255, 0.88)),
+          url('https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=2000&auto=format&fit=crop'),
+          url('/images/login-bg.svg')
+        `
+      }}
+    >
+      
+      {/* Decorative Blur Backing */}
+      <div className="absolute inset-0 bg-radial from-purple-200/20 via-transparent to-transparent pointer-events-none" />
+
+      {/* Centered Login Form Card */}
+      <div className="relative w-full max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-purple-100 p-8 z-10 transition-all">
         
         {/* Left Side: GxP Brand & Compliance Context */}
         <div className="bg-gradient-to-br from-purple-50 via-violet-50/70 to-white p-8 md:p-10 text-slate-800 flex flex-col justify-between border-r border-purple-100">
@@ -129,11 +143,18 @@ export const Login = ({ initialRegister = false }) => {
               </div>
             </div>
           </div>
-
-          <div className="pt-6 border-t border-purple-100 text-[11px] text-slate-500 flex items-center justify-between">
-            <span className="font-medium text-purple-800">Powered by VidyaGxP Suite</span>
-            <span className="font-mono text-slate-400">v1.0.4-PROD</span>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">DocuShield</h1>
+            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">
+              GxP
+            </span>
           </div>
+          <p className="text-xs text-purple-700 font-medium mt-1">
+            Enterprise Physical & Electronic Document Management
+          </p>
+          <p className="text-[11px] text-slate-400 mt-0.5">
+            Authorized pharmaceutical and QA personnel only
+          </p>
         </div>
 
         {/* Right Side: Login & Register Forms */}
@@ -175,6 +196,7 @@ export const Login = ({ initialRegister = false }) => {
                   : 'Authorized pharmaceutical and QA personnel only.'}
               </p>
             </div>
+          </div>
 
             {error && (
               <div className="mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
@@ -414,13 +436,48 @@ export const Login = ({ initialRegister = false }) => {
             )}
           </div>
 
-          <div className="mt-6 text-center text-[11px] text-slate-400">
-            Audit logging active. All access attempts are recorded.
+          <Button3D
+            type="submit"
+            variant="primary"
+            size="md"
+            disabled={loading}
+            className="w-full mt-2"
+          >
+            {loading ? 'Authenticating...' : 'Sign In with 21 CFR Credentials'}
+            <ArrowRight className="w-4 h-4 ml-1.5" />
+          </Button3D>
+        </form>
+
+        {/* Quick Demo Switcher */}
+        <div className="mt-6 pt-5 border-t border-slate-100">
+          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2 text-center">
+            Quick Demo Accounts (1-Click Login):
+          </span>
+          <div className="grid grid-cols-2 gap-1.5">
+            {demoAccounts.map((acc) => (
+              <button
+                key={acc.email}
+                type="button"
+                onClick={() => handleSelectDemo(acc)}
+                className={`text-left p-2 rounded-lg border text-[11px] transition ${
+                  email === acc.email
+                    ? 'border-purple-500 bg-purple-50/80 text-purple-900 font-semibold shadow-xs'
+                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                }`}
+              >
+                <div className="font-medium truncate">{acc.label}</div>
+                <div className="text-[10px] text-slate-400 truncate">{acc.dept}</div>
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* Footer Audit Notice */}
+        <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+          <span>Powered by VidyaGxP</span>
+          <span className="font-mono">v1.0.4-PROD</span>
+        </div>
       </div>
     </div>
   );
 };
-
