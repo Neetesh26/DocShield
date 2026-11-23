@@ -221,82 +221,90 @@ export const seedDatabase = async () => {
       { name: 'Analytical Method (ATM)', code: 'ATM', prefix: 'ATM', retentionYears: 7, reviewIntervalMonths: 12, requiresPhysicalTracking: true }
     ]);
 
-    console.log('[Seed] Creating hierarchical physical storage locations...');
-    const locations = await StorageLocation.create([
+    console.log('[Seed] Creating hierarchical physical storage locations across Plant-1 and Plant-2...');
+    const gridLayout = [
       {
-        building: 'Building A',
-        area: 'Central Archive Vault 1',
+        building: 'Plant-1',
+        area: 'Production Document Room',
         room: '101',
-        rack: '01',
-        shelf: '01',
-        bin: '01',
-        box: 'BX-01',
-        code: 'BLD-A/V1/R101/RK-01/SH-01/BIN-01',
-        capacity: 50,
-        currentOccupancy: 0,
-        department: 'Quality Assurance',
-        status: 'Available',
-        remarks: 'Fire-resistant climate-controlled vault for master QA documents'
-      },
-      {
-        building: 'Building A',
-        area: 'Central Archive Vault 1',
-        room: '101',
-        rack: '01',
-        shelf: '02',
-        bin: '02',
-        code: 'BLD-A/V1/R101/RK-01/SH-02/BIN-02',
-        capacity: 40,
-        currentOccupancy: 0,
-        department: 'Quality Assurance',
-        status: 'Available',
-        remarks: 'Active SOP controlled copy binders'
-      },
-      {
-        building: 'Building B',
-        area: 'Production Records Room',
-        room: '201',
-        rack: '02',
-        shelf: '01',
-        bin: '01',
-        code: 'BLD-B/PRD/R201/RK-02/SH-01/BIN-01',
-        capacity: 60,
-        currentOccupancy: 0,
+        rack: 'R-01',
         department: 'Production',
-        status: 'Available',
-        remarks: 'Batch manufacturing records archive with biometric access'
+        prefix: 'PLT-1/PRD/R101/RK-R01',
+        capacity: 25,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
       },
       {
-        building: 'Building B',
-        area: 'Production Records Room',
+        building: 'Plant-1',
+        area: 'Production Document Room',
+        room: '102',
+        rack: 'R-02',
+        department: 'Engineering',
+        prefix: 'PLT-1/ENG/R102/RK-R02',
+        capacity: 25,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
+      },
+      {
+        building: 'Plant-1',
+        area: 'QC Lab Records',
         room: '201',
-        rack: '02',
-        shelf: '02',
-        bin: '02',
-        code: 'BLD-B/PRD/R201/RK-02/SH-02/BIN-02',
-        capacity: 50,
-        currentOccupancy: 0,
-        department: 'Production',
-        status: 'Available',
-        remarks: 'Secondary packaging records storage'
-      },
-      {
-        building: 'Building C',
-        area: 'QC Testing Documentation',
-        room: '301',
-        rack: '03',
-        shelf: '01',
-        bin: '01',
-        code: 'BLD-C/QC/R301/RK-03/SH-01/BIN-01',
-        capacity: 45,
-        currentOccupancy: 0,
+        rack: 'R-01',
         department: 'Quality Control',
-        status: 'Available',
-        remarks: 'Analytical method validations and raw data logs'
+        prefix: 'PLT-1/QC/R201/RK-R01',
+        capacity: 25,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
+      },
+      {
+        building: 'Plant-2',
+        area: 'Archive Room',
+        room: '301',
+        rack: 'R-01',
+        department: 'Quality Assurance',
+        prefix: 'PLT-2/QA/R301/RK-R01',
+        capacity: 25,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
+      },
+      {
+        building: 'Plant-2',
+        area: 'Archive Room',
+        room: '302',
+        rack: 'R-03',
+        department: 'Production Archive',
+        prefix: 'PLT-2/PRD/R302/RK-R03',
+        capacity: 40,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
       }
-    ]);
+    ];
 
-    const [loc1, loc2, loc3, loc4, loc5] = locations;
+    const locDocsToCreate = [];
+    for (const group of gridLayout) {
+      for (const b of group.bins) {
+        locDocsToCreate.push({
+          building: group.building,
+          area: group.area,
+          room: group.room,
+          rack: group.rack,
+          shelf: '01',
+          bin: b,
+          box: 'BX-01',
+          code: `${group.prefix}/SH-01/BIN-${b}`,
+          capacity: group.capacity,
+          currentOccupancy: 0,
+          department: group.department,
+          status: 'Available',
+          remarks: `${group.area} - Rack ${group.rack} Bin ${b}`
+        });
+      }
+    }
+
+    const locations = await StorageLocation.create(locDocsToCreate);
+    const locMap = {};
+    locations.forEach(l => { locMap[l.code] = l; });
+
+    const loc1 = locMap['PLT-2/QA/R301/RK-R01/SH-01/BIN-B01'] || locations[0];
+    const loc2 = locMap['PLT-2/QA/R301/RK-R01/SH-01/BIN-B02'] || locations[1];
+    const loc3 = locMap['PLT-1/PRD/R101/RK-R01/SH-01/BIN-B01'] || locations[2];
+    const loc4 = locMap['PLT-1/PRD/R101/RK-R01/SH-01/BIN-B02'] || locations[3];
+    const loc5 = locMap['PLT-1/QC/R201/RK-R01/SH-01/BIN-B01'] || locations[4];
 
     console.log('[Seed] Generating sample documents and PDF files...');
     const sampleFiles = [

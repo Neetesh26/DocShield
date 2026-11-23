@@ -23,8 +23,28 @@ export const getStorageLocations = async (req, res, next) => {
       ];
     }
 
-    const locations = await StorageLocation.find(filter).sort({ building: 1, area: 1, rack: 1, shelf: 1, bin: 1 });
-    return sendSuccess(res, 'Storage locations retrieved', locations);
+    const locations = await StorageLocation.find(filter)
+      .sort({ building: 1, area: 1, rack: 1, shelf: 1, bin: 1 })
+      .lean();
+
+    // Dynamically calculate actual real-time document occupancy from the documents collection
+    const counts = await Document.aggregate([
+      { $group: { _id: '$storageLocation', count: { $sum: 1 } } }
+    ]);
+    const countMap = {};
+    counts.forEach(c => {
+      if (c._id) countMap[String(c._id)] = c.count;
+    });
+
+    const synchronizedLocations = locations.map(loc => {
+      const realOccupancy = countMap[String(loc._id)] || 0;
+      return {
+        ...loc,
+        currentOccupancy: realOccupancy
+      };
+    });
+
+    return sendSuccess(res, 'Storage locations retrieved', synchronizedLocations);
   } catch (error) {
     next(error);
   }
@@ -35,7 +55,15 @@ export const getStorageLocations = async (req, res, next) => {
  */
 export const getStorageHierarchy = async (req, res, next) => {
   try {
-    const locations = await StorageLocation.find().sort({ building: 1, area: 1, rack: 1 });
+    const locations = await StorageLocation.find().sort({ building: 1, area: 1, rack: 1 }).lean();
+
+    const counts = await Document.aggregate([
+      { $group: { _id: '$storageLocation', count: { $sum: 1 } } }
+    ]);
+    const countMap = {};
+    counts.forEach(c => {
+      if (c._id) countMap[String(c._id)] = c.count;
+    });
 
     // Build hierarchical tree: Building -> Area -> Room -> Rack -> Shelf -> Bin
     const tree = {};
@@ -45,6 +73,8 @@ export const getStorageHierarchy = async (req, res, next) => {
       if (!tree[loc.building][loc.area]) tree[loc.building][loc.area] = {};
       if (!tree[loc.building][loc.area][loc.rack]) tree[loc.building][loc.area][loc.rack] = [];
 
+      const realOccupancy = countMap[String(loc._id)] || 0;
+
       tree[loc.building][loc.area][loc.rack].push({
         id: loc._id,
         code: loc.code,
@@ -53,7 +83,7 @@ export const getStorageHierarchy = async (req, res, next) => {
         bin: loc.bin,
         box: loc.box,
         capacity: loc.capacity,
-        currentOccupancy: loc.currentOccupancy,
+        currentOccupancy: realOccupancy,
         status: loc.status,
         department: loc.department
       });
@@ -67,7 +97,7 @@ export const getStorageHierarchy = async (req, res, next) => {
 
 export const getLocationById = async (req, res, next) => {
   try {
-    const location = await StorageLocation.findById(req.params.id);
+    const location = await StorageLocation.findById(req.params.id).lean();
     if (!location) {
       return sendError(res, 'Storage location not found', 404);
     }
@@ -76,6 +106,8 @@ export const getLocationById = async (req, res, next) => {
     const storedDocuments = await Document.find({ storageLocation: location._id })
       .populate('currentCustodian', 'name email department')
       .select('documentNumber title version status physicalStatus currentCustodian boxNumber fileNumber effectiveDate');
+
+    location.currentOccupancy = storedDocuments.length;
 
     return sendSuccess(res, 'Location details retrieved', {
       location,
