@@ -89,7 +89,7 @@ export const TopHeader = ({ onOpenScanner }) => {
           size="sm"
           title="Scan Document QR Code"
         >
-          <QrCode className="w-3.5 h-3.5 text-orange-600" />
+          <QrCode className="w-3.5 h-3.5 text-orange-600 inline " />
           <span>Scan QR</span>
         </Button3D>
 
