@@ -58,6 +58,8 @@ export const ScanQrPage = () => {
           }
           if (parsed.docNum) docNumberOrId = parsed.docNum;
         } catch (e) {}
+      } else if (rawString.startsWith('VIDYAGXP:')) {
+        docNumberOrId = rawString.replace('VIDYAGXP:', '');
       } else if (rawString.startsWith('DOCUSHIELD:')) {
         docNumberOrId = rawString.replace('DOCUSHIELD:', '');
       }

@@ -1,7 +1,7 @@
 {
-  "name": "docushield-backend",
+  "name": "vidyagxp-backend",
   "version": "1.0.0",
-  "description": "DocuShield GxP Document & Physical Record Management System Backend API",
+  "description": "VidyaGxP Document & Physical Record Management System Backend API",
   "type": "module",
   "main": "src/server.js",
   "scripts": {

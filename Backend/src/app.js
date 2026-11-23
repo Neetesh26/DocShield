@@ -75,7 +75,7 @@ app.use('/uploads', express.static(path.resolve(__dirname, 'uploads')));
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
-    message: 'DocuShield GxP Backend API is operational',
+    message: 'VidyaGxP Backend API is operational',
     timestamp: new Date().toISOString()
   });
 });

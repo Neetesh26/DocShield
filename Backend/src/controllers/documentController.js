@@ -233,7 +233,7 @@ export const createDocument = async (req, res, next) => {
       folder,
       description,
       extractedMetadata,
-      qrCodeData: `DOCUSHIELD:${documentNumber}`,
+      qrCodeData: `VIDYAGXP:${documentNumber}`,
       legalHold: Boolean(legalHold),
       retentionYears: Number(retentionYears) || 5
     });
@@ -539,9 +539,9 @@ export const aiSearchDocuments = async (req, res, next) => {
         relevanceScore: 100
       }));
 
-      return sendSuccess(res, 'DocuShield AI Repository Catalog', {
+      return sendSuccess(res, 'VidyaGxP Repository Catalog', {
         query: '',
-        aiSummary: `DocuShield AI Repository View: Showing all ${allMapped.length} active controlled documents and master records indexed in the vault.`,
+        aiSummary: `VidyaGxP Repository View: Showing all ${allMapped.length} active controlled documents and master records indexed in the vault.`,
         interpreted: {},
         documents: allMapped,
         suggestedDocuments: allMapped.slice(0, 6),
@@ -754,15 +754,15 @@ export const aiSearchDocuments = async (req, res, next) => {
       }));
     }
 
-    // 4. Generate AI Natural Language Summary
+    // 4. Generate Natural Language Summary
     let aiSummary = '';
     if (isFallback) {
-      aiSummary = `DocuShield AI analyzed the repository for "${qTrimmed}". While an exact phrase was not indexed, the AI has retrieved the ${matchedDocs.length} most relevant active master procedures and controlled GxP records from the repository below.`;
+      aiSummary = `VidyaGxP Search analyzed the repository for "${qTrimmed}". While an exact phrase was not indexed, the search retrieved the ${matchedDocs.length} most relevant active master procedures and controlled GxP records from the repository below.`;
     } else {
       const top = matchedDocs[0];
       const deptPart = detected.department ? ` in ${detected.department}` : '';
       const typePart = detected.documentType ? ` of category ${detected.documentType}` : '';
-      aiSummary = `DocuShield AI identified ${matchedDocs.length} relevant GxP document(s)${deptPart}${typePart}. The top match is ${top.documentNumber} ("${top.title}") with an AI confidence score of ${top.aiConfidenceScore}%. Physical custody is registered at ${top.storageLocation?.code || 'Central Vault'}.`;
+      aiSummary = `VidyaGxP Search identified ${matchedDocs.length} relevant GxP document(s)${deptPart}${typePart}. The top match is ${top.documentNumber} ("${top.title}") with a relevance score of ${top.aiConfidenceScore}%. Physical custody is registered at ${top.storageLocation?.code || 'Central Vault'}.`;
     }
 
     const matchedIds = new Set(matchedDocs.map(d => d._id.toString()));
