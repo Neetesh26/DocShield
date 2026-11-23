@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Lock, Mail, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Shield, Lock, Mail, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button3D } from '../../components/common/Button3D';
 
@@ -10,6 +10,7 @@ export const Login = () => {
 
   const [email, setEmail] = useState('admin@docushield.com');
   const [password, setPassword] = useState('DocuShield@2026');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -47,143 +48,135 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+    <div
+      className="min-h-screen relative flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `
+          linear-gradient(135deg, rgba(250, 245, 255, 0.90), rgba(243, 232, 255, 0.88)),
+          url('https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=2000&auto=format&fit=crop'),
+          url('/images/login-bg.svg')
+        `
+      }}
+    >
+      {/* Decorative Blur Backing */}
+      <div className="absolute inset-0 bg-radial from-purple-200/20 via-transparent to-transparent pointer-events-none" />
+
+      {/* Centered Login Form Card */}
+      <div className="relative w-full max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-purple-100 p-8 z-10 transition-all">
         
-        {/* Left Side: GxP Brand & Compliance Context (Light Violet Style) */}
-        <div className="bg-gradient-to-br from-purple-50 via-violet-50/70 to-white p-8 md:p-10 text-slate-800 flex flex-col justify-between border-r border-purple-100">
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-purple-700 to-violet-500 flex items-center justify-center text-white font-bold shadow-lg shadow-purple-600/20">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                  DocuShield
-                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">GxP</span>
-                </h1>
-                <p className="text-xs text-purple-700 font-medium">Enterprise Physical & Electronic Document Management</p>
-              </div>
-            </div>
-
-            <div className="space-y-4 my-8">
-              <div className="flex items-start gap-3 bg-white/70 p-3 rounded-xl border border-purple-100 shadow-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  <span className="font-semibold text-slate-900">FDA 21 CFR Part 11 Compliant:</span> Enforces electronic signatures, immutable audit trails, and strict role permissions.
-                </p>
-              </div>
-              <div className="flex items-start gap-3 bg-white/70 p-3 rounded-xl border border-purple-100 shadow-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  <span className="font-semibold text-slate-900">Hierarchical Physical Tracking:</span> Coordinate records down to Building, Room, Rack, Shelf, and Bin with secure QR tracking.
-                </p>
-              </div>
-              <div className="flex items-start gap-3 bg-white/70 p-3 rounded-xl border border-purple-100 shadow-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  <span className="font-semibold text-slate-900">Intelligent Header Extraction:</span> Automated metadata extraction, confidence scores, and duplicate detection.
-                </p>
-              </div>
-            </div>
+        {/* Brand Header */}
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-700 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-purple-600/30 mb-3">
+            <Shield className="w-7 h-7" />
           </div>
-
-          <div className="pt-6 border-t border-purple-100 text-[11px] text-slate-500 flex items-center justify-between">
-            <span className="font-medium text-purple-800">Powered by VidyaGxP Suite</span>
-            <span className="font-mono text-slate-400">v1.0.4-PROD</span>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">DocuShield</h1>
+            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">
+              GxP
+            </span>
           </div>
+          <p className="text-xs text-purple-700 font-medium mt-1">
+            Enterprise Physical & Electronic Document Management
+          </p>
+          <p className="text-[11px] text-slate-400 mt-0.5">
+            Authorized pharmaceutical and QA personnel only
+          </p>
         </div>
 
-        {/* Right Side: Login Form & Demo Selectors */}
-        <div className="p-8 md:p-10 flex flex-col justify-between bg-white">
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 animate-shake">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Authentication Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <div className="mb-6">
-              <h2 className="text-lg font-bold text-slate-900">Sign in to Document Workspace</h2>
-              <p className="text-xs text-slate-500 mt-1">Authorized pharmaceutical and QA personnel only.</p>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Corporate Email Address</label>
+            <div className="relative">
+              <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@docushield.com"
+                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
+              />
             </div>
+          </div>
 
-            {error && (
-              <div className="mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Corporate Email Address</label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@docushield.com"
-                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
-                  />
-                </div>
-              </div>
-
-              <Button3D
-                type="submit"
-                variant="primary"
-                size="md"
-                disabled={loading}
-                className="w-full mt-2"
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+            <div className="relative">
+              <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full pl-9 pr-10 py-2 text-xs bg-slate-50/50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 text-slate-400 hover:text-purple-600 transition focus:outline-none"
+                title={showPassword ? 'Hide password' : 'Show password'}
               >
-                {loading ? 'Authenticating...' : 'Sign In with 21 CFR Credentials'}
-                <ArrowRight className="w-4 h-4" />
-              </Button3D>
-            </form>
-
-            {/* Quick Demo Switcher */}
-            <div className="mt-6 pt-5 border-t border-slate-100">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">
-                Quick Demo Accounts (1-Click Login):
-              </span>
-              <div className="grid grid-cols-2 gap-1.5">
-                {demoAccounts.map((acc) => (
-                  <button
-                    key={acc.email}
-                    type="button"
-                    onClick={() => handleSelectDemo(acc)}
-                    className={`text-left p-2 rounded-lg border text-[11px] transition ${
-                      email === acc.email
-                        ? 'border-purple-500 bg-purple-50/80 text-purple-900 font-semibold shadow-sm'
-                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <div className="font-medium truncate">{acc.label}</div>
-                    <div className="text-[10px] text-slate-400 truncate">{acc.dept}</div>
-                  </button>
-                ))}
-              </div>
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
           </div>
 
-          <div className="mt-6 text-center text-[11px] text-slate-400">
-            Audit logging active. All access attempts are recorded.
+          <Button3D
+            type="submit"
+            variant="primary"
+            size="md"
+            disabled={loading}
+            className="w-full mt-2"
+          >
+            {loading ? 'Authenticating...' : 'Sign In with 21 CFR Credentials'}
+            <ArrowRight className="w-4 h-4 ml-1.5" />
+          </Button3D>
+        </form>
+
+        {/* Quick Demo Switcher */}
+        <div className="mt-6 pt-5 border-t border-slate-100">
+          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2 text-center">
+            Quick Demo Accounts (1-Click Login):
+          </span>
+          <div className="grid grid-cols-2 gap-1.5">
+            {demoAccounts.map((acc) => (
+              <button
+                key={acc.email}
+                type="button"
+                onClick={() => handleSelectDemo(acc)}
+                className={`text-left p-2 rounded-lg border text-[11px] transition ${
+                  email === acc.email
+                    ? 'border-purple-500 bg-purple-50/80 text-purple-900 font-semibold shadow-xs'
+                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                }`}
+              >
+                <div className="font-medium truncate">{acc.label}</div>
+                <div className="text-[10px] text-slate-400 truncate">{acc.dept}</div>
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* Footer Audit Notice */}
+        <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+          <span>Powered by VidyaGxP</span>
+          <span className="font-mono">v1.0.4-PROD</span>
+        </div>
       </div>
     </div>
   );
 };
-
