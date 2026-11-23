@@ -4,7 +4,7 @@ import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, 
 import { reportService } from '../../services';
 import api from '../../services/api';
 
-const COLORS = ['#0D9488', '#0284C7', '#6366F1', '#EC4899', '#F59E0B', '#10B981'];
+const COLORS = ['#7C3AED', '#9333EA', '#A855F7', '#C084FC', '#F59E0B', '#E11D48'];
 
 export const Reports = () => {
   const [overview, setOverview] = useState(null);
@@ -65,7 +65,7 @@ export const Reports = () => {
           onClick={handleExportCsv}
           className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-sm"
         >
-          <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+          <FileSpreadsheet className="w-4 h-4 text-orange-400" />
           Export Repository CSV
         </button>
       </div>

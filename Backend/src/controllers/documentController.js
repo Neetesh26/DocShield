@@ -508,6 +508,28 @@ export const aiSearchDocuments = async (req, res, next) => {
       .populate('storageLocation')
       .sort({ createdAt: -1 });
 
+    // Extract real dynamic categories and suggested queries from MongoDB documents
+    const categoryCounts = {};
+    allDocs.forEach(d => {
+      const t = d.documentType || 'Standard Operating Procedure (SOP)';
+      categoryCounts[t] = (categoryCounts[t] || 0) + 1;
+    });
+    const availableCategories = Object.entries(categoryCounts).map(([type, count]) => ({
+      label: type,
+      count,
+      query: type
+    }));
+
+    const dynamicSuggestedQueries = allDocs
+      .filter(d => d.title && d.title.length > 5 && !d.title.endsWith(':'))
+      .slice(0, 8)
+      .map(d => ({
+        label: d.title.length > 45 ? `${d.title.slice(0, 45)}...` : d.title,
+        query: `${d.documentNumber} ${d.title}`,
+        documentNumber: d.documentNumber,
+        department: d.department
+      }));
+
     // Handle Empty Query: Return All Indexed Master Documents
     if (!qTrimmed) {
       const allMapped = allDocs.map(doc => ({
@@ -524,12 +546,13 @@ export const aiSearchDocuments = async (req, res, next) => {
         documents: allMapped,
         suggestedDocuments: allMapped.slice(0, 6),
         total: allMapped.length,
+        availableCategories,
+        suggestedQueries: dynamicSuggestedQueries,
         suggestedFollowUps: [
-          'Show HPLC SOPs in Quality Control',
-          'Paracetamol master batch manufacturing records',
-          'Cleaning validation protocols for equipment',
-          'Finished product testing specifications',
-          'Good Documentation Practices (GDP) SOP'
+          'Verify custodian chain of custody',
+          'Review physical vault coordinate assignment',
+          'Inspect 21 CFR Part 11 electronic signature trail',
+          'Request controlled physical copy'
         ]
       });
     }
@@ -765,6 +788,8 @@ export const aiSearchDocuments = async (req, res, next) => {
       suggestedDocuments: relatedSuggested.length > 0 ? relatedSuggested : allDocs.slice(0, 6),
       total: matchedDocs.length,
       isFallback,
+      availableCategories,
+      suggestedQueries: dynamicSuggestedQueries,
       suggestedFollowUps: [
         'Check physical vault coordinates',
         'Request controlled hard copy',

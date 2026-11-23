@@ -117,7 +117,7 @@ export const Approvals = () => {
                   <tr key={item._id} className="hover:bg-slate-50 transition">
                     <td className="py-3 px-4 font-semibold text-slate-900">{item.type}</td>
                     <td className="py-3 px-4 truncate max-w-xs">
-                      <div className="font-mono font-bold text-teal-700">{item.document?.documentNumber}</div>
+                      <div className="font-mono font-bold text-orange-700">{item.document?.documentNumber}</div>
                       <div className="text-[11px] text-slate-500 truncate">{item.document?.title}</div>
                     </td>
                     <td className="py-3 px-3 text-slate-700">{item.request?.requester?.name || 'Authorized Staff'}</td>
@@ -125,7 +125,7 @@ export const Approvals = () => {
                     <td className="py-3 px-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                         item.status === 'Approved'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          ? 'bg-orange-50 text-orange-800 border border-orange-200'
                           : item.status === 'Rejected'
                           ? 'bg-rose-50 text-rose-700 border-rose-200'
                           : 'bg-amber-50 text-amber-700 border-amber-200'
@@ -139,7 +139,7 @@ export const Approvals = () => {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => handleOpenAction(item, 'approve')}
-                            className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded text-[11px] font-semibold"
+                            className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded text-[11px] font-semibold"
                           >
                             Approve
                           </button>
@@ -170,7 +170,7 @@ export const Approvals = () => {
           <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-teal-600" />
+                <ShieldCheck className="w-5 h-5 text-orange-600" />
                 <h3 className="text-sm font-bold text-slate-900">
                   {actionType === 'approve' ? '21 CFR Part 11 Electronic Approval' : 'Rejection Justification'}
                 </h3>
@@ -180,7 +180,7 @@ export const Approvals = () => {
 
             <div className="text-xs bg-slate-50 p-3 rounded-lg space-y-1">
               <div><strong className="text-slate-700">Action:</strong> {activeApproval.type}</div>
-              <div><strong className="text-slate-700">Document:</strong> <span className="font-mono font-bold text-teal-700">{activeApproval.document?.documentNumber}</span> ({activeApproval.document?.title})</div>
+              <div><strong className="text-slate-700">Document:</strong> <span className="font-mono font-bold text-orange-700">{activeApproval.document?.documentNumber}</span> ({activeApproval.document?.title})</div>
               <div><strong className="text-slate-700">Department:</strong> {activeApproval.document?.department}</div>
             </div>
 
@@ -199,9 +199,9 @@ export const Approvals = () => {
               </div>
 
               {actionType === 'approve' && (
-                <div className="p-3 bg-teal-50/50 border border-teal-200 rounded-xl space-y-2">
-                  <div className="text-[11px] text-teal-900 font-semibold flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-teal-700" />
+                <div className="p-3 bg-orange-50/50 border border-orange-200 rounded-xl space-y-2">
+                  <div className="text-[11px] text-orange-900 font-semibold flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-orange-700" />
                     Electronic Signature Declaration
                   </div>
                   <p className="text-[11px] text-slate-600 leading-relaxed">
@@ -213,7 +213,7 @@ export const Approvals = () => {
                       required
                       checked={signedCheck}
                       onChange={(e) => setSignedCheck(e.target.checked)}
-                      className="rounded text-teal-600 border-slate-300"
+                      className="rounded text-orange-600 border-slate-300"
                     />
                     <span className="text-[11px] font-semibold text-slate-800">
                       I, {user?.name} ({user?.role}), execute this signature.
@@ -234,7 +234,7 @@ export const Approvals = () => {
                   type="submit"
                   disabled={submitting}
                   className={`px-4 py-1.5 text-white font-semibold rounded-lg shadow-sm ${
-                    actionType === 'approve' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-rose-600 hover:bg-rose-700'
+                    actionType === 'approve' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-rose-600 hover:bg-rose-700'
                   }`}
                 >
                   {submitting ? 'Executing...' : actionType === 'approve' ? 'Sign & Approve' : 'Confirm Rejection'}

@@ -14,7 +14,6 @@ import {
   QrCode,
   Tag,
   Calendar,
-  Sparkles,
   Info,
   Check,
   Eye,
@@ -212,9 +211,9 @@ export const UploadWizard = () => {
         boxNumber,
         fileNumber: fileNumber || `${metadata.documentNumber}-F1`,
         physicalCopiesCount: Number(physicalCopies) || 1,
-        fileUrl: serverFile?.fileUrl || '/uploads/sample.pdf',
-        fileName: serverFile?.originalName || selectedFile?.name || 'document.pdf',
-        fileSize: serverFile?.fileSize || selectedFile?.size || 1024,
+        fileUrl: serverFile?.fileUrl || '',
+        fileName: serverFile?.originalName || selectedFile?.name || '',
+        fileSize: serverFile?.fileSize || selectedFile?.size || 0,
         fileMimeType: serverFile?.fileMimeType || 'application/pdf',
         fileHash: serverFile?.fileHash || '',
         tags: metadata.tags.split(',').map(t => t.trim()).filter(Boolean),
@@ -244,7 +243,7 @@ export const UploadWizard = () => {
     const level = item.level;
     if (level === 'High') {
       return (
-        <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold bg-orange-50 text-orange-800 border border-orange-200">
           High Conf ({Math.round(item.score * 100)}%)
         </span>
       );
@@ -272,7 +271,7 @@ export const UploadWizard = () => {
   if (completedDoc) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 max-w-2xl mx-auto text-center space-y-6">
-        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+        <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto">
           <CheckCircle className="w-8 h-8" />
         </div>
         <div>
@@ -285,7 +284,7 @@ export const UploadWizard = () => {
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left text-xs space-y-2">
           <div className="flex justify-between">
             <span className="text-slate-500">Document Number:</span>
-            <span className="font-mono font-bold text-teal-700">{completedDoc.documentNumber}</span>
+            <span className="font-mono font-bold text-orange-700">{completedDoc.documentNumber}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-500">Title:</span>
@@ -313,7 +312,7 @@ export const UploadWizard = () => {
         <div className="flex items-center justify-center gap-3 pt-4">
           <button
             onClick={() => navigate(`/documents/${completedDoc._id}`)}
-            className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
           >
             Open Document Details
           </button>
@@ -344,7 +343,7 @@ export const UploadWizard = () => {
               Four-step regulated ingestion with intelligent OCR extraction and physical location assignment.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-teal-700 bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-200">
+          <div className="flex items-center gap-2 text-xs font-semibold text-orange-700 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200">
             <FileCheck2 className="w-4 h-4" />
             <span>Step {currentStep} of 4</span>
           </div>
@@ -357,15 +356,15 @@ export const UploadWizard = () => {
               key={st.num}
               className={`p-3 rounded-xl border transition ${
                 currentStep === st.num
-                  ? 'border-teal-500 bg-teal-50/50 text-teal-900 font-semibold'
+                  ? 'border-orange-500 bg-orange-50/50 text-orange-950 font-semibold'
                   : currentStep > st.num
-                  ? 'border-emerald-300 bg-emerald-50/40 text-emerald-800'
+                  ? 'border-slate-300 bg-slate-100/60 text-slate-800'
                   : 'border-slate-200 bg-slate-50 text-slate-400'
               }`}
             >
               <div className="flex items-center gap-2">
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                  currentStep > st.num ? 'bg-emerald-600 text-white' : currentStep === st.num ? 'bg-teal-600 text-white' : 'bg-slate-300 text-slate-700'
+                  currentStep > st.num ? 'bg-orange-600 text-white' : currentStep === st.num ? 'bg-orange-500 text-white' : 'bg-slate-300 text-slate-700'
                 }`}>
                   {currentStep > st.num ? <Check className="w-3 h-3" /> : st.num}
                 </span>
@@ -398,7 +397,7 @@ export const UploadWizard = () => {
               <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleFileDrop}
-                className="border-2 border-dashed border-slate-300 hover:border-teal-500 rounded-xl p-8 text-center bg-slate-50/50 hover:bg-teal-50/20 transition cursor-pointer"
+                className="border-2 border-dashed border-slate-300 hover:border-orange-500 rounded-xl p-8 text-center bg-slate-50/50 hover:bg-orange-50/20 transition cursor-pointer"
                 onClick={() => document.getElementById('file-input').click()}
               >
                 <input
@@ -408,7 +407,7 @@ export const UploadWizard = () => {
                   className="hidden"
                   onChange={handleFileDrop}
                 />
-                <div className="w-12 h-12 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center mx-auto mb-3">
                   <UploadCloud className="w-6 h-6" />
                 </div>
                 <div className="text-xs font-semibold text-slate-800">
@@ -420,12 +419,12 @@ export const UploadWizard = () => {
               </div>
 
               {selectedFile && (
-                <div className="mt-4 p-3 bg-teal-50 border border-teal-200 rounded-xl flex items-center justify-between">
+                <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <FileText className="w-5 h-5 text-teal-700" />
+                    <FileText className="w-5 h-5 text-orange-700" />
                     <div>
-                      <div className="text-xs font-semibold text-teal-900 truncate max-w-xs">{selectedFile.name}</div>
-                      <div className="text-[10px] text-teal-600">{(selectedFile.size / 1024).toFixed(1)} KB</div>
+                      <div className="text-xs font-semibold text-orange-900 truncate max-w-xs">{selectedFile.name}</div>
+                      <div className="text-[10px] text-orange-600">{(selectedFile.size / 1024).toFixed(1)} KB</div>
                     </div>
                   </div>
                   <button
@@ -445,7 +444,7 @@ export const UploadWizard = () => {
               <button
                 disabled={!selectedFile || loading}
                 onClick={handleProceedToExtraction}
-                className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-2 disabled:opacity-50"
               >
                 {loading ? 'Running OCR & Header Extraction...' : 'Continue to Header Extraction'}
                 <ArrowRight className="w-4 h-4" />
@@ -485,7 +484,7 @@ export const UploadWizard = () => {
                 <div className="font-bold flex items-center gap-2">
                   Potential Duplicate Document Detected ({duplicateWarning.matchType})
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                    duplicateWarning.isEffective ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-800'
+                    duplicateWarning.isEffective ? 'bg-orange-100 text-orange-800' : 'bg-slate-200 text-slate-800'
                   }`}>
                     Current Status: {duplicateWarning.status}
                   </span>
@@ -502,14 +501,14 @@ export const UploadWizard = () => {
 
           {/* Auto-Classification Pill */}
           {classification && (
-            <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl flex items-center justify-between text-xs">
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-xl flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-teal-600" />
-                <span className="font-medium text-teal-900">
+                <FileCheck2 className="w-4 h-4 text-orange-600" />
+                <span className="font-medium text-orange-950">
                   Auto-Classification Suggestion: <strong className="font-bold">{classification.documentType}</strong> in folder <strong className="font-bold">"{classification.folder}"</strong>
                 </span>
               </div>
-              <span className="text-[11px] text-teal-700 font-mono">
+              <span className="text-[11px] text-orange-800 font-mono">
                 Engine: {classification.engine}
               </span>
             </div>
@@ -550,7 +549,7 @@ export const UploadWizard = () => {
                     type="text"
                     value={metadata.documentNumber}
                     onChange={(e) => setMetadata({ ...metadata, documentNumber: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs font-mono font-semibold border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
+                    className="w-full px-3 py-1.5 text-xs font-mono font-semibold border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600"
                   />
                 </div>
 
@@ -563,7 +562,7 @@ export const UploadWizard = () => {
                     type="text"
                     value={metadata.version}
                     onChange={(e) => setMetadata({ ...metadata, version: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
+                    className="w-full px-3 py-1.5 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600"
                   />
                 </div>
               </div>
@@ -577,7 +576,7 @@ export const UploadWizard = () => {
                   type="text"
                   value={metadata.title}
                   onChange={(e) => setMetadata({ ...metadata, title: e.target.value })}
-                  className="w-full px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
+                  className="w-full px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600"
                 />
               </div>
 
@@ -587,7 +586,7 @@ export const UploadWizard = () => {
                   <select
                     value={metadata.documentType}
                     onChange={(e) => setMetadata({ ...metadata, documentType: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 bg-white"
+                    className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 bg-white"
                   >
                     <option value="Standard Operating Procedure (SOP)">Standard Operating Procedure (SOP)</option>
                     <option value="Batch Manufacturing Record (BMR)">Batch Manufacturing Record (BMR)</option>
@@ -606,7 +605,7 @@ export const UploadWizard = () => {
                   <select
                     value={metadata.department}
                     onChange={(e) => setMetadata({ ...metadata, department: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 bg-white"
+                    className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 bg-white"
                   >
                     <option value="Quality Assurance">Quality Assurance</option>
                     <option value="Quality Control">Quality Control</option>
@@ -729,7 +728,7 @@ export const UploadWizard = () => {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(3)}
-                  className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5"
+                  className="px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5"
                 >
                   Continue to Storage & Custody <ArrowRight className="w-3.5 h-3.5" />
                 </button>
@@ -744,20 +743,20 @@ export const UploadWizard = () => {
         <div className="space-y-6">
           {/* Storage Recommendation Banner */}
           {storageRecommendation && (
-            <div className="bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 p-4 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="bg-gradient-to-r from-orange-50 via-white to-slate-50 border border-orange-200 p-4 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center shrink-0">
                   <Box className="w-5 h-5" />
                 </div>
                 <div className="text-xs">
-                  <div className="font-bold text-teal-950 flex items-center gap-2">
+                  <div className="font-bold text-slate-900 flex items-center gap-2">
                     Rule-Based Storage Recommendation
-                    <span className="text-[10px] bg-teal-200 text-teal-900 px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-[10px] bg-orange-100 text-orange-900 px-2 py-0.5 rounded-full font-semibold border border-orange-200">
                       {storageRecommendation.occupancyPercentage}% Occupied
                     </span>
                   </div>
-                  <p className="text-teal-800 mt-0.5">{storageRecommendation.reason}</p>
-                  <div className="mt-1 font-mono text-[11px] text-teal-900 font-semibold">
+                  <p className="text-slate-600 mt-0.5">{storageRecommendation.reason}</p>
+                  <div className="mt-1 font-mono text-[11px] text-orange-800 font-semibold">
                     Coordinate: {storageRecommendation.code}
                   </div>
                 </div>
@@ -765,7 +764,7 @@ export const UploadWizard = () => {
               <button
                 type="button"
                 onClick={handleApplyRecommendation}
-                className="px-3.5 py-1.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold rounded-lg shadow-xs shrink-0 transition"
+                className="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-xs shrink-0 transition cursor-pointer"
               >
                 Apply Recommendation
               </button>
@@ -776,7 +775,7 @@ export const UploadWizard = () => {
             {/* Physical Storage Location Hierarchy */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                <Building className="w-4 h-4 text-teal-600" />
+                <Building className="w-4 h-4 text-orange-600" />
                 <h2 className="text-sm font-bold text-slate-900">Physical Storage Coordinates</h2>
               </div>
 
@@ -787,7 +786,7 @@ export const UploadWizard = () => {
                 <select
                   value={selectedLocationId}
                   onChange={(e) => setSelectedLocationId(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 bg-white"
+                  className="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 bg-white"
                 >
                   <option value="">-- Select Validated Storage Vault --</option>
                   {storageLocations.map((loc) => (
@@ -831,7 +830,7 @@ export const UploadWizard = () => {
             {/* Custody Assignment */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-                <UserCheck className="w-4 h-4 text-teal-600" />
+                <UserCheck className="w-4 h-4 text-orange-600" />
                 <h2 className="text-sm font-bold text-slate-900">Chain of Custody & Physical Copies</h2>
               </div>
 
@@ -842,7 +841,7 @@ export const UploadWizard = () => {
                 <select
                   value={selectedCustodianId}
                   onChange={(e) => setSelectedCustodianId(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 bg-white"
+                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 bg-white"
                 >
                   <option value="">-- Assign Responsible Personnel --</option>
                   {usersList.map((u) => (
@@ -895,7 +894,7 @@ export const UploadWizard = () => {
               type="button"
               disabled={!selectedLocationId || !selectedCustodianId}
               onClick={() => setCurrentStep(4)}
-              className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+              className="px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5 disabled:opacity-50"
             >
               Continue to Review & Sign <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -917,7 +916,7 @@ export const UploadWizard = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs">
             <div>
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Document Number</span>
-              <span className="font-mono font-bold text-teal-700 text-sm">{metadata.documentNumber}</span>
+              <span className="font-mono font-bold text-orange-700 text-sm">{metadata.documentNumber}</span>
             </div>
             <div>
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Title</span>
@@ -947,7 +946,7 @@ export const UploadWizard = () => {
             </div>
             <div>
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Designated Custodian</span>
-              <span className="font-semibold text-teal-800">
+              <span className="font-semibold text-orange-800">
                 {usersList.find(u => u._id === selectedCustodianId)?.name || 'Assigned'}
               </span>
             </div>
@@ -958,10 +957,10 @@ export const UploadWizard = () => {
           </div>
 
           {/* Electronic Signature Box */}
-          <div className="p-5 border-2 border-teal-200 rounded-2xl bg-teal-50/30 space-y-3">
+          <div className="p-5 border-2 border-orange-200 rounded-2xl bg-orange-50/30 space-y-3">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-teal-700" />
-              <h3 className="text-xs font-bold text-teal-950 uppercase tracking-wide">
+              <ShieldCheck className="w-5 h-5 text-orange-700" />
+              <h3 className="text-xs font-bold text-orange-950 uppercase tracking-wide">
                 21 CFR Part 11 Electronic Signature Confirmation
               </h3>
             </div>
@@ -974,7 +973,7 @@ export const UploadWizard = () => {
                 type="checkbox"
                 checked={signatureChecked}
                 onChange={(e) => setSignatureChecked(e.target.checked)}
-                className="w-4 h-4 text-teal-600 rounded border-slate-300 focus:ring-teal-500 cursor-pointer"
+                className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 cursor-pointer"
               />
               <label htmlFor="sign-check" className="text-xs font-semibold text-slate-800 cursor-pointer">
                 I, {user?.name || 'Authorized Operator'} ({user?.employeeId || 'EMP'}), digitally sign and authorize this ingestion.

@@ -1,42 +1,131 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Lock, Mail, AlertCircle, ArrowRight, CheckCircle2, User, UserPlus, Building2, Briefcase, BadgeCheck } from 'lucide-react';
+import {
+  Shield,
+  Lock,
+  Mail,
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Zap,
+  ShieldCheck,
+  Check
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button3D } from '../../components/common/Button3D';
 
-export const Login = ({ initialRegister = false }) => {
-  const { login, register } = useAuth();
+// The 6 GxP Quick Sign-In Users matching the system access levels
+const QUICK_USERS = [
+  {
+    initials: 'AS',
+    name: 'Anita Sharma',
+    role: 'Admin',
+    description: 'Admin · Master data, users, rules & settings',
+    email: 'anita.sharma@docushield.com',
+    password: 'DocuShield@2026',
+    department: 'Executive Administration',
+    badge: 'Super Admin'
+  },
+  {
+    initials: 'MI',
+    name: 'Dr. Meera Iyer',
+    role: 'QA Manager',
+    description: 'QA Manager · Approvals, audit trail, reports',
+    email: 'meera.iyer@docushield.com',
+    password: 'DocuShield@2026',
+    department: 'Quality Assurance',
+    badge: 'QA Lead'
+  },
+  {
+    initials: 'SP',
+    name: 'Suresh Patil',
+    role: 'Document Controller',
+    description: 'Document Controller · Upload, issue/receive, physical audits',
+    email: 'suresh.patil@docushield.com',
+    password: 'DocuShield@2026',
+    department: 'Document Control',
+    badge: 'Doc Control'
+  },
+  {
+    initials: 'RV',
+    name: 'Rahul Verma',
+    role: 'Custodian',
+    description: 'Custodian · Owns department documents, handovers',
+    email: 'rahul.verma@docushield.com',
+    password: 'DocuShield@2026',
+    department: 'Production',
+    badge: 'Custodian (Prod)'
+  },
+  {
+    initials: 'PN',
+    name: 'Priya Nair',
+    role: 'Custodian',
+    description: 'Custodian · Owns department documents, handovers',
+    email: 'priya.nair@docushield.com',
+    password: 'DocuShield@2026',
+    department: 'Quality Control',
+    badge: 'Custodian (QC)'
+  },
+  {
+    initials: 'AK',
+    name: 'Amit Kumar',
+    role: 'User / Viewer',
+    description: 'User / Viewer · Search, view, chat, raise requests',
+    email: 'amit.kumar@docushield.com',
+    password: 'DocuShield@2026',
+    department: 'Operations & R&D',
+    badge: 'Viewer'
+  }
+];
+
+export const Login = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [isRegister, setIsRegister] = useState(initialRegister);
-
-  // Login Form State
-  const [email, setEmail] = useState('admin@docushield.com');
-  const [password, setPassword] = useState('DocuShield@2026');
-
-  // Register Form State
-  const [regData, setRegData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    department: 'Quality Assurance',
-    role: 'Employee',
-    employeeId: `EMP-${Math.floor(100 + Math.random() * 900)}`,
-    designation: 'GxP Document Specialist',
-    phone: ''
-  });
+  // Selected quick user (defaults to Anita Sharma)
+  const [selectedUser, setSelectedUser] = useState(QUICK_USERS[0]);
+  const [email, setEmail] = useState(QUICK_USERS[0].email);
+  const [password, setPassword] = useState(QUICK_USERS[0].password);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const demoAccounts = [
-    { label: 'System Admin', email: 'admin@docushield.com', role: 'Admin', dept: 'QA & Compliance' },
-    { label: 'QA Lead', email: 'qa@docushield.com', role: 'QA', dept: 'Quality Assurance' },
-    { label: 'Doc Controller', email: 'doccontrol@docushield.com', role: 'Document Controller', dept: 'Doc Control' },
-    { label: 'Dept Head', email: 'depthead@docushield.com', role: 'Department Head', dept: 'Production' },
-    { label: 'QC Analyst', email: 'analyst@docushield.com', role: 'Employee', dept: 'Quality Control' }
-  ];
+  // 1-Click Select User
+  const handleSelectQuickUser = (acc) => {
+    setSelectedUser(acc);
+    setEmail(acc.email);
+    setPassword(acc.password);
+    setError('');
+  };
+
+  // 1-Click Direct Quick Login
+  const handleQuickSignIn = async (acc) => {
+    setSelectedUser(acc);
+    setEmail(acc.email);
+    setPassword(acc.password);
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await login(acc.email, acc.password);
+      if (res.success) {
+        setSuccessMsg(`Welcome, ${acc.name}! Accessing ${acc.role} Workspace...`);
+        setTimeout(() => {
+          navigate('/workspace/dashboard');
+        }, 300);
+      } else {
+        setError(res.message || 'Authentication failed. Please verify database connection.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Ensure MongoDB and backend server are running.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -52,431 +141,245 @@ export const Login = ({ initialRegister = false }) => {
         setError(res.message || 'Invalid email or password credentials');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Ensure MongoDB and backend server are running.');
+      setError(err.response?.data?.message || 'Login failed. Ensure backend server is running.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccessMsg('');
-    setLoading(true);
-
-    try {
-      const res = await register(regData);
-      if (res.success) {
-        setSuccessMsg('Account registered successfully! Redirecting...');
-        setTimeout(() => {
-          navigate('/workspace/dashboard');
-        }, 600);
-      } else {
-        setError(res.message || 'Registration failed');
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please check your details.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSelectDemo = (acc) => {
-    setEmail(acc.email);
-    setPassword('DocuShield@2026');
-    setError('');
-    setIsRegister(false);
   };
 
   return (
     <div
-      className="min-h-screen relative flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
+      className="min-h-screen relative flex items-center justify-center p-4 md:p-8 bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage: `
-          linear-gradient(135deg, rgba(250, 245, 255, 0.90), rgba(243, 232, 255, 0.88)),
-          url('https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=2000&auto=format&fit=crop'),
-          url('/images/login-bg.svg')
+          linear-gradient(135deg, rgba(255, 247, 237, 0.96), rgba(254, 243, 199, 0.92)),
+          url('https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=2000&auto=format&fit=crop')
         `
       }}
     >
-      
-      {/* Decorative Blur Backing */}
-      <div className="absolute inset-0 bg-radial from-purple-200/20 via-transparent to-transparent pointer-events-none" />
+      {/* Decorative Subtle Bhagwa Saffron Ambient Glow */}
+      <div className="absolute inset-0 bg-radial from-orange-300/20 via-transparent to-transparent pointer-events-none" />
 
-      {/* Centered Login Form Card */}
-      <div className="relative w-full max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-purple-100 p-8 z-10 transition-all">
+      {/* Main Dual-Pane Card */}
+      <div className="relative w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-orange-200/80 p-6 md:p-8 z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         
-        {/* Left Side: GxP Brand & Compliance Context */}
-        <div className="bg-gradient-to-br from-purple-50 via-violet-50/70 to-white p-8 md:p-10 text-slate-800 flex flex-col justify-between border-r border-purple-100">
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-purple-700 to-violet-500 flex items-center justify-center text-white font-bold shadow-lg shadow-purple-600/20">
-                <Shield className="w-6 h-6 text-white" />
+        {/* LEFT SECTION: 6 Quick Sign-In User Cards (Exact Match to Reference in Bhagwa Orange) */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-orange-100">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="p-1 rounded-md bg-orange-100 text-orange-700">
+                  <Zap className="w-4 h-4" />
+                </span>
+                <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+                  Quick Sign-In by GxP Role
+                </h2>
               </div>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                  DocuShield
-                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">GxP</span>
-                </h1>
-                <p className="text-xs text-purple-700 font-medium">Enterprise Physical & Electronic Document Management</p>
-              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Select an authorized personnel card to test specific role permissions.
+              </p>
             </div>
-
-            <div className="space-y-4 my-8">
-              <div className="flex items-start gap-3 bg-white/70 p-3 rounded-xl border border-purple-100 shadow-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  <span className="font-semibold text-slate-900">FDA 21 CFR Part 11 Compliant:</span> Enforces electronic signatures, immutable audit trails, and strict role permissions.
-                </p>
-              </div>
-              <div className="flex items-start gap-3 bg-white/70 p-3 rounded-xl border border-purple-100 shadow-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  <span className="font-semibold text-slate-900">Hierarchical Physical Tracking:</span> Coordinate records down to Building, Room, Rack, Shelf, and Bin with secure QR tracking.
-                </p>
-              </div>
-              <div className="flex items-start gap-3 bg-white/70 p-3 rounded-xl border border-purple-100 shadow-sm">
-                <CheckCircle2 className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  <span className="font-semibold text-slate-900">Intelligent Header Extraction:</span> Automated metadata extraction, confidence scores, and duplicate detection.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">DocuShield</h1>
-            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">
-              GxP
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-50 text-orange-800 border border-orange-200 font-semibold">
+              6 Role Personas
             </span>
           </div>
-          <p className="text-xs text-purple-700 font-medium mt-1">
-            Enterprise Physical & Electronic Document Management
-          </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">
-            Authorized pharmaceutical and QA personnel only
-          </p>
+
+          {/* Cards List */}
+          <div className="space-y-2.5">
+            {QUICK_USERS.map((acc) => {
+              const isSelected = selectedUser?.email === acc.email;
+              return (
+                <div
+                  key={acc.email}
+                  onClick={() => handleSelectQuickUser(acc)}
+                  onDoubleClick={() => handleQuickSignIn(acc)}
+                  className={`group relative p-3 rounded-xl transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                    isSelected
+                      ? 'border-2 border-orange-500 bg-orange-50/40 shadow-xs ring-2 ring-orange-500/10'
+                      : 'border border-slate-200 hover:border-orange-300 hover:bg-orange-50/20'
+                  }`}
+                  title={`Click to select, double-click to sign in as ${acc.name}`}
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {/* Human Enterprise Initials Circle: Deep Charcoal Slate + Active Bhagwa */}
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs transition-colors ${
+                        isSelected ? 'bg-orange-600 ring-2 ring-orange-400/40' : 'bg-slate-800'
+                      }`}
+                    >
+                      {acc.initials}
+                    </div>
+
+                    {/* Name & Subtitle */}
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 text-sm tracking-tight truncate">
+                          {acc.name}
+                        </span>
+                        {isSelected && (
+                          <span className="inline-flex items-center text-[10px] font-semibold text-orange-800 bg-orange-100 px-1.5 py-0.2 rounded-full border border-orange-200">
+                            <Check className="w-2.5 h-2.5 mr-0.5" /> Selected
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 truncate mt-0.5">
+                        {acc.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 1-Click Fast Login Trigger */}
+                  <div className="shrink-0 pl-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleQuickSignIn(acc);
+                      }}
+                      disabled={loading}
+                      className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg transition flex items-center gap-1 cursor-pointer ${
+                        isSelected
+                          ? 'bg-orange-600 text-white hover:bg-orange-700 shadow-xs'
+                          : 'bg-slate-100 text-slate-700 hover:bg-orange-50 hover:text-orange-800'
+                      }`}
+                    >
+                      <span>1-Click</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="pt-1 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Password for all test personas: <code className="font-mono font-semibold text-orange-800 bg-orange-50 px-1 py-0.5 rounded">DocuShield@2026</code></span>
+            <span className="text-orange-700 font-medium">21 CFR Part 11 Compliant</span>
+          </div>
         </div>
 
-        {/* Right Side: Login & Register Forms */}
-        <div className="p-8 md:p-10 flex flex-col justify-between bg-white max-h-[90vh] overflow-y-auto">
-          <div>
-            {/* Mode Switch Tabs */}
-            <div className="flex bg-slate-100 p-1 rounded-xl mb-6 border border-slate-200">
-              <button
-                type="button"
-                onClick={() => { setIsRegister(false); setError(''); setSuccessMsg(''); }}
-                className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
-                  !isRegister
-                    ? 'bg-white text-purple-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                onClick={() => { setIsRegister(true); setError(''); setSuccessMsg(''); }}
-                className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
-                  isRegister
-                    ? 'bg-white text-purple-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                Register New User
-              </button>
+        {/* RIGHT SECTION: Sign In Form with Selected Persona Details */}
+        <div className="lg:col-span-5 bg-orange-50/40 rounded-2xl border border-orange-200/80 p-6 space-y-5">
+          {/* Brand Header: Deep Slate (#0F172A) + Bhagwa Orange (#EA580C) Accent */}
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-slate-900 flex items-center justify-center text-orange-500 font-bold shadow-md border border-slate-800">
+              <Shield className="w-6 h-6 text-orange-500" />
             </div>
-
-            <div className="mb-5">
-              <h2 className="text-lg font-bold text-slate-900">
-                {isRegister ? 'Create GxP User Account' : 'Sign in to Document Workspace'}
-              </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                {isRegister
-                  ? 'Enroll new authorized personnel into the GxP system.'
-                  : 'Authorized pharmaceutical and QA personnel only.'}
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                DocuShield
+                <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
+                  GxP
+                </span>
+              </h1>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Pharmaceutical Document Security & Custody
               </p>
             </div>
           </div>
 
-            {error && (
-              <div className="mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
+          {/* Currently Selected User Summary Pill */}
+          {selectedUser && (
+            <div className="p-3 rounded-xl bg-white border border-orange-200 shadow-2xs space-y-1">
+              <span className="text-[10px] font-bold text-orange-800 uppercase tracking-wider block">
+                Signing In As:
+              </span>
+              <div className="flex items-center justify-between">
+                <div className="font-bold text-slate-900 text-xs">
+                  {selectedUser.name}
+                </div>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200">
+                  {selectedUser.role}
+                </span>
               </div>
-            )}
+              <p className="text-[11px] text-slate-500">
+                Department: {selectedUser.department}
+              </p>
+            </div>
+          )}
 
-            {successMsg && (
-              <div className="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>{successMsg}</span>
+          {/* Alerts */}
+          {error && (
+            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {successMsg && (
+            <div className="p-3 rounded-lg bg-orange-50 border border-orange-200 text-orange-800 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-orange-600" />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
+          {/* Sign In Form */}
+          <form onSubmit={handleLoginSubmit} className="space-y-3.5">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Authorized Corporate Email
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@docushield.com"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition"
+                />
               </div>
-            )}
+            </div>
 
-            {/* SIGN IN FORM */}
-            {!isRegister ? (
-              <>
-                <form onSubmit={handleLoginSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Corporate Email Address</label>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="name@docushield.com"
-                        className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-                    <div className="relative">
-                      <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                      <input
-                        type="password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
-                      />
-                    </div>
-                  </div>
-
-                  <Button3D
-                    type="submit"
-                    variant="primary"
-                    size="md"
-                    disabled={loading}
-                    className="w-full mt-2"
-                  >
-                    {loading ? 'Authenticating...' : 'Sign In with 21 CFR Credentials'}
-                    <ArrowRight className="w-4 h-4" />
-                  </Button3D>
-                </form>
-
-                {/* Quick Demo Switcher */}
-                <div className="mt-6 pt-5 border-t border-slate-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                      Quick Demo Accounts (1-Click Login):
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {demoAccounts.map((acc) => (
-                      <button
-                        key={acc.email}
-                        type="button"
-                        onClick={() => handleSelectDemo(acc)}
-                        className={`text-left p-2 rounded-lg border text-[11px] transition ${
-                          email === acc.email
-                            ? 'border-purple-500 bg-purple-50/80 text-purple-900 font-semibold shadow-sm'
-                            : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                        }`}
-                      >
-                        <div className="font-medium truncate">{acc.label}</div>
-                        <div className="text-[10px] text-slate-400 truncate">{acc.dept}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-4 text-center">
-                  <button
-                    type="button"
-                    onClick={() => { setIsRegister(true); setError(''); }}
-                    className="text-xs text-purple-700 hover:text-purple-900 font-medium hover:underline inline-flex items-center gap-1"
-                  >
-                    <UserPlus className="w-3.5 h-3.5" />
-                    Don't have an account? Register new user
-                  </button>
-                </div>
-              </>
-            ) : (
-              /* REGISTRATION FORM */
-              <form onSubmit={handleRegisterSubmit} className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
-                  <div className="relative">
-                    <User className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                    <input
-                      type="text"
-                      required
-                      value={regData.name}
-                      onChange={(e) => setRegData({ ...regData, name: e.target.value })}
-                      placeholder="e.g. John Doe"
-                      className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Corporate Email Address</label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                    <input
-                      type="email"
-                      required
-                      value={regData.email}
-                      onChange={(e) => setRegData({ ...regData, email: e.target.value })}
-                      placeholder="john.doe@docushield.com"
-                      className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
-                    <div className="relative">
-                      <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                      <input
-                        type="password"
-                        required
-                        minLength={6}
-                        value={regData.password}
-                        onChange={(e) => setRegData({ ...regData, password: e.target.value })}
-                        placeholder="Min 6 chars"
-                        className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Employee ID</label>
-                    <div className="relative">
-                      <BadgeCheck className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                      <input
-                        type="text"
-                        required
-                        value={regData.employeeId}
-                        onChange={(e) => setRegData({ ...regData, employeeId: e.target.value })}
-                        placeholder="EMP-QA-101"
-                        className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">GxP Role</label>
-                    <select
-                      value={regData.role}
-                      onChange={(e) => setRegData({ ...regData, role: e.target.value })}
-                      className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition bg-white"
-                    >
-                      <option value="Employee">Employee (QC / Operator)</option>
-                      <option value="QA">QA (Quality Assurance)</option>
-                      <option value="Document Controller">Document Controller</option>
-                      <option value="Department Head">Department Head</option>
-                      <option value="Admin">System Administrator</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Department</label>
-                    <div className="relative">
-                      <Building2 className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                      <select
-                        value={regData.department}
-                        onChange={(e) => setRegData({ ...regData, department: e.target.value })}
-                        className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition bg-white"
-                      >
-                        <option value="Quality Assurance">Quality Assurance</option>
-                        <option value="Document Control">Document Control</option>
-                        <option value="Production">Production</option>
-                        <option value="Quality Control">Quality Control</option>
-                        <option value="Regulatory Affairs">Regulatory Affairs</option>
-                        <option value="Warehouse & Logistics">Warehouse & Logistics</option>
-                        <option value="Information Technology">Information Technology</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Designation</label>
-                  <div className="relative">
-                    <Briefcase className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                    <input
-                      type="text"
-                      value={regData.designation}
-                      onChange={(e) => setRegData({ ...regData, designation: e.target.value })}
-                      placeholder="e.g. Validation Specialist"
-                      className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
-                    />
-                  </div>
-                </div>
-
-                <Button3D
-                  type="submit"
-                  variant="primary"
-                  size="md"
-                  disabled={loading}
-                  className="w-full mt-3"
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Security Password
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-9 pr-10 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-orange-600 transition cursor-pointer p-0.5 rounded"
+                  title={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {loading ? 'Creating GxP Account...' : 'Enroll & Sign In with 21 CFR'}
-                  <UserPlus className="w-4 h-4" />
-                </Button3D>
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
 
-                <div className="mt-3 text-center">
-                  <button
-                    type="button"
-                    onClick={() => { setIsRegister(false); setError(''); }}
-                    className="text-xs text-purple-700 hover:text-purple-900 font-medium hover:underline inline-flex items-center gap-1"
-                  >
-                    Already have an account? Sign In
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
+            <Button3D
+              type="submit"
+              variant="primary"
+              size="md"
+              disabled={loading}
+              className="w-full mt-2"
+            >
+              {loading ? 'Authenticating with 21 CFR...' : `Sign In as ${selectedUser?.role || 'User'}`}
+              <ArrowRight className="w-4 h-4 ml-1.5 inline" />
+            </Button3D>
+          </form>
 
-          <Button3D
-            type="submit"
-            variant="primary"
-            size="md"
-            disabled={loading}
-            className="w-full mt-2"
-          >
-            {loading ? 'Authenticating...' : 'Sign In with 21 CFR Credentials'}
-            <ArrowRight className="w-4 h-4 ml-1.5" />
-          </Button3D>
-        </form>
-
-        {/* Quick Demo Switcher */}
-        <div className="mt-6 pt-5 border-t border-slate-100">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2 text-center">
-            Quick Demo Accounts (1-Click Login):
-          </span>
-          <div className="grid grid-cols-2 gap-1.5">
-            {demoAccounts.map((acc) => (
-              <button
-                key={acc.email}
-                type="button"
-                onClick={() => handleSelectDemo(acc)}
-                className={`text-left p-2 rounded-lg border text-[11px] transition ${
-                  email === acc.email
-                    ? 'border-purple-500 bg-purple-50/80 text-purple-900 font-semibold shadow-xs'
-                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                }`}
-              >
-                <div className="font-medium truncate">{acc.label}</div>
-                <div className="text-[10px] text-slate-400 truncate">{acc.dept}</div>
-              </button>
-            ))}
+          {/* Regulatory Notice */}
+          <div className="pt-2 text-[10px] text-slate-400 text-center flex items-center justify-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-orange-600" />
+            <span>Regulated by US FDA 21 CFR Part 11 & EU Annex 11</span>
           </div>
         </div>
 
-        {/* Footer Audit Notice */}
-        <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-          <span>Powered by VidyaGxP</span>
-          <span className="font-mono">v1.0.4-PROD</span>
-        </div>
       </div>
     </div>
   );

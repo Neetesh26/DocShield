@@ -101,7 +101,7 @@ export const Requests = () => {
           </select>
           <button
             onClick={handleOpenModal}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm"
           >
             <Plus className="w-4 h-4" /> New Request
           </button>
@@ -139,7 +139,7 @@ export const Requests = () => {
                   const canCancel = r.status === 'Pending' && (String(r.requester?._id) === String(user?._id) || user?.role === 'Admin');
                   return (
                     <tr key={r._id} className="hover:bg-slate-50 transition">
-                      <td className="py-3 px-4 font-mono font-bold text-teal-700 whitespace-nowrap">{r.requestNumber}</td>
+                      <td className="py-3 px-4 font-mono font-bold text-orange-700 whitespace-nowrap">{r.requestNumber}</td>
                       <td className="py-3 px-4 font-medium text-slate-900 truncate max-w-xs">
                         <div className="font-mono font-bold text-slate-800">{r.document?.documentNumber}</div>
                         <div className="text-[11px] text-slate-500 truncate">{r.document?.title}</div>
@@ -157,7 +157,7 @@ export const Requests = () => {
                       <td className="py-3 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                           r.status === 'Approved'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            ? 'bg-orange-50 text-orange-800 border border-orange-200'
                             : r.status === 'Rejected'
                             ? 'bg-rose-50 text-rose-700 border-rose-200'
                             : r.status === 'Cancelled'
@@ -265,7 +265,7 @@ export const Requests = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg"
+                  className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg"
                 >
                   Submit Request
                 </button>

@@ -55,16 +55,24 @@ export const AuthProvider = ({ children }) => {
     return { success: false, message: res.message || 'Registration failed' };
   };
 
+  const clearLocalStorage = () => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      // ignore
+    }
+    setUser(null);
+    setToken(null);
+  };
+
   const logout = async () => {
     try {
       await authService.logout();
     } catch (e) {
       // ignore
     } finally {
-      setUser(null);
-      setToken(null);
-      localStorage.removeItem('docushield_token');
-      localStorage.removeItem('docushield_user');
+      clearLocalStorage();
     }
   };
 
@@ -83,6 +91,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        clearLocalStorage,
         hasRole
       }}
     >

@@ -139,7 +139,7 @@ export const MasterData = () => {
         <button
           onClick={() => setActiveTab('departments')}
           className={`py-3 px-4 text-xs font-semibold border-b-2 transition ${
-            activeTab === 'departments' ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-800'
+            activeTab === 'departments' ? 'border-orange-600 text-orange-700' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
           Departments ({data.departments?.length || 0})
@@ -147,7 +147,7 @@ export const MasterData = () => {
         <button
           onClick={() => setActiveTab('documentTypes')}
           className={`py-3 px-4 text-xs font-semibold border-b-2 transition ${
-            activeTab === 'documentTypes' ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-800'
+            activeTab === 'documentTypes' ? 'border-orange-600 text-orange-700' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
           Document Types ({data.documentTypes?.length || 0})
@@ -155,7 +155,7 @@ export const MasterData = () => {
         <button
           onClick={() => setActiveTab('locations')}
           className={`py-3 px-4 text-xs font-semibold border-b-2 transition ${
-            activeTab === 'locations' ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-800'
+            activeTab === 'locations' ? 'border-orange-600 text-orange-700' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
           Storage Coordinates ({data.locations?.length || 0})
@@ -163,7 +163,7 @@ export const MasterData = () => {
         <button
           onClick={() => setActiveTab('users')}
           className={`py-3 px-4 text-xs font-semibold border-b-2 transition ${
-            activeTab === 'users' ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-800'
+            activeTab === 'users' ? 'border-orange-600 text-orange-700' : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
           Personnel Directory ({data.users?.length || 0})
@@ -179,7 +179,7 @@ export const MasterData = () => {
             </h2>
             <button
               onClick={() => setShowDeptModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" /> Add Department
             </button>
@@ -199,12 +199,12 @@ export const MasterData = () => {
               <tbody className="divide-y divide-slate-100">
                 {data.departments?.map(d => (
                   <tr key={d._id} className="hover:bg-slate-50">
-                    <td className="py-2.5 font-mono font-bold text-teal-700">{d.code}</td>
+                    <td className="py-2.5 font-mono font-bold text-orange-700">{d.code}</td>
                     <td className="py-2.5 font-semibold text-slate-900">{d.name}</td>
                     <td className="py-2.5 text-slate-600">{d.description || 'Core GxP Unit'}</td>
                     <td className="py-2.5 text-slate-700">{d.headName || 'Assigned Lead'}</td>
                     <td className="py-2.5">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-800 border border-orange-200">
                         Active
                       </span>
                     </td>
@@ -225,7 +225,7 @@ export const MasterData = () => {
             </h2>
             <button
               onClick={() => setShowTypeModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" /> Add Document Type
             </button>
@@ -245,12 +245,12 @@ export const MasterData = () => {
               <tbody className="divide-y divide-slate-100">
                 {data.documentTypes?.map(t => (
                   <tr key={t._id} className="hover:bg-slate-50">
-                    <td className="py-2.5 font-mono font-bold text-teal-700">{t.code}</td>
+                    <td className="py-2.5 font-mono font-bold text-orange-700">{t.code}</td>
                     <td className="py-2.5 font-mono font-bold text-slate-800">{t.prefix}</td>
                     <td className="py-2.5 font-semibold text-slate-900">{t.name}</td>
                     <td className="py-2.5 font-mono text-slate-700">{t.retentionYears || 5} Years</td>
                     <td className="py-2.5">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-teal-50 text-teal-800 border border-teal-200">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-800 border border-orange-200">
                         Enforced
                       </span>
                     </td>
@@ -283,7 +283,7 @@ export const MasterData = () => {
               <tbody className="divide-y divide-slate-100">
                 {data.locations?.map(l => (
                   <tr key={l._id} className="hover:bg-slate-50">
-                    <td className="py-2.5 font-mono font-bold text-teal-700">{l.code}</td>
+                    <td className="py-2.5 font-mono font-bold text-orange-700">{l.code}</td>
                     <td className="py-2.5 font-medium text-slate-900">{l.building}</td>
                     <td className="py-2.5 text-slate-700">{l.area}</td>
                     <td className="py-2.5 font-mono text-slate-600">RK-{l.rack} / SH-{l.shelf} / BIN-{l.bin}</td>
@@ -332,7 +332,7 @@ export const MasterData = () => {
                     <td className="py-2.5 font-semibold text-slate-900">{u.name}</td>
                     <td className="py-2.5 text-slate-600">{u.email}</td>
                     <td className="py-2.5">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-teal-50 text-teal-800 border border-teal-200">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-800 border border-orange-200">
                         {u.role}
                       </span>
                     </td>
@@ -396,7 +396,7 @@ export const MasterData = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg"
+                  className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg"
                 >
                   Save Department
                 </button>
@@ -471,7 +471,7 @@ export const MasterData = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg"
+                  className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg"
                 >
                   Save Document Type
                 </button>

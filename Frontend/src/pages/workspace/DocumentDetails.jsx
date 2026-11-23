@@ -7,7 +7,6 @@ import {
   Printer,
   Download,
   Edit3,
-  Bot,
   History,
   GitBranch,
   Layers,
@@ -18,7 +17,6 @@ import {
   CheckCircle,
   AlertCircle,
   Clock,
-  Sparkles,
   Send,
   MessageSquare,
   ChevronLeft,
@@ -145,7 +143,7 @@ export const DocumentDetails = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-3"></div>
         <p className="text-xs font-medium">Loading GxP Document Dossier...</p>
       </div>
     );
@@ -174,7 +172,7 @@ export const DocumentDetails = () => {
     { id: 'metadata', label: 'Metadata', icon: FileCheck2 },
     { id: 'location', label: 'Location & Custody', icon: MapPin },
     { id: 'versions', label: `Versions (${versions.length})`, icon: GitBranch },
-    { id: 'assistant', label: 'AI Assistant', icon: Bot, isAi: true },
+    { id: 'assistant', label: 'Procedure Q&A', icon: MessageSquare },
     { id: 'requests', label: `Requests (${requests.length})`, icon: Clock },
     { id: 'audit', label: `Audit Trail (${auditLogs.length})`, icon: History },
     { id: 'related', label: `Related (${relatedDocs.length})`, icon: Layers }
@@ -196,14 +194,14 @@ export const DocumentDetails = () => {
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="font-mono font-bold text-lg text-teal-800">{doc.documentNumber}</span>
+            <span className="font-mono font-bold text-lg text-orange-950">{doc.documentNumber}</span>
             <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
               Rev {doc.version}
             </span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200">
               {doc.status}
             </span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200">
+            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
               Physical: {doc.physicalStatus}
             </span>
           </div>
@@ -223,7 +221,7 @@ export const DocumentDetails = () => {
             onClick={() => setShowWhereIsItModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg border border-slate-300 transition"
           >
-            <MapPin className="w-3.5 h-3.5 text-teal-600" />
+            <MapPin className="w-3.5 h-3.5 text-orange-600" />
             Where is it?
           </button>
           <button
@@ -235,7 +233,7 @@ export const DocumentDetails = () => {
           </button>
           <button
             onClick={() => setShowRequestModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
           >
             <Printer className="w-3.5 h-3.5" />
             Request Print / Checkout
@@ -253,7 +251,7 @@ export const DocumentDetails = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 py-3 px-3.5 text-xs font-semibold border-b-2 transition whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'border-teal-600 text-teal-700'
+                  ? 'border-orange-600 text-orange-700'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
               } ${tab.isAi ? 'text-indigo-600' : ''}`}
             >
@@ -300,7 +298,7 @@ export const DocumentDetails = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 text-xs">
             <div>
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Document Number</span>
-              <span className="font-mono font-bold text-teal-700 text-sm">{doc.documentNumber}</span>
+              <span className="font-mono font-bold text-orange-700 text-sm">{doc.documentNumber}</span>
             </div>
             <div>
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Title</span>
@@ -369,7 +367,7 @@ export const DocumentDetails = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <Building className="w-4 h-4 text-teal-600" />
+              <Building className="w-4 h-4 text-orange-600" />
               <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
                 Physical Archival Hierarchy
               </h2>
@@ -389,7 +387,7 @@ export const DocumentDetails = () => {
               </div>
               <div className="flex justify-between border-b pb-2 border-slate-100">
                 <span className="text-slate-500">Rack / Shelf / Bin:</span>
-                <span className="font-mono font-bold text-teal-700">{doc.storageLocation?.code}</span>
+                <span className="font-mono font-bold text-orange-700">{doc.storageLocation?.code}</span>
               </div>
               <div className="flex justify-between border-b pb-2 border-slate-100">
                 <span className="text-slate-500">Box Identifier:</span>
@@ -404,7 +402,7 @@ export const DocumentDetails = () => {
 
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <UserCheck className="w-4 h-4 text-teal-600" />
+              <UserCheck className="w-4 h-4 text-orange-600" />
               <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
                 Accountable Custodian
               </h2>
@@ -453,9 +451,9 @@ export const DocumentDetails = () => {
               <tbody className="divide-y divide-slate-100">
                 {versions.map((ver) => (
                   <tr key={ver._id}>
-                    <td className="py-2.5 font-mono font-bold text-teal-700">{ver.version}</td>
+                    <td className="py-2.5 font-mono font-bold text-orange-700">{ver.version}</td>
                     <td className="py-2.5">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-800 border border-orange-200">
                         {ver.status}
                       </span>
                     </td>
@@ -470,23 +468,23 @@ export const DocumentDetails = () => {
         </div>
       )}
 
-      {/* TAB 5: AI DOCUMENT ASSISTANT */}
+      {/* TAB 5: DOCUMENT INQUIRIES & COMPLIANCE Q&A */}
       {activeTab === 'assistant' && (
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <Bot className="w-5 h-5 text-indigo-600" />
+              <MessageSquare className="w-5 h-5 text-orange-600" />
               <div>
                 <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-                  AI Procedure Assistant
+                  Procedure & Compliance Inquiries
                 </h2>
                 <p className="text-[11px] text-slate-500">
-                  Contextual assistant grounded on document {doc.documentNumber} ({doc.title}).
+                  Contextual procedure reference grounded on document {doc.documentNumber} ({doc.title}).
                 </p>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-              Provider Abstraction Active
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200">
+              Regulatory Reference Active
             </span>
           </div>
 
@@ -496,7 +494,7 @@ export const DocumentDetails = () => {
               onClick={() => {
                 setChatInput('Summarize the critical control points of this document.');
               }}
-              className="px-2.5 py-1 rounded-full border border-indigo-200 bg-indigo-50/60 text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap"
+              className="px-2.5 py-1 rounded-full border border-orange-200 bg-orange-50/60 text-orange-800 hover:bg-orange-100 transition whitespace-nowrap cursor-pointer"
             >
               Summarize critical control points
             </button>
@@ -504,7 +502,7 @@ export const DocumentDetails = () => {
               onClick={() => {
                 setChatInput('Generate a 3-question training quiz based on this procedure.');
               }}
-              className="px-2.5 py-1 rounded-full border border-indigo-200 bg-indigo-50/60 text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap"
+              className="px-2.5 py-1 rounded-full border border-orange-200 bg-orange-50/60 text-orange-800 hover:bg-orange-100 transition whitespace-nowrap cursor-pointer"
             >
               Generate compliance quiz
             </button>
@@ -512,7 +510,7 @@ export const DocumentDetails = () => {
               onClick={() => {
                 setChatInput('What are the key deviation actions mentioned in this SOP?');
               }}
-              className="px-2.5 py-1 rounded-full border border-indigo-200 bg-indigo-50/60 text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap"
+              className="px-2.5 py-1 rounded-full border border-orange-200 bg-orange-50/60 text-orange-800 hover:bg-orange-100 transition whitespace-nowrap cursor-pointer"
             >
               Key deviation actions
             </button>
@@ -528,7 +526,7 @@ export const DocumentDetails = () => {
                 <div
                   className={`max-w-[80%] p-3 rounded-xl whitespace-pre-wrap ${
                     msg.sender === 'user'
-                      ? 'bg-teal-600 text-white rounded-br-none'
+                      ? 'bg-orange-600 text-white rounded-br-none'
                       : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none shadow-xs'
                   }`}
                 >
@@ -573,7 +571,7 @@ export const DocumentDetails = () => {
             </h2>
             <button
               onClick={() => setShowRequestModal(true)}
-              className="text-xs font-semibold text-teal-600 hover:underline"
+              className="text-xs font-semibold text-orange-600 hover:underline"
             >
               + Submit New Request
             </button>
@@ -599,13 +597,13 @@ export const DocumentDetails = () => {
                 ) : (
                   requests.map((r) => (
                     <tr key={r._id}>
-                      <td className="py-2.5 font-mono font-bold text-teal-700">{r.requestNumber}</td>
+                      <td className="py-2.5 font-mono font-bold text-orange-900">{r.requestNumber}</td>
                       <td className="py-2.5 font-medium">{r.requestType}</td>
                       <td className="py-2.5">{r.requester?.name || 'User'}</td>
                       <td className="py-2.5 text-slate-600 truncate max-w-xs">{r.reason}</td>
                       <td className="py-2.5">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                          r.status === 'Approved' ? 'bg-emerald-50 text-emerald-700' : r.status === 'Pending' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700'
+                          r.status === 'Approved' ? 'bg-orange-50 text-orange-800 border border-orange-200' : r.status === 'Pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-700'
                         }`}>
                           {r.status}
                         </span>
@@ -641,7 +639,7 @@ export const DocumentDetails = () => {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-bold px-1.5 py-0.2 rounded bg-teal-100 text-teal-800">
+                    <span className="font-mono text-[10px] font-bold px-1.5 py-0.2 rounded bg-orange-100 text-orange-900 border border-orange-200">
                       {log.action}
                     </span>
                     <span className="text-slate-600">{log.details}</span>
@@ -664,10 +662,10 @@ export const DocumentDetails = () => {
               <div
                 key={rel._id}
                 onClick={() => navigate(`/documents/${rel._id}`)}
-                className="p-3 rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/20 cursor-pointer transition flex items-center justify-between text-xs"
+                className="p-3 rounded-xl border border-slate-200 hover:border-orange-400 hover:bg-orange-50/20 cursor-pointer transition flex items-center justify-between text-xs"
               >
                 <div>
-                  <div className="font-mono font-bold text-teal-700">{rel.documentNumber}</div>
+                  <div className="font-mono font-bold text-orange-800">{rel.documentNumber}</div>
                   <div className="font-medium text-slate-800 truncate max-w-xs">{rel.title}</div>
                   <div className="text-[10px] text-slate-400">Rev {rel.version} • {rel.department}</div>
                 </div>
@@ -688,7 +686,7 @@ export const DocumentDetails = () => {
             </div>
 
             {requestSuccess ? (
-              <div className="p-4 bg-emerald-50 text-emerald-800 rounded-xl text-xs text-center font-medium">
+              <div className="p-4 bg-orange-50 text-orange-800 border border-orange-200 rounded-xl text-xs text-center font-medium">
                 {requestSuccess}
               </div>
             ) : (
@@ -743,7 +741,7 @@ export const DocumentDetails = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg"
+                    className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg"
                   >
                     Submit Request
                   </button>
@@ -760,7 +758,7 @@ export const DocumentDetails = () => {
           <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-teal-600" />
+                <MapPin className="w-5 h-5 text-orange-600" />
                 <h3 className="text-sm font-bold text-slate-900">Physical Coordinate Locator</h3>
               </div>
               <button onClick={() => setShowWhereIsItModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
@@ -769,7 +767,7 @@ export const DocumentDetails = () => {
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 text-xs">
               <div className="flex justify-between">
                 <span className="text-slate-500">Document Number:</span>
-                <span className="font-mono font-bold text-teal-700">{doc.documentNumber}</span>
+                <span className="font-mono font-bold text-orange-700">{doc.documentNumber}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Target Facility:</span>
@@ -785,7 +783,7 @@ export const DocumentDetails = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Exact Shelf Coordinate:</span>
-                <span className="font-mono font-bold text-teal-700">{doc.storageLocation?.code}</span>
+                <span className="font-mono font-bold text-orange-700">{doc.storageLocation?.code}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Box & File Tag:</span>
@@ -795,7 +793,7 @@ export const DocumentDetails = () => {
 
             {/* Visual rack illustration */}
             <div className="p-4 bg-[#0F172A] rounded-xl text-white text-center space-y-2">
-              <span className="text-[11px] font-mono text-teal-400 block uppercase">
+              <span className="text-[11px] font-mono text-orange-400 block uppercase">
                 Rack Visual Locator
               </span>
               <div className="grid grid-cols-4 gap-1.5 max-w-xs mx-auto py-2">
@@ -803,7 +801,7 @@ export const DocumentDetails = () => {
                   <div
                     key={bin}
                     className={`h-10 rounded border flex items-center justify-center text-[10px] font-mono ${
-                      bin === 2 ? 'bg-teal-500 border-teal-300 text-slate-900 font-bold shadow-md' : 'bg-slate-800 border-slate-700 text-slate-400'
+                      bin === 2 ? 'bg-orange-500 border-orange-300 text-slate-900 font-bold shadow-md' : 'bg-slate-800 border-slate-700 text-slate-400'
                     }`}
                   >
                     Bin {bin} {bin === 2 ? '★' : ''}
@@ -845,7 +843,7 @@ export const DocumentDetails = () => {
             </div>
             <button
               onClick={() => window.print()}
-              className="w-full py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5"
+              className="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5"
             >
               <Printer className="w-3.5 h-3.5" /> Print Binder Spine Label
             </button>

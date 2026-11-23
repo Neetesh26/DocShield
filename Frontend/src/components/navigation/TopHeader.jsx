@@ -62,7 +62,7 @@ export const TopHeader = ({ onOpenScanner }) => {
             placeholder={`Search repository by ${searchMode === 'All' ? 'Doc #, title, or keywords...' : searchMode + '...'}`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-24 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition placeholder:text-slate-400 text-slate-700"
+            className="w-full pl-9 pr-24 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition placeholder:text-slate-400 text-slate-700"
           />
           <div className="absolute right-1">
             <select
@@ -89,7 +89,7 @@ export const TopHeader = ({ onOpenScanner }) => {
           size="sm"
           title="Scan Document QR Code"
         >
-          <QrCode className="w-3.5 h-3.5 text-purple-600" />
+          <QrCode className="w-3.5 h-3.5 text-orange-600" />
           <span>Scan QR</span>
         </Button3D>
 
@@ -116,7 +116,7 @@ export const TopHeader = ({ onOpenScanner }) => {
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-[11px] text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1"
+                    className="text-[11px] text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
                   >
                     <CheckCheck className="w-3.5 h-3.5" />
                     Mark all read
@@ -135,11 +135,11 @@ export const TopHeader = ({ onOpenScanner }) => {
                         if (n.link) navigate(n.link);
                         setShowNotifications(false);
                       }}
-                      className={`p-3 text-xs cursor-pointer transition hover:bg-slate-50 ${!n.isRead ? 'bg-teal-50/40' : ''}`}
+                      className={`p-3 text-xs cursor-pointer transition hover:bg-slate-50 ${!n.isRead ? 'bg-orange-50/40' : ''}`}
                     >
                       <div className="font-medium text-slate-800 flex items-center justify-between">
                         <span>{n.title}</span>
-                        {!n.isRead && <span className="w-2 h-2 rounded-full bg-teal-500"></span>}
+                        {!n.isRead && <span className="w-2 h-2 rounded-full bg-orange-500"></span>}
                       </div>
                       <p className="text-slate-500 text-[11px] mt-0.5 leading-snug">{n.message}</p>
                       <span className="text-[10px] text-slate-400 mt-1 block">
@@ -159,12 +159,12 @@ export const TopHeader = ({ onOpenScanner }) => {
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-50 transition"
           >
-            <div className="w-8 h-8 rounded-full bg-teal-600 text-white font-bold flex items-center justify-center text-xs shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-orange-600 text-white font-bold flex items-center justify-center text-xs shadow-sm">
               {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
             <div className="text-left hidden md:block">
               <div className="text-xs font-semibold text-slate-800 leading-tight">{user?.name || 'GxP User'}</div>
-              <div className="text-[11px] font-medium text-teal-600 flex items-center gap-1">
+              <div className="text-[11px] font-medium text-orange-600 flex items-center gap-1">
                 <span>{user?.role || 'Employee'}</span>
                 <span className="text-slate-300">•</span>
                 <span className="text-slate-400 font-normal">{user?.department || 'Operations'}</span>

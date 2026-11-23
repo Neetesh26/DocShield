@@ -20,8 +20,10 @@ import {
   History,
   Settings,
   Shield,
-  FileCheck2
+  FileCheck2,
+  Lock
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 
 const navigationGroups = [
@@ -65,30 +67,129 @@ const navigationGroups = [
   }
 ];
 
+// Strict Role-Based Access Control Mapping
+export const isRouteAllowedForRole = (itemPath, role) => {
+  if (!role || role === 'Admin') return true;
+
+  if (role === 'QA Manager' || role === 'QA') {
+    // QA Manager: Approvals, audit trail, reports, review & retention, repository, tasks, requests
+    const allowed = [
+      '/workspace/dashboard',
+      '/workspace/search',
+      '/workspace/repository',
+      '/workflow/tasks',
+      '/workflow/requests',
+      '/workflow/approvals',
+      '/workflow/review-retention',
+      '/governance/reports',
+      '/governance/audit-trail'
+    ];
+    return allowed.includes(itemPath);
+  }
+
+  if (role === 'Document Controller') {
+    // Document Controller: Upload, issue/receive, physical audits, storage map, custody, checkouts
+    const allowed = [
+      '/workspace/dashboard',
+      '/workspace/search',
+      '/workspace/repository',
+      '/workspace/upload',
+      '/workspace/bulk-upload',
+      '/workspace/scan-qr',
+      '/physical/storage-map',
+      '/physical/custody',
+      '/physical/checkout',
+      '/physical/audit',
+      '/workflow/tasks',
+      '/workflow/requests'
+    ];
+    return allowed.includes(itemPath);
+  }
+
+  if (role === 'Custodian') {
+    // Custodian: Owns department documents, handovers, checkouts, storage map view
+    const allowed = [
+      '/workspace/dashboard',
+      '/workspace/search',
+      '/workspace/repository',
+      '/workspace/scan-qr',
+      '/physical/storage-map',
+      '/physical/custody',
+      '/physical/checkout',
+      '/workflow/tasks',
+      '/workflow/requests'
+    ];
+    return allowed.includes(itemPath);
+  }
+
+  if (role === 'User / Viewer' || role === 'Viewer' || role === 'Employee') {
+    // User / Viewer: Search, view, chat, raise requests
+    const allowed = [
+      '/workspace/dashboard',
+      '/workspace/search',
+      '/workspace/repository',
+      '/workflow/tasks',
+      '/workflow/requests'
+    ];
+    return allowed.includes(itemPath);
+  }
+
+  return true;
+};
+
 export const Sidebar = () => {
+  const { user } = useAuth();
   const { unreadCount } = useNotifications();
+  const userRole = user?.role || 'User / Viewer';
+
+  // Filter navigation groups according to active persona's RBAC permissions
+  const filteredGroups = navigationGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => isRouteAllowedForRole(item.path, userRole))
+    }))
+    .filter(group => group.items.length > 0);
 
   return (
-    <aside className="w-64 bg-white text-slate-700 flex flex-col h-screen select-none border-r border-slate-200 shrink-0 shadow-sm">
-      {/* Brand Header */}
-      <div className="h-16 px-5 flex items-center justify-between border-b border-purple-100 bg-purple-50/40">
+    <aside className="w-64 bg-white text-slate-700 flex flex-col h-screen select-none border-r border-slate-200 shrink-0 shadow-xs">
+      {/* Brand Header: Deep Slate (#0F172A) + Bhagwa Orange Accent */}
+      <div className="h-16 px-5 flex items-center justify-between border-b border-slate-200/80 bg-white">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-purple-700 to-violet-500 flex items-center justify-center text-white shadow-md shadow-purple-600/20">
-            <Shield className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 shadow-xs">
+            <Shield className="w-5 h-5 text-orange-500" />
           </div>
           <div>
-            <div className="font-bold text-slate-900 tracking-wide text-base flex items-center gap-1.5">
+            <div className="font-bold text-slate-900 tracking-tight text-base flex items-center gap-1.5">
               DocuShield
-              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">GxP</span>
+              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
+                GxP
+              </span>
             </div>
-            <div className="text-[11px] text-purple-600 font-medium tracking-tight">by VidyaGxP</div>
+            <div className="text-[11px] text-orange-600 font-semibold tracking-tight">
+              Pharma Vault
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Nav List */}
+      {/* User Persona Profile Pill in Sidebar */}
+      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
+        <div className="min-w-0 pr-2">
+          <div className="text-xs font-bold text-slate-900 truncate">
+            {user?.name || 'Authorized User'}
+          </div>
+          <div className="text-[10px] text-slate-500 font-medium truncate">
+            {user?.department || 'GxP Operations'}
+          </div>
+        </div>
+        <span className="shrink-0 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">
+          {userRole}
+        </span>
+      </div>
+
+      {/* Nav List - Strictly Filtered by Role Access */}
       <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-        {navigationGroups.map((group) => (
+        {filteredGroups.map((group) => (
           <div key={group.title}>
             <div className="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">
               {group.title}
@@ -101,11 +202,11 @@ export const Sidebar = () => {
                     key={item.path}
                     to={item.path}
                     className={({ isActive }) => `
-                      flex items-center justify-between px-3 py-2 rounded-lg text-[13px] font-medium transition-all
+                      flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-medium transition-all
                       ${isActive
-                        ? 'bg-purple-100/70 text-purple-800 font-semibold border-l-4 border-purple-600 shadow-sm'
-                        : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50/60'}
-                      ${item.highlight ? 'text-purple-600 font-semibold' : ''}
+                        ? 'bg-orange-50 text-orange-950 font-bold border-l-4 border-orange-600 shadow-2xs'
+                        : 'text-slate-600 hover:text-orange-900 hover:bg-orange-50/40'}
+                      ${item.highlight ? 'text-orange-600 font-semibold' : ''}
                     `}
                   >
                     <div className="flex items-center gap-3">
@@ -126,14 +227,13 @@ export const Sidebar = () => {
       </div>
 
       {/* Footer GxP Status */}
-      <div className="p-3.5 border-t border-purple-100 bg-purple-50/30 text-xs text-slate-500 flex items-center justify-between">
+      <div className="p-3.5 border-t border-slate-200 bg-slate-50/70 text-xs text-slate-500 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></div>
-          <span className="font-medium text-slate-700">21 CFR Part 11</span>
+          <div className="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></div>
+          <span className="font-semibold text-slate-700">21 CFR Part 11</span>
         </div>
         <span className="text-[11px] text-slate-400 font-mono">v1.0.4-PROD</span>
       </div>
     </aside>
   );
 };
-

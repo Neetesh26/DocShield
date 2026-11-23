@@ -102,7 +102,7 @@ export const ScanQrPage = () => {
       {/* Camera Scanning Box */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-          <Camera className="w-4 h-4 text-teal-600" />
+          <Camera className="w-4 h-4 text-orange-600" />
           <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Optical Camera Scanner</h2>
         </div>
 
@@ -124,12 +124,12 @@ export const ScanQrPage = () => {
             value={manualCode}
             onChange={(e) => setManualCode(e.target.value)}
             placeholder="Enter Document Number (e.g. SOP-QA-0042) or QR Token..."
-            className="flex-1 px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
+            className="flex-1 px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600"
           />
           <button
             type="submit"
             disabled={searching || !manualCode.trim()}
-            className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5 transition disabled:opacity-50"
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5 transition disabled:opacity-50"
           >
             {searching ? 'Looking up...' : 'Lookup'}
             <ArrowRight className="w-3.5 h-3.5" />

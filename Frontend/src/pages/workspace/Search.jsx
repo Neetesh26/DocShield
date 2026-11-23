@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search as SearchIcon,
-  Sparkles,
-  Bot,
   Filter,
   FileText,
   ArrowRight,
@@ -51,29 +49,6 @@ export const Search = () => {
   const [showTypeahead, setShowTypeahead] = useState(false);
   const typeaheadRef = useRef(null);
 
-  // Suggested Natural Language Prompts
-  const suggestedPrompts = [
-    'Show all active SOPs in Quality Assurance',
-    'HPLC System Operation and Calibration SOP in QC',
-    'Paracetamol 500mg Master Batch Manufacturing Record',
-    'Cleaning Validation Protocols for Fluid Bed Dryer',
-    'Finished Product Testing Specification for Metformin',
-    'Purified water generation qualification protocol',
-    'Deviation investigation in sterile filling suite',
-    'Active controlled procedures stored in Building A Vault'
-  ];
-
-  // Quick Category Filter Pills
-  const quickCategories = [
-    { label: 'All Documents', query: '' },
-    { label: 'SOPs', query: 'Show all Standard Operating Procedures (SOP)' },
-    { label: 'BMR & BPR', query: 'Master Batch Manufacturing & Production Records' },
-    { label: 'Validation Protocols', query: 'Validation protocols and qualification reports' },
-    { label: 'Specifications', query: 'Raw Material and Finished Product Specifications' },
-    { label: 'Deviation & CAPA', query: 'Deviation investigations and CAPA actions' },
-    { label: 'Logbooks', query: 'Equipment and facility operational logbooks' }
-  ];
-
   // Execute AI Search (Handles both query and empty query)
   const executeAiSearch = async (targetQuery = query) => {
     try {
@@ -83,20 +58,37 @@ export const Search = () => {
       const res = await documentService.aiSearch(targetQuery ? targetQuery.trim() : '');
       if (res.success && res.data) {
         setAiData(res.data);
-        setResults(res.data.documents || []);
+        const docs = res.data.documents || (Array.isArray(res.data) ? res.data : []);
+        setResults(docs);
         if (res.data.suggestedDocuments && res.data.suggestedDocuments.length > 0) {
           setSuggestedDocs(res.data.suggestedDocuments);
         }
-        setTotal(res.data.total || (res.data.documents || []).length);
+        setTotal(res.data.total || docs.length);
+      } else {
+        // Fallback to standard listing if AI search returned no data
+        const fallbackRes = await documentService.getDocuments({ limit: 30 });
+        if (fallbackRes.success && fallbackRes.data) {
+          setResults(fallbackRes.data);
+          setTotal(fallbackRes.data.length);
+        }
       }
     } catch (err) {
-      console.error('AI search error', err);
+      console.error('AI search error, falling back to document repository', err);
+      try {
+        const fallbackRes = await documentService.getDocuments({ limit: 30 });
+        if (fallbackRes.success && fallbackRes.data) {
+          setResults(fallbackRes.data);
+          setTotal(fallbackRes.data.length);
+        }
+      } catch (innerErr) {
+        console.error('Failed to fetch fallback documents', innerErr);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Load Initial Documents on Component Mount (Always displays documents)
+  // Load Initial Documents on Component Mount (Always displays documents directly from API)
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -109,14 +101,30 @@ export const Search = () => {
         const res = await documentService.aiSearch(queryToUse);
         if (res.success && res.data) {
           setAiData(res.data);
-          setResults(res.data.documents || []);
+          const docs = res.data.documents || (Array.isArray(res.data) ? res.data : []);
+          setResults(docs);
           if (res.data.suggestedDocuments && res.data.suggestedDocuments.length > 0) {
             setSuggestedDocs(res.data.suggestedDocuments);
           }
-          setTotal(res.data.total || (res.data.documents || []).length);
+          setTotal(res.data.total || docs.length);
+        } else {
+          const fallbackRes = await documentService.getDocuments({ limit: 30 });
+          if (fallbackRes.success && fallbackRes.data) {
+            setResults(fallbackRes.data);
+            setTotal(fallbackRes.data.length);
+          }
         }
       } catch (err) {
-        console.error('Failed to load initial search documents', err);
+        console.error('Failed to load initial search documents, falling back to repository', err);
+        try {
+          const fallbackRes = await documentService.getDocuments({ limit: 30 });
+          if (fallbackRes.success && fallbackRes.data) {
+            setResults(fallbackRes.data);
+            setTotal(fallbackRes.data.length);
+          }
+        } catch (innerErr) {
+          console.error('Failed to fetch fallback documents', innerErr);
+        }
       } finally {
         setLoading(false);
       }
@@ -171,10 +179,13 @@ export const Search = () => {
     }
   };
 
-  const handlePromptClick = (promptText) => {
-    setQuery(promptText);
+  const handlePromptClick = (promptItem) => {
+    const promptQuery = typeof promptItem === 'string'
+      ? promptItem
+      : (promptItem?.query || promptItem?.label || '');
+    setQuery(promptQuery);
     setMode('ai');
-    executeAiSearch(promptText);
+    executeAiSearch(promptQuery);
   };
 
   const handleCategoryClick = (catQuery) => {
@@ -224,19 +235,19 @@ export const Search = () => {
     <div className="space-y-6">
       
       {/* Header with Mode Switcher */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-purple-100 gap-3">
+      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-orange-100 gap-3">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              DocuShield AI Semantic Intelligence & Search
+              Document Archive & Regulatory Repository Search
             </h1>
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200">
-              <Sparkles className="w-3 h-3 text-purple-600" />
-              Neural NLP Engine
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-slate-900 text-orange-400 border border-slate-800">
+              <ShieldCheck className="w-3 h-3 text-orange-400" />
+              Validated GxP Index
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Query pharmaceutical procedures, batch records, and vault coordinates using natural language understanding.
+            Query pharmaceutical procedures, batch records, formulations, and physical vault coordinates across the repository.
           </p>
         </div>
 
@@ -247,20 +258,20 @@ export const Search = () => {
             onClick={() => setMode('ai')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer ${
               mode === 'ai'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-purple-700'
+                ? 'bg-orange-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-orange-700'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>AI Natural Language</span>
+            <SearchIcon className="w-3.5 h-3.5" />
+            <span>Intelligent Search</span>
           </button>
           <button
             type="button"
             onClick={() => setMode('standard')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer ${
               mode === 'standard'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-purple-700'
+                ? 'bg-orange-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-orange-700'
             }`}
           >
             <Filter className="w-3.5 h-3.5" />
@@ -270,14 +281,14 @@ export const Search = () => {
       </div>
 
       {/* Main Search Panel with Auto-Suggest Dropdown */}
-      <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-xs space-y-4 relative" ref={typeaheadRef}>
+      <div className="bg-white p-6 rounded-2xl border border-orange-100 shadow-xs space-y-4 relative" ref={typeaheadRef}>
         <form onSubmit={handleSearch} className="space-y-4">
           
-          {/* Natural Language AI Search Bar with Live Typeahead Suggestions */}
+          {/* Main Search Bar with Live Typeahead Suggestions */}
           <div className="relative">
             <div className="relative flex items-center">
-              <div className="absolute left-4 text-purple-600 pointer-events-none">
-                {mode === 'ai' ? <Sparkles className="w-5 h-5 animate-pulse" /> : <SearchIcon className="w-5 h-5 text-slate-400" />}
+              <div className="absolute left-4 text-orange-600 pointer-events-none">
+                <SearchIcon className="w-5 h-5 text-orange-600" />
               </div>
               <input
                 type="text"
@@ -289,10 +300,10 @@ export const Search = () => {
                 onFocus={() => setShowTypeahead(true)}
                 placeholder={
                   mode === 'ai'
-                    ? "Ask DocuShield AI e.g. 'Show HPLC calibration SOPs in QC Lab' or 'Paracetamol BMR in Building B'..."
+                    ? "Search repository by document number, title, formulation, API, or department (e.g. 'HPLC SOP', 'Paracetamol BMR')..."
                     : "Search across Document Number, Title, Formulation, API, or Keywords..."
                 }
-                className="w-full pl-12 pr-32 py-3.5 text-sm bg-slate-50/50 border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 font-medium text-slate-800 placeholder:text-slate-400 transition"
+                className="w-full pl-12 pr-32 py-3.5 text-sm bg-slate-50/50 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 font-medium text-slate-800 placeholder:text-slate-400 transition"
               />
               <div className="absolute right-2 flex items-center gap-1.5">
                 {query && (
@@ -313,30 +324,21 @@ export const Search = () => {
                   size="sm"
                   disabled={loading}
                 >
-                  {mode === 'ai' ? (
-                    <>
-                      <Sparkles className="w-3.5 h-3.5 mr-1" />
-                      <span>Search AI</span>
-                    </>
-                  ) : (
-                    <>
-                      <SearchIcon className="w-3.5 h-3.5 mr-1" />
-                      <span>Search</span>
-                    </>
-                  )}
+                  <SearchIcon className="w-3.5 h-3.5 mr-1" />
+                  <span>Search</span>
                 </Button3D>
               </div>
             </div>
 
             {/* Live Autocomplete Typeahead Dropdown */}
             {showTypeahead && typeaheadMatches.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-purple-200 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100">
-                <div className="p-2.5 bg-purple-50/60 border-b border-purple-100 flex items-center justify-between text-[11px] font-semibold text-purple-900">
-                  <span className="flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                    Suggested Documents Matching Query:
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-orange-200 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100">
+                <div className="p-2.5 bg-orange-50/60 border-b border-orange-100 flex items-center justify-between text-[11px] font-semibold text-orange-900">
+                  <span className="flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-orange-600" />
+                    Indexed Records Matching Query:
                   </span>
-                  <span className="text-[10px] text-purple-600 font-mono">
+                  <span className="text-[10px] text-orange-600 font-mono">
                     {typeaheadMatches.length} Found
                   </span>
                 </div>
@@ -345,24 +347,24 @@ export const Search = () => {
                     <div
                       key={doc._id}
                       onClick={() => handleSelectSuggestedDoc(doc)}
-                      className="p-3 hover:bg-purple-50/80 transition cursor-pointer flex items-center justify-between gap-3 text-xs"
+                      className="p-3 hover:bg-orange-50/80 transition cursor-pointer flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="flex items-start gap-2.5 min-w-0">
-                        <FileCheck2 className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                        <FileCheck2 className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-purple-800">{doc.documentNumber}</span>
+                            <span className="font-mono font-bold text-orange-800">{doc.documentNumber}</span>
                             <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono">
                               v{doc.version}
                             </span>
-                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 font-medium">
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-orange-50 text-orange-700 font-medium">
                               {doc.department}
                             </span>
                           </div>
                           <p className="text-slate-700 font-medium truncate mt-0.5">{doc.title}</p>
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-purple-400 shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-orange-400 shrink-0" />
                     </div>
                   ))}
                 </div>
@@ -370,45 +372,63 @@ export const Search = () => {
             )}
           </div>
 
-          {/* AI One-Click Prompt Suggestions & Quick Category Pills */}
+          {/* Real Dynamic Categories and Suggestions from Live API */}
           {mode === 'ai' && (
             <div className="space-y-3 pt-1">
-              {/* Quick Category Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">
-                  Browse:
-                </span>
-                {quickCategories.map((cat, idx) => (
+              {/* Dynamic Category Filter Pills */}
+              {((aiData?.availableCategories && aiData.availableCategories.length > 0) || results.length > 0) && (
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">
+                    Live Categories:
+                  </span>
                   <button
-                    key={idx}
                     type="button"
-                    onClick={() => handleCategoryClick(cat.query)}
-                    className="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer shrink-0 border bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-800 border-slate-200 hover:border-purple-300"
+                    onClick={() => handleCategoryClick('')}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer shrink-0 border bg-orange-100 text-orange-800 border-orange-300"
                   >
-                    {cat.label}
+                    All Types
                   </button>
-                ))}
-              </div>
-
-              {/* Natural Language Prompt Chips */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Suggested Natural Language Queries:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {suggestedPrompts.map((prompt, idx) => (
+                  {(aiData?.availableCategories || Array.from(new Set(results.map(d => d.documentType))).filter(Boolean).map(t => ({ label: t, query: t }))).map((cat, idx) => (
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => handlePromptClick(prompt)}
-                      className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100/80 border border-purple-200/80 text-purple-900 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5"
+                      onClick={() => handleCategoryClick(cat.query || cat.label)}
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer shrink-0 border bg-slate-100 hover:bg-orange-100 text-slate-700 hover:text-orange-800 border-slate-200 hover:border-orange-300"
                     >
-                      <Zap className="w-3 h-3 text-purple-600 shrink-0" />
-                      <span>{prompt}</span>
+                      {cat.label} {cat.count !== undefined ? `(${cat.count})` : ''}
                     </button>
                   ))}
                 </div>
-              </div>
+              )}
+
+              {/* Dynamic Suggested Queries from Real Documents in Vault */}
+              {(aiData?.suggestedQueries?.length > 0 || results.length > 0) && (
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Frequently Referenced Records (1-Click Query):
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(aiData?.suggestedQueries || results.slice(0, 6).map(d => ({ label: `${d.title.slice(0, 45)}...`, query: d.documentNumber, documentNumber: d.documentNumber }))).map((prompt, idx) => {
+                      const label = typeof prompt === 'string' ? prompt : (prompt.label || prompt.query);
+                      const docNum = typeof prompt === 'object' ? prompt.documentNumber : null;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handlePromptClick(prompt)}
+                          className="px-2.5 py-1 bg-orange-50 hover:bg-orange-100/80 border border-orange-200/80 text-orange-900 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                        >
+                          <Zap className="w-3 h-3 text-orange-600 shrink-0" />
+                          {docNum && (
+                            <span className="font-mono font-bold text-orange-800 shrink-0">{docNum}:</span>
+                          )}
+                          <span className="truncate max-w-sm">{label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -505,20 +525,20 @@ export const Search = () => {
         </form>
       </div>
 
-      {/* AI Synthesis Executive Summary Box */}
+      {/* Document Query Analysis & Synthesis Summary Box */}
       {aiData?.aiSummary && (
-        <div className="bg-gradient-to-r from-purple-50 via-violet-50/60 to-white p-5 rounded-2xl border border-purple-200 shadow-xs space-y-3">
+        <div className="bg-gradient-to-r from-orange-50 via-slate-50 to-white p-5 rounded-2xl border border-orange-200 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-purple-600 text-white flex items-center justify-center shadow-xs">
-                <Bot className="w-4 h-4" />
+              <div className="w-7 h-7 rounded-lg bg-slate-900 text-orange-400 flex items-center justify-center shadow-xs">
+                <Compass className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-bold text-slate-900 tracking-tight">DocuShield AI Analysis</h3>
-                <span className="text-[10px] text-purple-700 font-medium">Semantic Relevance & Synthesis</span>
+                <h3 className="text-xs font-bold text-slate-900 tracking-tight">Repository Query Analysis</h3>
+                <span className="text-[10px] text-orange-700 font-medium">Record Relevance & Synthesis</span>
               </div>
             </div>
-            <span className="text-xs font-mono font-bold text-purple-800 bg-purple-100/80 px-2 py-0.5 rounded border border-purple-200">
+            <span className="text-xs font-mono font-bold text-orange-800 bg-orange-100/80 px-2 py-0.5 rounded border border-orange-200">
               {total} Record(s) Verified
             </span>
           </div>
@@ -529,15 +549,15 @@ export const Search = () => {
 
           {/* Interpreted Entities Chips */}
           {aiData.interpreted && (
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-purple-100 text-[11px]">
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-orange-100 text-[11px]">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Extracted Intent:</span>
               {aiData.interpreted.department && (
-                <span className="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-semibold border border-purple-200">
+                <span className="px-2 py-0.5 rounded bg-orange-100 text-orange-800 font-semibold border border-orange-200">
                   Dept: {aiData.interpreted.department}
                 </span>
               )}
               {aiData.interpreted.documentType && (
-                <span className="px-2 py-0.5 rounded bg-violet-100 text-violet-800 font-semibold border border-violet-200">
+                <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-semibold border border-slate-200">
                   Type: {aiData.interpreted.documentType}
                 </span>
               )}
@@ -552,7 +572,7 @@ export const Search = () => {
                 </span>
               )}
               {aiData.interpreted.status && (
-                <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200">
+                <span className="px-2 py-0.5 rounded bg-orange-50 text-orange-800 font-semibold border border-orange-200">
                   Status: {aiData.interpreted.status}
                 </span>
               )}
@@ -567,7 +587,7 @@ export const Search = () => {
                 {aiData.suggestedFollowUps.map((action, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded bg-white border border-purple-200 text-purple-700 text-[10px] font-medium"
+                    className="px-2 py-0.5 rounded bg-white border border-orange-200 text-orange-700 text-[10px] font-medium"
                   >
                     • {action}
                   </span>
@@ -583,13 +603,13 @@ export const Search = () => {
         <div className="flex items-center justify-between text-xs text-slate-500">
           <span>
             Displaying <strong className="text-slate-900 font-bold">{results.length}</strong> GxP documents
-            {mode === 'ai' && ' ranked by neural relevance'}
+            {mode === 'ai' && ' ranked by repository relevance'}
           </span>
           {results.length > 0 && (
             <button
               type="button"
               onClick={handleReset}
-              className="text-purple-700 hover:text-purple-800 font-semibold text-xs cursor-pointer"
+              className="text-orange-700 hover:text-orange-800 font-semibold text-xs cursor-pointer"
             >
               Reset to All Documents
             </button>
@@ -597,15 +617,15 @@ export const Search = () => {
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-purple-100">
-            <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-            <p className="text-xs font-semibold text-purple-800">Analyzing repository with DocuShield AI...</p>
+          <div className="p-12 text-center text-slate-400 bg-white rounded-2xl border border-orange-100">
+            <div className="w-8 h-8 border-3 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-xs font-semibold text-orange-800">Querying validated repository index...</p>
           </div>
         ) : results.length === 0 ? (
-          <div className="bg-white p-8 text-center rounded-2xl border border-purple-200 text-slate-500 text-xs space-y-3">
-            <Sparkles className="w-8 h-8 text-purple-600 mx-auto" />
+          <div className="bg-white p-8 text-center rounded-2xl border border-orange-200 text-slate-500 text-xs space-y-3">
+            <SearchIcon className="w-8 h-8 text-slate-400 mx-auto" />
             <p className="font-semibold text-slate-800">No matching records located for the provided query and filters.</p>
-            <p className="text-slate-500">DocuShield AI suggests clearing filters or selecting from the master repository below.</p>
+            <p className="text-slate-500">Try adjusting search terms, clearing filters, or browsing the master repository below.</p>
             <Button3D variant="primary" size="sm" onClick={handleReset}>
               <RotateCw className="w-3.5 h-3.5 mr-1" />
               <span>View All Master Documents</span>
@@ -617,53 +637,53 @@ export const Search = () => {
               <div
                 key={doc._id}
                 onClick={() => navigate(`/documents/${doc._id}`)}
-                className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-purple-400 shadow-xs hover:shadow-md cursor-pointer transition flex flex-col justify-between group"
+                className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-orange-400 shadow-xs hover:shadow-md cursor-pointer transition flex flex-col justify-between group"
               >
                 <div className="space-y-2">
                   {/* Top Row: Doc #, Confidence & Status */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-purple-700 text-sm">{doc.documentNumber}</span>
+                      <span className="font-mono font-bold text-orange-700 text-sm">{doc.documentNumber}</span>
                       <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                         v{doc.version}
                       </span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-orange-50 text-orange-700 border border-orange-200">
                         {doc.documentType || 'SOP'}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      {/* AI Confidence Badge */}
+                      {/* Relevance Badge */}
                       {doc.aiConfidenceScore !== undefined && (
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 ${
                             doc.aiConfidenceScore >= 80
-                              ? 'bg-purple-100 text-purple-800 border-purple-300'
+                              ? 'bg-orange-100 text-orange-800 border-orange-300'
                               : 'bg-amber-50 text-amber-800 border-amber-300'
                           }`}
                         >
-                          <Sparkles className="w-2.5 h-2.5 text-purple-600" />
-                          {doc.aiConfidenceScore}% Match
+                          <CheckCircle2 className="w-2.5 h-2.5 text-orange-600" />
+                          {doc.aiConfidenceScore}% Relevance
                         </span>
                       )}
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-800 border border-orange-200">
                         {doc.status}
                       </span>
                     </div>
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xs font-bold text-slate-900 group-hover:text-purple-700 transition line-clamp-1">
+                  <h3 className="text-xs font-bold text-slate-900 group-hover:text-orange-700 transition line-clamp-1">
                     {doc.title}
                   </h3>
 
-                  {/* AI Match Reasons Tags */}
+                  {/* Match Criteria Tags */}
                   {doc.aiMatchReasons && doc.aiMatchReasons.length > 0 && (
                     <div className="flex flex-wrap gap-1 pt-0.5">
                       {doc.aiMatchReasons.slice(0, 2).map((reason, rIdx) => (
                         <span
                           key={rIdx}
-                          className="px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[10px] font-medium border border-purple-100"
+                          className="px-2 py-0.5 rounded bg-orange-50 text-orange-800 text-[10px] font-medium border border-orange-100"
                         >
                           ✓ {reason}
                         </span>
@@ -680,10 +700,10 @@ export const Search = () => {
                 {/* Footer Meta */}
                 <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-[11px] text-slate-500 font-mono">
                   <span className="flex items-center gap-1 text-slate-700">
-                    <Building className="w-3 h-3 text-purple-600" />
+                    <Building className="w-3 h-3 text-orange-600" />
                     {doc.storageLocation?.code || 'Central Vault'}
                   </span>
-                  <span className="text-purple-700 font-semibold group-hover:underline flex items-center gap-0.5">
+                  <span className="text-orange-700 font-semibold group-hover:underline flex items-center gap-0.5">
                     Open <ExternalLink className="w-3 h-3" />
                   </span>
                 </div>
@@ -698,8 +718,8 @@ export const Search = () => {
         <div className="space-y-4 pt-4 border-t border-slate-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
-                <Bookmark className="w-4 h-4 text-purple-700" />
+              <div className="w-7 h-7 rounded-lg bg-orange-100 text-orange-800 flex items-center justify-center font-bold">
+                <Bookmark className="w-4 h-4 text-orange-700" />
               </div>
               <div>
                 <h2 className="text-sm font-bold text-slate-900 tracking-tight">
@@ -712,7 +732,7 @@ export const Search = () => {
             </div>
             <button
               onClick={() => navigate('/workspace/repository')}
-              className="text-xs font-semibold text-purple-700 hover:text-purple-800 hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-orange-700 hover:text-orange-800 hover:underline flex items-center gap-1 cursor-pointer"
             >
               View Repository <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -722,19 +742,19 @@ export const Search = () => {
             {suggestedDocs.map((doc) => (
               <div
                 key={doc._id}
-                className="bg-white p-4 rounded-2xl border border-slate-200 hover:border-purple-300 shadow-xs hover:shadow-md transition flex flex-col justify-between group"
+                className="bg-white p-4 rounded-2xl border border-slate-200 hover:border-orange-300 shadow-xs hover:shadow-md transition flex flex-col justify-between group"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-purple-700 text-xs">{doc.documentNumber}</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                    <span className="font-mono font-bold text-orange-700 text-xs">{doc.documentNumber}</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
                       {doc.documentType || 'SOP'}
                     </span>
                   </div>
 
                   <h3
                     onClick={() => navigate(`/documents/${doc._id}`)}
-                    className="text-xs font-bold text-slate-900 group-hover:text-purple-700 transition cursor-pointer line-clamp-2"
+                    className="text-xs font-bold text-slate-900 group-hover:text-orange-700 transition cursor-pointer line-clamp-2"
                     title={doc.title}
                   >
                     {doc.title}
@@ -750,9 +770,9 @@ export const Search = () => {
                   <button
                     type="button"
                     onClick={() => handleSelectSuggestedDoc(doc)}
-                    className="text-purple-700 hover:text-purple-800 font-semibold text-[11px] flex items-center gap-1 cursor-pointer"
+                    className="text-orange-700 hover:text-orange-800 font-semibold text-[11px] flex items-center gap-1 cursor-pointer"
                   >
-                    <Sparkles className="w-3 h-3 text-purple-600" />
+                    <SearchIcon className="w-3 h-3 text-orange-600" />
                     Search Related
                   </button>
                   <button

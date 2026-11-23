@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FileText,
@@ -20,8 +20,7 @@ import {
   ArrowUpRight,
   RotateCw,
   FolderKanban,
-  Sparkles,
-  Bot,
+  Compass,
   Zap
 } from 'lucide-react';
 import {
@@ -39,24 +38,19 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { reportService } from '../../services';
 import { Button3D } from '../../components/common/Button3D';
+import { isRouteAllowedForRole } from '../../components/navigation/Sidebar';
 
-// GxP-compliant palette for dynamically returned API document types
+// GxP Clinical Palette for dynamically returned API document types
 const DONUT_PALETTE = [
-  '#7c3aed', // Royal Violet
-  '#9333ea', // Vivid Purple
+  '#ea580c', // Deep Teal
+  '#f59e0b', // Medical Cyan
+  '#c2410c', // Clinical Blue
+  '#f97316', // Emerald Teal
   '#f59e0b', // Amber
-  '#e11d48', // Crimson Rose
-  '#a855f7', // Bright Purple
-  '#c084fc', // Light Violet
-  '#d97706', // Bronze Amber
-  '#64748b', // Slate
-  '#ec4899', // Pink
-  '#ea580c', // Orange
-  '#84cc16', // Lime
-  '#1e1b4b', // Deep Indigo
-  '#6b21a8', // Deep Violet
-  '#8b5cf6', // Soft Purple
-  '#94a3b8'  // Light Slate
+  '#e11d48', // Rose
+  '#475569', // Slate
+  '#059669', // Emerald
+  '#334155'  // Deep Slate
 ];
 
 export const Dashboard = () => {
@@ -70,11 +64,26 @@ export const Dashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeDonutIndex, setActiveDonutIndex] = useState(null);
   const [dashboardAiQuery, setDashboardAiQuery] = useState('');
+  const [showTypeahead, setShowTypeahead] = useState(false);
+  const typeaheadRef = useRef(null);
 
-  const handleDashboardAiSearch = (e) => {
+  // Close typeahead dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (typeaheadRef.current && !typeaheadRef.current.contains(e.target)) {
+        setShowTypeahead(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleDashboardAiSearch = (e, customQuery) => {
     if (e) e.preventDefault();
-    if (dashboardAiQuery.trim()) {
-      navigate(`/workspace/search?q=${encodeURIComponent(dashboardAiQuery.trim())}&mode=ai`);
+    const queryToRun = (customQuery !== undefined ? customQuery : dashboardAiQuery).trim();
+    if (queryToRun) {
+      setShowTypeahead(false);
+      navigate(`/workspace/search?q=${encodeURIComponent(queryToRun)}&mode=ai`);
     }
   };
 
@@ -121,20 +130,20 @@ export const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <div className="w-9 h-9 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p className="text-xs font-semibold text-purple-800">Fetching Live GxP KPI Metrics from Database...</p>
+        <div className="w-9 h-9 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p className="text-xs font-semibold text-orange-800">Fetching Live GxP KPI Metrics from Database...</p>
       </div>
     );
   }
 
   // 8 Fully Clickable KPI Cards mapping directly to database fields
-  const statCards = [
+  const allStatCards = [
     {
       label: 'Total Documents',
       value: stats?.totalDocuments ?? 0,
       icon: FileText,
-      color: 'text-purple-700',
-      bg: 'bg-purple-100',
+      color: 'text-orange-700',
+      bg: 'bg-orange-50',
       link: '/workspace/repository',
       desc: 'All active indexed records'
     },
@@ -142,8 +151,8 @@ export const Dashboard = () => {
       label: 'Effective Documents',
       value: stats?.effectiveDocuments ?? 0,
       icon: CheckCircle,
-      color: 'text-violet-700',
-      bg: 'bg-violet-100',
+      color: 'text-amber-700',
+      bg: 'bg-amber-50',
       link: '/workspace/repository?status=Effective',
       desc: 'Released & verified'
     },
@@ -152,7 +161,7 @@ export const Dashboard = () => {
       value: stats?.pendingApprovals ?? 0,
       icon: Clock,
       color: 'text-amber-700',
-      bg: 'bg-amber-100',
+      bg: 'bg-amber-50',
       link: '/workflow/approvals',
       desc: '21 CFR sign-off needed'
     },
@@ -160,8 +169,8 @@ export const Dashboard = () => {
       label: 'Pending Requests',
       value: stats?.pendingRequests ?? 0,
       icon: FileCheck,
-      color: 'text-purple-800',
-      bg: 'bg-purple-50',
+      color: 'text-orange-800',
+      bg: 'bg-orange-50',
       link: '/workflow/requests',
       desc: 'Issuance & revision queues'
     },
@@ -170,7 +179,7 @@ export const Dashboard = () => {
       value: stats?.dueForReview ?? 0,
       icon: Calendar,
       color: 'text-rose-700',
-      bg: 'bg-rose-100',
+      bg: 'bg-rose-50',
       link: '/workflow/review-retention',
       desc: 'Approaching review cycle'
     },
@@ -187,8 +196,8 @@ export const Dashboard = () => {
       label: 'Pending Handovers',
       value: stats?.pendingHandovers ?? 0,
       icon: ArrowRightLeft,
-      color: 'text-purple-600',
-      bg: 'bg-purple-100',
+      color: 'text-orange-600',
+      bg: 'bg-orange-50',
       link: '/physical/custody',
       desc: 'Custody transfer confirmations'
     },
@@ -203,8 +212,11 @@ export const Dashboard = () => {
     }
   ];
 
-  // Quick Action Buttons
-  const quickActions = [
+  // Strictly filter visible KPI cards by active role permissions
+  const statCards = allStatCards.filter(card => isRouteAllowedForRole(card.link.split('?')[0], user?.role));
+
+  // Quick Action Buttons strictly filtered by active role permissions
+  const allQuickActions = [
     { label: 'Upload Document', icon: UploadCloud, path: '/workspace/upload', primary: true },
     { label: 'Search Archive', icon: Search, path: '/workspace/search' },
     { label: 'Scan QR Label', icon: QrCode, path: '/workspace/scan-qr' },
@@ -214,6 +226,8 @@ export const Dashboard = () => {
     { label: 'Custody Handover', icon: ArrowRightLeft, path: '/physical/custody' },
     { label: 'Storage Map', icon: Box, path: '/physical/storage-map' }
   ];
+
+  const quickActions = allQuickActions.filter(act => isRouteAllowedForRole(act.path, user?.role));
 
   // Strictly Real API Data for Donut Chart (NO static types, NO fallback arrays)
   const donutData = (charts?.byType || []).map((item, idx) => ({
@@ -234,22 +248,49 @@ export const Dashboard = () => {
   // Strictly Real API Data for Recent Ingestions
   const recentDocs = widgets?.recentDocuments || [];
 
+  // AI Suggestion Chips: Clean Curated GxP Queries + Live Database Document Identifiers
+  const curatedGxPChips = [
+    { label: 'HPLC Calibration SOP', query: 'HPLC calibration SOP in Quality Control', badge: 'QC' },
+    { label: 'Paracetamol BMR', query: 'Paracetamol Master Batch Manufacturing Record', badge: 'BMR' },
+    { label: 'Cleaning Validation', query: 'Cleaning Validation Protocol for Fluid Bed Dryer', badge: 'VAL' },
+    { label: '21 CFR Part 11 CSV', query: 'Computerized System Validation 21 CFR Part 11', badge: 'CSV' },
+    { label: 'Metformin Spec', query: 'Finished Product Specification for Metformin', badge: 'SPEC' }
+  ];
+
+  const recentDocChips = recentDocs.slice(0, 3).map(d => ({
+    label: d.documentNumber,
+    query: d.documentNumber,
+    title: d.title,
+    badge: d.version ? `v${d.version}` : 'Vault'
+  }));
+
+  const aiSuggestionChips = [...curatedGxPChips, ...recentDocChips];
+
+  // Dynamic Typeahead matches in dashboard search against live database documents
+  const typeaheadMatches = dashboardAiQuery.trim().length >= 1
+    ? recentDocs.filter(d =>
+        (d.documentNumber || '').toLowerCase().includes(dashboardAiQuery.toLowerCase()) ||
+        (d.title || '').toLowerCase().includes(dashboardAiQuery.toLowerCase()) ||
+        (d.department || '').toLowerCase().includes(dashboardAiQuery.toLowerCase())
+      ).slice(0, 5)
+    : [];
+
   return (
     <div className="space-y-6">
       
       {/* Greeting & Date Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-purple-100 gap-3">
+      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-200 gap-3">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
               Welcome back, {user?.name || 'Quality Officer'}
             </h1>
-            <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">
+            <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
               {user?.role || 'Admin'}
             </span>
-            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live Database Connected
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-900 text-orange-400 border border-slate-800 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+              Repository Active
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -266,35 +307,41 @@ export const Dashboard = () => {
             disabled={refreshing}
             title="Re-fetch live KPIs from API"
           >
-            <RotateCw className={`w-3.5 h-3.5 text-purple-700 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <RotateCw className={`w-3.5 h-3.5 text-orange-700 mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
             <span>{refreshing ? 'Syncing...' : 'Refresh Live API'}</span>
           </Button3D>
 
-          {/* Upload Button */}
-          <Button3D
-            onClick={() => navigate('/workspace/upload')}
-            variant="primary"
-            size="md"
-          >
-            <UploadCloud className="w-4 h-4 mr-1.5" />
-            Upload Document
-          </Button3D>
+          {/* Upload Button (Only if authorized for upload) */}
+          {isRouteAllowedForRole('/workspace/upload', user?.role) && (
+            <Button3D
+              onClick={() => navigate('/workspace/upload')}
+              variant="primary"
+              size="md"
+            >
+              <UploadCloud className="w-4 h-4 mr-1.5" />
+              Upload Document
+            </Button3D>
+          )}
         </div>
       </div>
 
-      {/* Advanced AI Search Bar in Dashboard (Compact AI System) */}
-      <div className="bg-gradient-to-r from-purple-50 via-white to-purple-50/50 p-4 rounded-2xl border border-purple-200 shadow-xs space-y-2.5">
+      {/* Advanced Repository Search Bar in Dashboard (Live Typeahead Search) */}
+      <div className="bg-gradient-to-r from-orange-50/60 via-white to-slate-50/60 p-4 rounded-2xl border border-orange-200/80 shadow-xs space-y-2.5 relative" ref={typeaheadRef}>
         <form onSubmit={handleDashboardAiSearch} className="space-y-2.5">
           <div className="relative flex items-center">
-            <div className="absolute left-4 text-purple-600 pointer-events-none flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 animate-pulse" />
+            <div className="absolute left-4 text-orange-600 pointer-events-none flex items-center gap-1.5">
+              <Search className="w-4 h-4" />
             </div>
             <input
               type="text"
               value={dashboardAiQuery}
-              onChange={(e) => setDashboardAiQuery(e.target.value)}
-              placeholder="Ask DocuShield AI in natural language (e.g. 'Show HPLC SOPs in QC Lab', 'Paracetamol BMR', 'Records in Building A Vault')..."
-              className="w-full pl-11 pr-28 py-2.5 text-xs md:text-sm bg-white border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 font-medium text-slate-800 placeholder:text-slate-400 transition shadow-2xs"
+              onChange={(e) => {
+                setDashboardAiQuery(e.target.value);
+                setShowTypeahead(true);
+              }}
+              onFocus={() => setShowTypeahead(true)}
+              placeholder="Search repository by document number, title, formulation, API, or department (e.g. 'HPLC SOP', 'Paracetamol BMR')..."
+              className="w-full pl-11 pr-28 py-2.5 text-xs md:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 font-medium text-slate-800 placeholder:text-slate-400 transition shadow-2xs"
             />
             <div className="absolute right-1.5">
               <Button3D
@@ -302,31 +349,76 @@ export const Dashboard = () => {
                 variant="primary"
                 size="sm"
               >
-                <Sparkles className="w-3 h-3 mr-1" />
-                <span>Ask AI</span>
+                <Search className="w-3.5 h-3.5 mr-1" />
+                <span>Search</span>
               </Button3D>
             </div>
           </div>
 
-          {/* 1-Click AI Quick Suggestion Chips */}
+          {/* Live Autocomplete Typeahead Dropdown */}
+          {showTypeahead && typeaheadMatches.length > 0 && (
+            <div className="absolute left-4 right-4 top-[56px] bg-white border border-orange-200 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100">
+              <div className="p-2.5 bg-orange-50/80 border-b border-orange-100 flex items-center justify-between text-[11px] font-semibold text-orange-900">
+                <span className="flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-orange-600" />
+                  Indexed Records Matching Query:
+                </span>
+                <span className="text-[10px] text-orange-700 font-mono">
+                  {typeaheadMatches.length} Matches
+                </span>
+              </div>
+              <div className="max-h-60 overflow-y-auto">
+                {typeaheadMatches.map((doc) => (
+                  <div
+                    key={doc._id}
+                    onClick={() => {
+                      setShowTypeahead(false);
+                      navigate(`/documents/${doc._id}`);
+                    }}
+                    className="p-2.5 hover:bg-orange-50/60 transition cursor-pointer flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <FileCheck className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-orange-800">{doc.documentNumber}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-medium">
+                            {doc.department}
+                          </span>
+                        </div>
+                        <p className="text-slate-700 font-medium truncate mt-0.5 text-[11px]">{doc.title}</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-orange-500 shrink-0" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 1-Click Fast Inquiries & Database Document Identifiers */}
           <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-0.5">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
-              <Bot className="w-3 h-3 text-purple-600" /> AI Suggestions:
+              <Compass className="w-3 h-3 text-orange-600" /> Quick Inquiries:
             </span>
-            {[
-              'HPLC Calibration SOP in QC',
-              'Paracetamol 500mg Master BMR',
-              'Cleaning Validation Protocols',
-              'Finished Product Specifications'
-            ].map((chip, idx) => (
+            {aiSuggestionChips.map((chip, idx) => (
               <button
                 key={idx}
                 type="button"
-                onClick={() => navigate(`/workspace/search?q=${encodeURIComponent(chip)}&mode=ai`)}
-                className="shrink-0 px-2.5 py-0.5 rounded-full bg-white border border-purple-200 text-purple-900 hover:bg-purple-100 hover:border-purple-300 transition text-[11px] font-medium shadow-2xs flex items-center gap-1 cursor-pointer"
+                onClick={() => {
+                  setDashboardAiQuery(chip.query);
+                  handleDashboardAiSearch(null, chip.query);
+                }}
+                className="shrink-0 px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-800 hover:bg-orange-50 hover:border-orange-300 transition text-[11px] font-medium shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                title={chip.title || chip.query}
               >
-                <Zap className="w-2.5 h-2.5 text-purple-600" />
-                <span>{chip}</span>
+                <Zap className="w-2.5 h-2.5 text-orange-600 shrink-0" />
+                <span className="font-semibold text-slate-800">{chip.label}</span>
+                {chip.badge && (
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-orange-50 text-orange-700 font-mono font-semibold">
+                    {chip.badge}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -341,11 +433,11 @@ export const Dashboard = () => {
             <div
               key={i}
               onClick={() => navigate(card.link)}
-              className="group p-4 bg-white rounded-xl border border-slate-200 shadow-xs hover:border-purple-300 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer relative overflow-hidden"
+              className="group p-4 bg-white rounded-xl border border-slate-200 shadow-xs hover:border-orange-300 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer relative overflow-hidden"
               title={`Click to open ${card.label}`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-600 group-hover:text-purple-700 transition">
+                <span className="text-xs font-semibold text-slate-600 group-hover:text-orange-700 transition">
                   {card.label}
                 </span>
                 <div className={`w-8 h-8 rounded-lg ${card.bg} ${card.color} flex items-center justify-center transition group-hover:scale-110 shadow-xs`}>
@@ -354,7 +446,7 @@ export const Dashboard = () => {
               </div>
               <div className="mt-2 text-2xl font-black text-slate-900 tracking-tight flex items-baseline justify-between">
                 <span>{card.value}</span>
-                <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-purple-600 transition" />
+                <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-orange-600 transition" />
               </div>
               <p className="text-[10px] text-slate-400 mt-1 truncate">{card.desc}</p>
             </div>
@@ -376,11 +468,11 @@ export const Dashboard = () => {
                 onClick={() => navigate(act.path)}
                 className={`p-2.5 rounded-xl border text-center flex flex-col items-center justify-center gap-1.5 transition active:translate-y-[2px] cursor-pointer ${
                   act.primary
-                    ? 'bg-purple-50 border-purple-200 text-purple-900 hover:bg-purple-100 font-semibold shadow-xs'
-                    : 'border-slate-200 hover:bg-purple-50/50 hover:border-purple-200 text-slate-700 font-medium'
+                    ? 'bg-orange-50 border-orange-200 text-orange-900 hover:bg-orange-100 font-semibold shadow-xs'
+                    : 'border-slate-200 hover:bg-orange-50/50 hover:border-orange-200 text-slate-700 font-medium'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${act.primary ? 'text-purple-700' : 'text-slate-500'}`} />
+                <Icon className={`w-4 h-4 ${act.primary ? 'text-orange-700' : 'text-slate-500'}`} />
                 <span className="text-[11px] leading-tight">{act.label}</span>
               </button>
             );
@@ -396,13 +488,13 @@ export const Dashboard = () => {
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-bold text-slate-900 tracking-tight">Documents by type</h2>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-100 font-semibold">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200 font-semibold">
                 {stats?.totalDocuments ?? 0} Total
               </span>
             </div>
             <button
               onClick={() => navigate('/workspace/repository')}
-              className="text-xs font-semibold text-purple-700 hover:text-purple-800 hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-orange-700 hover:text-orange-800 hover:underline flex items-center gap-1 cursor-pointer"
               title="Browse all documents in repository"
             >
               Browse
@@ -451,7 +543,7 @@ export const Dashboard = () => {
                             <div className="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg">
                               <p className="font-bold">{data.name}</p>
                               <p className="text-slate-300">{data.value} Documents</p>
-                              <p className="text-[10px] text-purple-300 mt-0.5">Click to view in repository</p>
+                              <p className="text-[10px] text-orange-300 mt-0.5">Click to view in repository</p>
                             </div>
                           );
                         }
@@ -464,30 +556,39 @@ export const Dashboard = () => {
 
               {/* Legend: Strictly renders real API document types */}
               <div className="md:col-span-6 max-h-56 overflow-y-auto pr-1">
-                <div className="flex flex-col gap-1.5 text-[11px]">
-                  {donutData.map((item, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => navigate(`/workspace/repository?type=${encodeURIComponent(item.name)}`)}
-                      onMouseEnter={() => setActiveDonutIndex(idx)}
-                      onMouseLeave={() => setActiveDonutIndex(null)}
-                      className={`flex items-center justify-between p-1.5 rounded-lg transition cursor-pointer ${
-                        activeDonutIndex === idx ? 'bg-purple-100 font-bold text-purple-900' : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                      title={`Click to filter by ${item.name}`}
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <span
-                          className="w-2.5 h-2.5 rounded-xs shrink-0"
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <span className="truncate max-w-[150px]">{item.name}</span>
+                <div className="flex flex-col gap-1 text-[11px]">
+                  {donutData.map((item, idx) => {
+                    const totalDocs = stats?.totalDocuments || donutData.reduce((acc, c) => acc + c.value, 0) || 1;
+                    const percent = Math.round((item.value / totalDocs) * 100);
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => navigate(`/workspace/repository?type=${encodeURIComponent(item.name)}`)}
+                        onMouseEnter={() => setActiveDonutIndex(idx)}
+                        onMouseLeave={() => setActiveDonutIndex(null)}
+                        className={`flex items-center justify-between px-2 py-1.5 rounded-lg transition cursor-pointer ${
+                          activeDonutIndex === idx ? 'bg-orange-50 font-bold text-orange-900 shadow-2xs' : 'text-slate-700 hover:bg-slate-50'
+                        }`}
+                        title={`Click to filter by ${item.name}`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span
+                            className="w-2.5 h-2.5 rounded-xs shrink-0"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span className="truncate max-w-[155px] font-medium">{item.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                          <span className="font-mono font-bold text-orange-800 text-[11px]">
+                            {item.value}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            ({percent}%)
+                          </span>
+                        </div>
                       </div>
-                      <span className="font-mono font-bold text-purple-800 text-[11px] ml-2">
-                        {item.value}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -500,7 +601,7 @@ export const Dashboard = () => {
             <h2 className="text-sm font-bold text-slate-900 tracking-tight">Uploads over time</h2>
             <span
               onClick={() => navigate('/workspace/repository?sort=createdAt')}
-              className="text-xs text-slate-400 font-medium cursor-pointer hover:text-purple-600 transition"
+              className="text-xs text-slate-400 font-medium cursor-pointer hover:text-orange-600 transition"
               title="Click to view chronological archive"
             >
               last 12 months
@@ -517,8 +618,8 @@ export const Dashboard = () => {
               >
                 <defs>
                   <linearGradient id="uploadsSpline" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#9333ea" stopOpacity={0.28} />
-                    <stop offset="95%" stopColor="#9333ea" stopOpacity={0.02} />
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.28} />
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#f1f5f9" />
@@ -540,7 +641,7 @@ export const Dashboard = () => {
                       const data = payload[0].payload;
                       return (
                         <div className="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg">
-                          <p className="font-bold text-purple-300">{data.month}</p>
+                          <p className="font-bold text-orange-300">{data.month}</p>
                           <p className="text-slate-100">{data.documents} Documents Uploaded</p>
                           <p className="text-[10px] text-slate-400 mt-0.5">Click to view repository</p>
                         </div>
@@ -552,12 +653,12 @@ export const Dashboard = () => {
                 <Area
                   type="monotone"
                   dataKey="documents"
-                  stroke="#9333ea"
+                  stroke="#f97316"
                   strokeWidth={3}
                   fillOpacity={1}
                   fill="url(#uploadsSpline)"
-                  activeDot={{ r: 6, fill: '#9333ea', stroke: '#ffffff', strokeWidth: 2 }}
-                  dot={{ r: 4, fill: '#ffffff', stroke: '#9333ea', strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: '#f97316', stroke: '#ffffff', strokeWidth: 2 }}
+                  dot={{ r: 4, fill: '#ffffff', stroke: '#f97316', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -577,7 +678,7 @@ export const Dashboard = () => {
             </h2>
             <button
               onClick={() => navigate('/physical/storage-map')}
-              className="text-xs font-semibold text-purple-700 hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-orange-700 hover:text-orange-800 hover:underline flex items-center gap-1 cursor-pointer"
             >
               Storage Map <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -592,7 +693,7 @@ export const Dashboard = () => {
                 <div
                   key={i}
                   onClick={() => navigate(`/physical/storage-map?building=${encodeURIComponent(loc.building)}`)}
-                  className="space-y-1.5 p-2 rounded-lg hover:bg-purple-50/50 transition cursor-pointer"
+                  className="space-y-1.5 p-2 rounded-lg hover:bg-orange-50/50 transition cursor-pointer"
                   title="Click to view vault coordinates"
                 >
                   <div className="flex items-center justify-between text-xs">
@@ -604,7 +705,7 @@ export const Dashboard = () => {
                   <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        loc.utilization > 80 ? 'bg-amber-500' : 'bg-purple-600'
+                        loc.utilization > 80 ? 'bg-amber-500' : 'bg-orange-600'
                       }`}
                       style={{ width: `${Math.min(100, loc.utilization)}%` }}
                     ></div>
@@ -623,7 +724,7 @@ export const Dashboard = () => {
             </h2>
             <button
               onClick={() => navigate('/workspace/repository')}
-              className="text-xs font-semibold text-purple-700 hover:text-purple-800 flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-orange-700 hover:text-orange-800 flex items-center gap-1 cursor-pointer"
             >
               View all <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -652,10 +753,10 @@ export const Dashboard = () => {
                     <tr
                       key={doc._id}
                       onClick={() => navigate(`/documents/${doc._id}`)}
-                      className="hover:bg-purple-50/60 transition cursor-pointer"
+                      className="hover:bg-orange-50/50 transition cursor-pointer"
                       title={`Open ${doc.documentNumber}`}
                     >
-                      <td className="py-2.5 font-mono font-bold text-purple-700">{doc.documentNumber}</td>
+                      <td className="py-2.5 font-mono font-bold text-orange-700">{doc.documentNumber}</td>
                       <td className="py-2.5 text-slate-800 font-medium truncate max-w-[220px]" title={doc.title}>
                         {doc.title}
                       </td>
@@ -664,7 +765,7 @@ export const Dashboard = () => {
                         {doc.storageLocation?.code || 'Vault Coordinate'}
                       </td>
                       <td className="py-2.5 text-right">
-                        <span className="p-1 text-slate-400 hover:text-purple-700 inline-flex items-center gap-1">
+                        <span className="p-1 text-slate-400 hover:text-orange-700 inline-flex items-center gap-1">
                           View <ExternalLink className="w-3.5 h-3.5" />
                         </span>
                       </td>

@@ -101,7 +101,7 @@ export const StorageMap = () => {
               placeholder="Search vault or rack coordinates..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
+              className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600"
             />
           </div>
 
@@ -115,18 +115,18 @@ export const StorageMap = () => {
                   onClick={() => handleSelectLocation(loc)}
                   className={`p-3.5 rounded-xl border text-xs cursor-pointer transition ${
                     isSelected
-                      ? 'border-teal-500 bg-teal-50/50 shadow-xs'
+                      ? 'border-orange-500 bg-orange-50/50 shadow-xs'
                       : 'border-slate-200 hover:border-slate-300 bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-teal-800">{loc.code}</span>
+                    <span className="font-mono font-bold text-orange-800">{loc.code}</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                       loc.status === 'Full'
                         ? 'bg-rose-50 text-rose-700 border-rose-200'
                         : loc.status === 'Near Full'
                         ? 'bg-amber-50 text-amber-700 border-amber-200'
-                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-orange-50 text-orange-800 border-orange-200'
                     }`}>
                       {loc.status}
                     </span>
@@ -141,7 +141,7 @@ export const StorageMap = () => {
                     </div>
                     <div className="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${occPercent > 80 ? 'bg-amber-500' : 'bg-teal-500'}`}
+                        className={`h-full rounded-full ${occPercent > 80 ? 'bg-amber-500' : 'bg-orange-500'}`}
                         style={{ width: `${Math.min(100, occPercent)}%` }}
                       ></div>
                     </div>
@@ -160,7 +160,7 @@ export const StorageMap = () => {
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-2">
-                    <Box className="w-5 h-5 text-teal-600" />
+                    <Box className="w-5 h-5 text-orange-600" />
                     <div>
                       <h2 className="text-base font-bold text-slate-900 font-mono">{selectedLocation.code}</h2>
                       <p className="text-xs text-slate-500">
@@ -184,7 +184,7 @@ export const StorageMap = () => {
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[10px] uppercase font-semibold">Rack & Shelf</span>
-                    <span className="font-mono font-bold text-teal-800">Rack {selectedLocation.rack} / Shelf {selectedLocation.shelf}</span>
+                    <span className="font-mono font-bold text-orange-800">Rack {selectedLocation.rack} / Shelf {selectedLocation.shelf}</span>
                   </div>
                   <div>
                     <span className="text-slate-400 block text-[10px] uppercase font-semibold">Bin & Box</span>
@@ -227,7 +227,7 @@ export const StorageMap = () => {
                       <tbody className="divide-y divide-slate-100">
                         {storedDocs.map((doc) => (
                           <tr key={doc._id} className="hover:bg-slate-50 transition">
-                            <td className="py-2.5 font-mono font-bold text-teal-700">{doc.documentNumber}</td>
+                            <td className="py-2.5 font-mono font-bold text-orange-700">{doc.documentNumber}</td>
                             <td className="py-2.5 font-medium text-slate-900 truncate max-w-xs">{doc.title}</td>
                             <td className="py-2.5 font-mono">{doc.version}</td>
                             <td className="py-2.5 font-mono text-slate-500">{doc.fileNumber || 'F1'}</td>
@@ -236,7 +236,7 @@ export const StorageMap = () => {
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   onClick={() => setMoveDoc(doc)}
-                                  className="px-2 py-1 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded text-[11px] font-semibold border border-slate-200"
+                                  className="px-2 py-1 text-slate-600 hover:text-orange-700 hover:bg-orange-50 rounded text-[11px] font-semibold border border-slate-200"
                                 >
                                   Relocate
                                 </button>
@@ -274,7 +274,7 @@ export const StorageMap = () => {
             </div>
 
             <div className="text-xs bg-slate-50 p-3 rounded-lg space-y-1">
-              <div><strong className="text-slate-700">Document:</strong> <span className="font-mono font-bold text-teal-700">{moveDoc.documentNumber}</span></div>
+              <div><strong className="text-slate-700">Document:</strong> <span className="font-mono font-bold text-orange-700">{moveDoc.documentNumber}</span></div>
               <div className="truncate"><strong className="text-slate-700">Title:</strong> {moveDoc.title}</div>
               <div><strong className="text-slate-700">Current Location:</strong> <span className="font-mono">{selectedLocation?.code}</span></div>
             </div>
@@ -321,7 +321,7 @@ export const StorageMap = () => {
                 <button
                   type="submit"
                   disabled={!targetLocationId}
-                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg disabled:opacity-50"
+                  className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg disabled:opacity-50"
                 >
                   Confirm Relocation
                 </button>

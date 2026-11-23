@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { MainLayout } from '../layouts/MainLayout';
+import { isRouteAllowedForRole } from '../components/navigation/Sidebar';
 
 // Auth
 import { Login } from '../pages/auth/Login';
@@ -38,12 +39,22 @@ const ProtectedRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-900 text-slate-300">
-        <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// Guard individual routes based on user GxP role
+const RoleRoute = ({ routePath, children }) => {
+  const { user } = useAuth();
+  const role = user?.role || 'User / Viewer';
+  if (!isRouteAllowedForRole(routePath, role)) {
+    return <Navigate to="/workspace/dashboard" replace />;
   }
   return children;
 };
@@ -67,31 +78,31 @@ export const AppRoutes = () => {
         <Route index element={<Navigate to="/workspace/dashboard" replace />} />
         
         {/* Workspace */}
-        <Route path="workspace/dashboard" element={<Dashboard />} />
-        <Route path="workspace/search" element={<Search />} />
-        <Route path="workspace/repository" element={<Repository />} />
-        <Route path="workspace/upload" element={<UploadWizard />} />
-        <Route path="workspace/bulk-upload" element={<BulkUpload />} />
-        <Route path="workspace/scan-qr" element={<ScanQrPage />} />
+        <Route path="workspace/dashboard" element={<RoleRoute routePath="/workspace/dashboard"><Dashboard /></RoleRoute>} />
+        <Route path="workspace/search" element={<RoleRoute routePath="/workspace/search"><Search /></RoleRoute>} />
+        <Route path="workspace/repository" element={<RoleRoute routePath="/workspace/repository"><Repository /></RoleRoute>} />
+        <Route path="workspace/upload" element={<RoleRoute routePath="/workspace/upload"><UploadWizard /></RoleRoute>} />
+        <Route path="workspace/bulk-upload" element={<RoleRoute routePath="/workspace/bulk-upload"><BulkUpload /></RoleRoute>} />
+        <Route path="workspace/scan-qr" element={<RoleRoute routePath="/workspace/scan-qr"><ScanQrPage /></RoleRoute>} />
         <Route path="documents/:id" element={<DocumentDetails />} />
 
         {/* Physical */}
-        <Route path="physical/storage-map" element={<StorageMap />} />
-        <Route path="physical/custody" element={<CustodyHandovers />} />
-        <Route path="physical/checkout" element={<CheckoutRegister />} />
-        <Route path="physical/audit" element={<PhysicalAudit />} />
+        <Route path="physical/storage-map" element={<RoleRoute routePath="/physical/storage-map"><StorageMap /></RoleRoute>} />
+        <Route path="physical/custody" element={<RoleRoute routePath="/physical/custody"><CustodyHandovers /></RoleRoute>} />
+        <Route path="physical/checkout" element={<RoleRoute routePath="/physical/checkout"><CheckoutRegister /></RoleRoute>} />
+        <Route path="physical/audit" element={<RoleRoute routePath="/physical/audit"><PhysicalAudit /></RoleRoute>} />
 
         {/* Workflow */}
-        <Route path="workflow/tasks" element={<MyTasks />} />
-        <Route path="workflow/requests" element={<Requests />} />
-        <Route path="workflow/approvals" element={<Approvals />} />
-        <Route path="workflow/review-retention" element={<ReviewRetention />} />
+        <Route path="workflow/tasks" element={<RoleRoute routePath="/workflow/tasks"><MyTasks /></RoleRoute>} />
+        <Route path="workflow/requests" element={<RoleRoute routePath="/workflow/requests"><Requests /></RoleRoute>} />
+        <Route path="workflow/approvals" element={<RoleRoute routePath="/workflow/approvals"><Approvals /></RoleRoute>} />
+        <Route path="workflow/review-retention" element={<RoleRoute routePath="/workflow/review-retention"><ReviewRetention /></RoleRoute>} />
 
         {/* Governance */}
-        <Route path="governance/reports" element={<Reports />} />
-        <Route path="governance/master-data" element={<MasterData />} />
-        <Route path="governance/audit-trail" element={<AuditTrail />} />
-        <Route path="governance/settings" element={<Settings />} />
+        <Route path="governance/reports" element={<RoleRoute routePath="/governance/reports"><Reports /></RoleRoute>} />
+        <Route path="governance/master-data" element={<RoleRoute routePath="/governance/master-data"><MasterData /></RoleRoute>} />
+        <Route path="governance/audit-trail" element={<RoleRoute routePath="/governance/audit-trail"><AuditTrail /></RoleRoute>} />
+        <Route path="governance/settings" element={<RoleRoute routePath="/governance/settings"><Settings /></RoleRoute>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/workspace/dashboard" replace />} />
@@ -99,4 +110,3 @@ export const AppRoutes = () => {
     </Routes>
   );
 };
-

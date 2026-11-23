@@ -46,7 +46,7 @@ export const MyTasks = () => {
           </p>
         </div>
         <div className="text-xs font-mono bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 shadow-xs">
-          Open Action Items: <strong className="text-teal-700 font-bold">{totalTasks}</strong>
+          Open Action Items: <strong className="text-orange-700 font-bold">{totalTasks}</strong>
         </div>
       </div>
 
@@ -56,14 +56,14 @@ export const MyTasks = () => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-teal-600" />
+              <ShieldCheck className="w-4 h-4 text-orange-600" />
               <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
                 Approvals Pending ({approvals.length})
               </h2>
             </div>
             <button
               onClick={() => navigate('/workflow/approvals')}
-              className="text-[11px] font-semibold text-teal-600 hover:underline"
+              className="text-[11px] font-semibold text-orange-600 hover:underline"
             >
               All Approvals
             </button>
@@ -77,11 +77,11 @@ export const MyTasks = () => {
                 <div
                   key={app._id}
                   onClick={() => navigate('/workflow/approvals')}
-                  className="p-3 rounded-xl border border-slate-200 hover:border-teal-500 cursor-pointer bg-slate-50/50 hover:bg-teal-50/20 transition text-xs space-y-1"
+                  className="p-3 rounded-xl border border-slate-200 hover:border-orange-500 cursor-pointer bg-slate-50/50 hover:bg-orange-50/20 transition text-xs space-y-1"
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-slate-800">{app.type}</span>
-                    <span className="font-mono text-[10px] text-teal-700">{app.document?.documentNumber}</span>
+                    <span className="font-mono text-[10px] text-orange-700">{app.document?.documentNumber}</span>
                   </div>
                   <p className="text-slate-500 text-[11px] truncate">{app.comments || 'Awaiting electronic review'}</p>
                 </div>
@@ -94,14 +94,14 @@ export const MyTasks = () => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <ArrowRightLeft className="w-4 h-4 text-purple-600" />
+              <ArrowRightLeft className="w-4 h-4 text-orange-600" />
               <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
                 Handovers Awaiting Acceptance ({handovers.length})
               </h2>
             </div>
             <button
               onClick={() => navigate('/physical/custody')}
-              className="text-[11px] font-semibold text-purple-600 hover:underline"
+              className="text-[11px] font-semibold text-orange-600 hover:underline"
             >
               Custody
             </button>
@@ -115,7 +115,7 @@ export const MyTasks = () => {
                 <div
                   key={hnd._id}
                   onClick={() => navigate('/physical/custody')}
-                  className="p-3 rounded-xl border border-slate-200 hover:border-purple-500 cursor-pointer bg-slate-50/50 hover:bg-purple-50/20 transition text-xs space-y-1"
+                  className="p-3 rounded-xl border border-slate-200 hover:border-purple-500 cursor-pointer bg-slate-50/50 hover:bg-slate-100/20 transition text-xs space-y-1"
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-mono font-bold text-purple-800">{hnd.handoverNumber}</span>
