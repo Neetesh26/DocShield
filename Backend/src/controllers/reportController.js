@@ -22,7 +22,9 @@ export const getReportsOverview = async (req, res, next) => {
       docsByStatus,
       checkoutsByStatus,
       requestsByType,
-      auditsSummary
+      auditsSummary,
+      timelineTrend,
+      vaultOccupancyByBuilding
     ] = await Promise.all([
       Document.aggregate([
         { $match: dateFilter },
@@ -56,6 +58,27 @@ export const getReportsOverview = async (req, res, next) => {
             totalMissing: { $sum: '$summary.missingCount' }
           }
         }
+      ]),
+      Document.aggregate([
+        { $match: dateFilter },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } },
+        { $project: { month: '$_id', count: 1, _id: 0 } }
+      ]),
+      StorageLocation.aggregate([
+        {
+          $group: {
+            _id: '$building',
+            totalCapacity: { $sum: '$capacity' },
+            currentOccupancy: { $sum: '$currentOccupancy' }
+          }
+        },
+        { $project: { building: '$_id', capacity: '$totalCapacity', occupancy: '$currentOccupancy', _id: 0 } }
       ])
     ]);
 
@@ -65,7 +88,9 @@ export const getReportsOverview = async (req, res, next) => {
       docsByStatus,
       checkoutsByStatus,
       requestsByType,
-      auditsSummary
+      auditsSummary,
+      timelineTrend,
+      vaultOccupancyByBuilding
     });
   } catch (error) {
     next(error);

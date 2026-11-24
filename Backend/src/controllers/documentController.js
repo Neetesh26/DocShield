@@ -291,7 +291,7 @@ export const createDocument = async (req, res, next) => {
 };
 
 /**
- * Get Documents with Search, Filters, Sorting, and Pagination
+ * Get Documents with Advanced Keyword Search, Multi-Field Filters, Dynamic Sorting, and Pagination
  */
 export const getDocuments = async (req, res, next) => {
   try {
@@ -304,6 +304,9 @@ export const getDocuments = async (req, res, next) => {
       product,
       batchNumber,
       custodian,
+      storageLocation,
+      dateFrom,
+      dateTo,
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
@@ -312,65 +315,116 @@ export const getDocuments = async (req, res, next) => {
 
     const filter = {};
 
+    // 1. High-accuracy multi-field keyword search
     if (search && search.trim()) {
       const trimmedSearch = search.trim();
       const escapedSearch = trimmedSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const searchRegex = new RegExp(escapedSearch, 'i');
-      const searchTokens = trimmedSearch.split(/\s+/).filter(t => t.length > 1);
 
+      // Resolve matching custodians and storage locations in parallel
+      const [matchingUsers, matchingLocations] = await Promise.all([
+        User.find({ name: searchRegex }).select('_id').limit(20),
+        StorageLocation.find({
+          $or: [
+            { code: searchRegex },
+            { building: searchRegex },
+            { area: searchRegex },
+            { room: searchRegex }
+          ]
+        }).select('_id').limit(20)
+      ]);
+
+      const userIds = matchingUsers.map(u => u._id);
+      const locationIds = matchingLocations.map(l => l._id);
+
+      // Tokenize for multi-word queries
+      const searchTokens = trimmedSearch.split(/\s+/).filter(t => t.length > 1);
       const tokenConditions = searchTokens.map(tok => {
         const tr = new RegExp(tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
         return [
           { documentNumber: tr },
           { title: tr },
+          { description: tr },
           { product: tr },
           { batchNumber: tr },
           { department: tr },
           { documentType: tr },
-          { tags: tr }
+          { tags: tr },
+          { boxNumber: tr },
+          { fileNumber: tr }
         ];
       }).flat();
 
-      filter.$or = [
+      const orConditions = [
         { documentNumber: searchRegex },
         { title: searchRegex },
+        { description: searchRegex },
         { product: searchRegex },
         { batchNumber: searchRegex },
+        { department: searchRegex },
+        { documentType: searchRegex },
         { tags: searchRegex },
+        { boxNumber: searchRegex },
+        { fileNumber: searchRegex },
         ...tokenConditions
       ];
+
+      if (userIds.length > 0) {
+        orConditions.push({ currentCustodian: { $in: userIds } });
+      }
+      if (locationIds.length > 0) {
+        orConditions.push({ storageLocation: { $in: locationIds } });
+      }
+
+      filter.$or = orConditions;
     }
 
+    // 2. Exact GxP Field Filters
     if (status) filter.status = status;
     if (department) filter.department = department;
     if (documentType) filter.documentType = documentType;
     if (physicalStatus) filter.physicalStatus = physicalStatus;
-    if (product) filter.product = new RegExp(product, 'i');
-    if (batchNumber) filter.batchNumber = new RegExp(batchNumber, 'i');
+    if (product) filter.product = new RegExp(product.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    if (batchNumber) filter.batchNumber = new RegExp(batchNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     if (custodian) filter.currentCustodian = custodian;
+    if (storageLocation) filter.storageLocation = storageLocation;
 
-    const pageNum = parseInt(page, 10);
-    const limitNum = parseInt(limit, 10);
+    if (dateFrom || dateTo) {
+      filter.createdAt = {};
+      if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
+      if (dateTo) filter.createdAt.$lte = new Date(dateTo);
+    }
+
+    // 3. Robust Pagination and Sorting
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
     const skip = (pageNum - 1) * limitNum;
 
+    const allowedSortFields = ['createdAt', 'effectiveDate', 'documentNumber', 'title', 'version', 'status', 'physicalStatus', 'department'];
+    const actualSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
     const sortOptions = {};
-    sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    sortOptions[actualSortBy] = sortOrder === 'asc' ? 1 : -1;
 
     const [documents, totalCount] = await Promise.all([
       Document.find(filter)
-        .populate('currentCustodian', 'name email department')
+        .populate('currentCustodian', 'name email department employeeId designation')
         .populate('storageLocation')
+        .populate('uploadedBy', 'name email')
         .sort(sortOptions)
         .skip(skip)
         .limit(limitNum),
       Document.countDocuments(filter)
     ]);
 
+    const totalPages = Math.ceil(totalCount / limitNum) || 1;
+
     return sendSuccess(res, 'Documents retrieved successfully', documents, 200, {
       total: totalCount,
       page: pageNum,
       limit: limitNum,
-      totalPages: Math.ceil(totalCount / limitNum)
+      totalPages,
+      hasNextPage: pageNum < totalPages,
+      hasPrevPage: pageNum > 1
     });
   } catch (error) {
     next(error);
@@ -491,6 +545,22 @@ export const aiSearchDocuments = async (req, res, next) => {
     const query = req.body?.query || req.query?.q || '';
     const qTrimmed = query.trim();
 
+    const {
+      department: filterDept,
+      documentType: filterType,
+      status: filterStatus,
+      physicalStatus: filterPhysicalStatus,
+      product: filterProduct,
+      batchNumber: filterBatchNumber,
+      sortBy = 'relevance',
+      sortOrder = 'desc',
+      page = 1,
+      limit = 10
+    } = { ...req.query, ...req.body };
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
+
     // Helper: basic morphological stemmer
     const stem = (w) => {
       let s = (w || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -530,22 +600,45 @@ export const aiSearchDocuments = async (req, res, next) => {
         department: d.department
       }));
 
-    // Handle Empty Query: Return All Indexed Master Documents
+    // Handle Empty Query: Return All Indexed Master Documents with filtering, sorting and pagination
     if (!qTrimmed) {
-      const allMapped = allDocs.map(doc => ({
+      let allMapped = allDocs.map(doc => ({
         ...doc.toObject(),
         aiConfidenceScore: 100,
         aiMatchReasons: ['Active Master Procedure in GxP Vault'],
         relevanceScore: 100
       }));
 
+      if (filterDept) allMapped = allMapped.filter(d => d.department === filterDept);
+      if (filterType) allMapped = allMapped.filter(d => d.documentType === filterType);
+      if (filterStatus) allMapped = allMapped.filter(d => d.status === filterStatus);
+      if (filterPhysicalStatus) allMapped = allMapped.filter(d => d.physicalStatus === filterPhysicalStatus);
+      if (filterProduct) allMapped = allMapped.filter(d => (d.product || '').toLowerCase().includes(filterProduct.toLowerCase()));
+      if (filterBatchNumber) allMapped = allMapped.filter(d => (d.batchNumber || '').toLowerCase().includes(filterBatchNumber.toLowerCase()));
+
+      if (sortBy && sortBy !== 'relevance') {
+        allMapped.sort((a, b) => {
+          const valA = a[sortBy] || '';
+          const valB = b[sortBy] || '';
+          return sortOrder === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+        });
+      }
+
+      const totalCount = allMapped.length;
+      const paginatedDocs = allMapped.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+
       return sendSuccess(res, 'VidyaGxP Repository Catalog', {
         query: '',
-        aiSummary: `VidyaGxP Repository View: Showing all ${allMapped.length} active controlled documents and master records indexed in the vault.`,
+        aiSummary: `VidyaGxP Repository View: Showing ${totalCount} active controlled documents and master records indexed in the vault.`,
         interpreted: {},
-        documents: allMapped,
+        documents: paginatedDocs,
         suggestedDocuments: allMapped.slice(0, 6),
-        total: allMapped.length,
+        total: totalCount,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(totalCount / limitNum) || 1,
+        hasNextPage: pageNum < Math.ceil(totalCount / limitNum),
+        hasPrevPage: pageNum > 1,
         availableCategories,
         suggestedQueries: dynamicSuggestedQueries,
         suggestedFollowUps: []
@@ -765,6 +858,26 @@ export const aiSearchDocuments = async (req, res, next) => {
       aiSummary = `VidyaGxP Search identified ${matchedDocs.length} relevant GxP document(s)${deptPart}${typePart}. The top match is ${top.documentNumber} ("${top.title}") with a relevance score of ${top.aiConfidenceScore}%. Physical custody is registered at ${top.storageLocation?.code || 'Central Vault'}.`;
     }
 
+    // Apply explicit filters if supplied
+    if (filterDept) matchedDocs = matchedDocs.filter(d => d.department === filterDept);
+    if (filterType) matchedDocs = matchedDocs.filter(d => d.documentType === filterType);
+    if (filterStatus) matchedDocs = matchedDocs.filter(d => d.status === filterStatus);
+    if (filterPhysicalStatus) matchedDocs = matchedDocs.filter(d => d.physicalStatus === filterPhysicalStatus);
+    if (filterProduct) matchedDocs = matchedDocs.filter(d => (d.product || '').toLowerCase().includes(filterProduct.toLowerCase()));
+    if (filterBatchNumber) matchedDocs = matchedDocs.filter(d => (d.batchNumber || '').toLowerCase().includes(filterBatchNumber.toLowerCase()));
+
+    // Custom sorting if requested
+    if (sortBy && sortBy !== 'relevance') {
+      matchedDocs.sort((a, b) => {
+        const valA = a[sortBy] || '';
+        const valB = b[sortBy] || '';
+        return sortOrder === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+      });
+    }
+
+    const totalMatched = matchedDocs.length;
+    const paginatedMatchedDocs = matchedDocs.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+
     const matchedIds = new Set(matchedDocs.map(d => d._id.toString()));
     const relatedSuggested = allDocs
       .filter(d => !matchedIds.has(d._id.toString()))
@@ -779,9 +892,14 @@ export const aiSearchDocuments = async (req, res, next) => {
       query: qTrimmed,
       aiSummary,
       interpreted: detected,
-      documents: matchedDocs,
+      documents: paginatedMatchedDocs,
       suggestedDocuments: relatedSuggested.length > 0 ? relatedSuggested : allDocs.slice(0, 6),
-      total: matchedDocs.length,
+      total: totalMatched,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(totalMatched / limitNum) || 1,
+      hasNextPage: pageNum < Math.ceil(totalMatched / limitNum),
+      hasPrevPage: pageNum > 1,
       isFallback,
       availableCategories,
       suggestedQueries: dynamicSuggestedQueries,
