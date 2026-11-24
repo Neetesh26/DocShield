@@ -36,6 +36,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { reportService } from '../../services';
 import { Button3D } from '../../components/common/Button3D';
 import { isRouteAllowedForRole } from '../../components/navigation/Sidebar';
@@ -56,6 +57,7 @@ const DONUT_PALETTE = [
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);
@@ -279,7 +281,7 @@ export const Dashboard = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              Welcome back, {user?.name || 'Quality Officer'}
+              {t('Welcome back,')} {user?.name || 'Quality Officer'}
             </h1>
             <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
               {user?.role || 'Admin'}
@@ -304,7 +306,7 @@ export const Dashboard = () => {
             title="Re-fetch live KPIs from API"
           >
             <RotateCw className={`w-3.5 h-3.5 text-orange-700 mr-1.5 inline ${refreshing ? 'animate-spin' : ''}`} />
-            <span>{refreshing ? 'Syncing...' : 'Refresh'}</span>
+            <span>{refreshing ? t('Syncing...') : t('Refresh')}</span>
           </Button3D>
 
           {/* Upload Button (Only if authorized for upload) */}
@@ -315,7 +317,7 @@ export const Dashboard = () => {
               size="md"
             >
               <UploadCloud className="w-4 h-4 mr-1.5 inline" />
-              Upload
+              {t('Upload')}
             </Button3D>
           )}
         </div>
@@ -336,7 +338,7 @@ export const Dashboard = () => {
                 setShowTypeahead(true);
               }}
               onFocus={() => setShowTypeahead(true)}
-              placeholder="Search repository by document number, title, formulation, API, or department (e.g. 'HPLC SOP', 'Paracetamol BMR')..."
+              placeholder={t("Search repository by document number, title, formulation, API, or department (e.g. 'HPLC SOP', 'Paracetamol BMR')...")}
               className="w-full pl-11 pr-28 py-2.5 text-xs md:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 font-medium text-slate-800 placeholder:text-slate-400 transition shadow-2xs"
             />
             <div className="absolute right-1.5">
@@ -346,7 +348,7 @@ export const Dashboard = () => {
                 size="sm"
               >
                 <Search className="w-3.5 h-3.5 mr-1 inline" />
-                <span>Search</span>
+                <span>{t('Search')}</span>
               </Button3D>
             </div>
           </div>
@@ -396,7 +398,7 @@ export const Dashboard = () => {
           {aiSuggestionChips.length > 0 && (
             <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-0.5">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
-                <Compass className="w-3 h-3 text-orange-600" /> Quick Inquiries:
+                <Compass className="w-3 h-3 text-orange-600" /> {t('Quick Inquiries:')}
               </span>
               {aiSuggestionChips.map((chip, idx) => (
                 <button
@@ -436,7 +438,7 @@ export const Dashboard = () => {
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-600 group-hover:text-orange-700 transition">
-                  {card.label}
+                  {t(card.label)}
                 </span>
                 <div className={`w-8 h-8 rounded-lg ${card.bg} ${card.color} flex items-center justify-center transition group-hover:scale-110 shadow-xs`}>
                   <Icon className="w-4 h-4" />
@@ -446,7 +448,7 @@ export const Dashboard = () => {
                 <span>{card.value}</span>
                 <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-orange-600 transition" />
               </div>
-              <p className="text-[10px] text-slate-400 mt-1 truncate">{card.desc}</p>
+              <p className="text-[10px] text-slate-400 mt-1 truncate">{t(card.desc)}</p>
             </div>
           );
         })}
@@ -455,7 +457,7 @@ export const Dashboard = () => {
       {/* Quick Action Bar - Tactile Clickable */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
-          Quick Launch Actions (Clickable)
+          {t('QUICK LAUNCH ACTIONS (CLICKABLE)')}
         </span>
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2">
           {quickActions.map((act, i) => {
@@ -471,7 +473,7 @@ export const Dashboard = () => {
                 }`}
               >
                 <Icon className={`w-4 h-4 ${act.primary ? 'text-orange-700' : 'text-slate-500'}`} />
-                <span className="text-[11px] leading-tight">{act.label}</span>
+                <span className="text-[11px] leading-tight">{t(act.label)}</span>
               </button>
             );
           })}
@@ -485,9 +487,9 @@ export const Dashboard = () => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight">Documents by type</h2>
+              <h2 className="text-sm font-bold text-slate-900 tracking-tight">{t('Documents by Type')}</h2>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200 font-semibold">
-                {stats?.totalDocuments ?? 0} Total
+                {stats?.totalDocuments ?? 0} {t('Total')}
               </span>
             </div>
             <button
@@ -495,7 +497,7 @@ export const Dashboard = () => {
               className="text-xs font-semibold text-orange-700 hover:text-orange-800 hover:underline flex items-center gap-1 cursor-pointer"
               title="Browse all documents in repository"
             >
-              Browse
+              {t('Browse')}
             </button>
           </div>
 
@@ -596,13 +598,13 @@ export const Dashboard = () => {
         {/* CHART 2: Uploads Over Time (Spline Area Chart strictly from API charts.uploadTrends) */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h2 className="text-sm font-bold text-slate-900 tracking-tight">Uploads over time</h2>
+            <h2 className="text-sm font-bold text-slate-900 tracking-tight">{t('Uploads over time')}</h2>
             <span
               onClick={() => navigate('/workspace/repository?sort=createdAt')}
               className="text-xs text-slate-400 font-medium cursor-pointer hover:text-orange-600 transition"
               title="Click to view chronological archive"
             >
-              last 12 months
+              {t('last 12 months', 'last 12 months')}
             </span>
           </div>
 
@@ -672,19 +674,19 @@ export const Dashboard = () => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Physical Vault Utilization
+              {t('Physical Vault Utilization')}
             </h2>
             <button
               onClick={() => navigate('/physical/storage-map')}
               className="text-xs font-semibold text-orange-700 hover:text-orange-800 hover:underline flex items-center gap-1 cursor-pointer"
             >
-              Storage Map <ChevronRight className="w-3.5 h-3.5" />
+              {t('Storage Map')} <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
           <div className="space-y-4 pt-1">
             {storageStats.length === 0 ? (
               <div className="text-center text-xs text-slate-400 py-8">
-                No storage facilities registered in database
+                {t('No storage facilities registered in database')}
               </div>
             ) : (
               storageStats.map((loc, i) => (
@@ -718,13 +720,13 @@ export const Dashboard = () => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Recent Document
+              {t('Recent Repository Ingestions')}
             </h2>
             <button
               onClick={() => navigate('/workspace/repository')}
               className="text-xs font-semibold text-orange-700 hover:text-orange-800 flex items-center gap-1 cursor-pointer"
             >
-              View all <ChevronRight className="w-3.5 h-3.5" />
+              {t('View all')} <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -732,18 +734,18 @@ export const Dashboard = () => {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-slate-100 text-[11px] font-semibold text-slate-400 uppercase">
-                  <th className="pb-2">Doc #</th>
-                  <th className="pb-2">Title</th>
-                  <th className="pb-2">Rev</th>
-                  <th className="pb-2">Location</th>
-                  <th className="pb-2 text-right">Action</th>
+                  <th className="pb-2">{t('Doc #')}</th>
+                  <th className="pb-2">{t('Title')}</th>
+                  <th className="pb-2">{t('Rev')}</th>
+                  <th className="pb-2">{t('Location')}</th>
+                  <th className="pb-2 text-right">{t('Action')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {recentDocs.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-8 text-center text-xs text-slate-400">
-                      No recent document ingestions found in database
+                      {t('No recent document ingestions found in database')}
                     </td>
                   </tr>
                 ) : (
@@ -764,7 +766,7 @@ export const Dashboard = () => {
                       </td>
                       <td className="py-2.5 text-right">
                         <span className="p-1 text-slate-400 hover:text-orange-700 inline-flex items-center gap-1">
-                          View <ExternalLink className="w-3.5 h-3.5" />
+                          {t('View')} <ExternalLink className="w-3.5 h-3.5" />
                         </span>
                       </td>
                     </tr>
