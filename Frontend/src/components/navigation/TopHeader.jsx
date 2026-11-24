@@ -703,55 +703,20 @@ export const TopHeader = ({ onOpenScanner }) => {
               z-50 overflow-hidden
             ">
 
-              {/* PROFILE INFO */}
-
-              <div className="
-                px-4 py-3
-                border-b border-slate-100 dark:border-slate-800
-                bg-slate-50 dark:bg-slate-800/70
-              ">
-
-                <div className="flex items-center gap-2.5">
-
-                  <div className="
-                    w-10 h-10
-                    rounded-full
-                    bg-orange-600
-                    text-white font-bold
-                    flex items-center justify-center
-                  ">
-                    {userInitial}
-                  </div>
-
-                  <div className="min-w-0">
-
-                    <p className="
-                      text-xs font-semibold
-                      text-slate-800 dark:text-slate-100
-                    ">
-                      {user?.name || 'GxP User'}
-                    </p>
-
-                    <p className="
-                      text-[11px]
-                      text-slate-500 dark:text-slate-400
-                      truncate mt-1
-                    ">
-                      {user?.email || 'No email available'}
-                    </p>
-
-                  </div>
-
+              {/* PROFILE INFO (Clean, non-duplicated header) */}
+              <div className="px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/60">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Signed in as
+                </p>
+                <p className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate mt-0.5" title={user?.email}>
+                  {user?.email || 'No email available'}
+                </p>
+                <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                  <span>ID: {user?.employeeId || 'EMP-000'}</span>
+                  <span className="px-1.5 py-0.2 rounded bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800/60">
+                    {user?.role || 'Staff'}
+                  </span>
                 </div>
-
-                <div className="
-                  mt-3
-                  text-[10px] font-mono
-                  text-slate-400
-                ">
-                  Employee ID: {user?.employeeId || 'EMP-000'}
-                </div>
-
               </div>
 
               {/* ACCOUNT SETTINGS */}

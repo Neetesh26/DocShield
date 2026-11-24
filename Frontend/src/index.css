@@ -27,16 +27,16 @@
 }
 
 .btn-3d-primary {
-  background: linear-gradient(180deg, #9333ea 0%, #7e22ce 100%);
+  background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
   color: #ffffff;
-  border: 1px solid #6b21a8;
-  box-shadow: 0 4px 0 #581c87, 0 6px 12px rgba(126, 34, 206, 0.25);
+  border: 1px solid #c2410c;
+  box-shadow: 0 4px 0 #9a3412, 0 6px 12px rgba(234, 88, 12, 0.25);
 }
 .btn-3d-primary:hover {
-  background: linear-gradient(180deg, #a855f7 0%, #9333ea 100%);
+  background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
 }
 .btn-3d-primary:active {
-  box-shadow: 0 1px 0 #581c87, 0 2px 4px rgba(126, 34, 206, 0.2);
+  box-shadow: 0 1px 0 #9a3412, 0 2px 4px rgba(234, 88, 12, 0.2);
 }
 
 .btn-3d-amber {
@@ -328,5 +328,47 @@ html.dark ::-webkit-scrollbar-thumb {
 html.dark ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+
+/* 13. Reports & Analytics Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.02); opacity: 0.9; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 3s ease-in-out infinite;
+}
+
+.report-card-glow {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.report-card-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -6px rgba(234, 88, 12, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
+}
+
+html.dark .report-card-glow:hover {
+  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(249, 115, 22, 0.2);
+}
+
 
 
