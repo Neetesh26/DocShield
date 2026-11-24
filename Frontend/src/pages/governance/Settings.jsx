@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
-import { Settings as SettingsIcon, ShieldCheck, Lock, Clock, FileCode, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings as SettingsIcon, ShieldCheck, Lock, Clock, FileCode, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button3D } from '../../components/common/Button3D';
+import { settingService } from '../../services';
 
 export const Settings = () => {
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   const [form, setForm] = useState({
     sessionTimeoutMin: '30',
@@ -16,25 +20,75 @@ export const Settings = () => {
     enforceBarcodeScanOnReturn: true
   });
 
-  const handleSave = (e) => {
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        setLoading(true);
+        const res = await settingService.getSettings();
+        if (res?.data) {
+          setForm({
+            sessionTimeoutMin: res.data.sessionTimeoutMin || '30',
+            maxPasswordAgeDays: res.data.maxPasswordAgeDays || '90',
+            electronicSignatureStatement: res.data.electronicSignatureStatement || 'I certify that this record has been reviewed and executed in compliance with 21 CFR Part 11 and current Good Manufacturing Practices (cGMP).',
+            autoArchiveExpiredYears: res.data.autoArchiveExpiredYears || '7',
+            requireDualSignOffForDestruction: res.data.requireDualSignOffForDestruction !== undefined ? res.data.requireDualSignOffForDestruction : true,
+            enforceBarcodeScanOnReturn: res.data.enforceBarcodeScanOnReturn !== undefined ? res.data.enforceBarcodeScanOnReturn : true
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load settings from DB:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      setSaving(true);
+      setError(null);
+      await settingService.updateSettings(form);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error('Failed to save settings:', err);
+      setError(err?.response?.data?.message || 'Failed to persist settings to database.');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+        <span className="ml-2 text-xs text-slate-500 font-medium">Loading system compliance settings from MongoDB...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="text-xl font-bold text-slate-900 tracking-tight">System & Compliance Governance Settings</h1>
         <p className="text-xs text-slate-500">
-          Configure global 21 CFR Part 11 electronic records, audit trail retentions, and quality parameters.
+          Configure global 21 CFR Part 11 electronic records, audit trail retentions, and quality parameters (Synced dynamically with MongoDB).
         </p>
       </div>
 
       {saved && (
-        <div className="p-3 bg-orange-50 border border-orange-200 rounded-xl text-orange-900 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-orange-600" />
-          <span>System configuration parameters successfully updated and logged to audit trail.</span>
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>System configuration parameters successfully updated in MongoDB and logged to 21 CFR Part 11 audit trail.</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -133,12 +187,12 @@ export const Settings = () => {
             type="submit"
             variant="primary"
             size="md"
+            disabled={saving}
           >
-            Save Configuration Changes
+            {saving ? 'Saving to Database...' : 'Save Configuration Changes'}
           </Button3D>
         </div>
       </form>
     </div>
   );
 };
-
