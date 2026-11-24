@@ -22,6 +22,7 @@ import masterDataRoutes from './routes/masterDataRoutes.js';
 import auditLogRoutes from './routes/auditLogRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import assistantRoutes from './routes/assistantRoutes.js';
+import settingRoutes from './routes/settingRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -96,6 +97,7 @@ app.use('/api/master-data', masterDataRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/assistant', assistantRoutes);
+app.use('/api/settings', settingRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
