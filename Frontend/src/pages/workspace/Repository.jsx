@@ -81,7 +81,7 @@ export const Repository = () => {
   const getStatusBadge = (st) => {
     switch (st) {
       case 'Effective':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-orange-50 text-orange-800 border-orange-200';
       case 'Draft':
         return 'bg-slate-100 text-slate-700 border-slate-300';
       case 'In Review':
@@ -89,7 +89,7 @@ export const Repository = () => {
       case 'Pending Approval':
         return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'Superseded':
-        return 'bg-purple-50 text-purple-700 border-purple-200';
+        return 'bg-slate-100 text-slate-700 border-slate-200';
       case 'Archived':
         return 'bg-slate-200 text-slate-800 border-slate-400';
       default:
@@ -100,7 +100,7 @@ export const Repository = () => {
   const getPhysicalStatusBadge = (pst) => {
     switch (pst) {
       case 'Stored':
-        return 'bg-teal-50 text-teal-700 border-teal-200';
+        return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'Checked Out':
         return 'bg-amber-50 text-amber-800 border-amber-300';
       case 'In Transit':
@@ -124,7 +124,7 @@ export const Repository = () => {
         </div>
         <button
           onClick={() => navigate('/workspace/upload')}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
+          className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
         >
           <Plus className="w-4 h-4" />
           Ingest Document
@@ -141,7 +141,7 @@ export const Repository = () => {
               placeholder="Filter by document number, title, batch number, or tags..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
+              className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600"
             />
           </div>
           <button
@@ -239,7 +239,7 @@ export const Repository = () => {
               {loading ? (
                 <tr>
                   <td colSpan="10" className="py-12 text-center text-slate-400">
-                    <div className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
                     Loading repository records...
                   </td>
                 </tr>
@@ -253,7 +253,7 @@ export const Repository = () => {
               ) : (
                 documents.map((doc) => (
                   <tr key={doc._id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-3 px-4 font-mono font-bold text-teal-700 whitespace-nowrap">
+                    <td className="py-3 px-4 font-mono font-bold text-orange-700 whitespace-nowrap">
                       {doc.documentNumber}
                     </td>
                     <td className="py-3 px-4 font-medium text-slate-900 truncate max-w-[220px]" title={doc.title}>
@@ -282,14 +282,14 @@ export const Repository = () => {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setSelectedQrDoc(doc)}
-                          className="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded transition"
+                          className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded transition"
                           title="View QR Label"
                         >
                           <QrCode className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => navigate(`/documents/${doc._id}`)}
-                          className="px-2.5 py-1 bg-slate-100 hover:bg-teal-600 hover:text-white text-slate-700 rounded text-xs font-semibold transition"
+                          className="px-2.5 py-1 bg-slate-100 hover:bg-orange-600 hover:text-white text-slate-700 rounded text-xs font-semibold transition"
                         >
                           Open
                         </button>
@@ -350,7 +350,7 @@ export const Repository = () => {
                 onClick={() => {
                   window.print();
                 }}
-                className="flex-1 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5"
+                className="flex-1 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5"
               >
                 <Printer className="w-3.5 h-3.5" /> Print Binder Label
               </button>

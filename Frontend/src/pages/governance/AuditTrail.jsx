@@ -65,7 +65,7 @@ export const AuditTrail = () => {
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 shadow-xs">
-          <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <ShieldCheck className="w-4 h-4 text-orange-600" />
           <span>Integrity Verification Active (Append-Only)</span>
         </div>
       </div>
@@ -80,7 +80,7 @@ export const AuditTrail = () => {
               placeholder="Filter by operator name..."
               value={userQuery}
               onChange={(e) => setUserQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
+              className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600"
             />
           </div>
 
@@ -158,7 +158,7 @@ export const AuditTrail = () => {
                     <td className="py-3 px-3 font-semibold text-slate-900 whitespace-nowrap">{log.userName}</td>
                     <td className="py-3 px-3 text-slate-600">{log.userRole}</td>
                     <td className="py-3 px-3">
-                      <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200">
+                      <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200">
                         {log.action}
                       </span>
                     </td>
@@ -170,7 +170,7 @@ export const AuditTrail = () => {
                     <td className="py-3 px-4 text-right">
                       <button
                         onClick={() => setSelectedEntry(log)}
-                        className="p-1 text-slate-500 hover:text-teal-700"
+                        className="p-1 text-slate-500 hover:text-orange-700"
                         title="View Full Metadata"
                       >
                         <Eye className="w-3.5 h-3.5" />
@@ -228,7 +228,7 @@ export const AuditTrail = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Action:</span>
-                <span className="font-mono font-bold text-teal-800">{selectedEntry.action}</span>
+                <span className="font-mono font-bold text-orange-800">{selectedEntry.action}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Target Entity:</span>

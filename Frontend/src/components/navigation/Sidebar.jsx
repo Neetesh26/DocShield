@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -20,9 +20,14 @@ import {
   History,
   Settings,
   Shield,
-  FileCheck2
+  ChevronLeft,
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const navigationGroups = [
   {
@@ -65,57 +70,199 @@ const navigationGroups = [
   }
 ];
 
+// Strict Role-Based Access Control Mapping
+export const isRouteAllowedForRole = (itemPath, role) => {
+  if (!role || role === 'Admin') return true;
+
+  if (role === 'QA Manager' || role === 'QA') {
+    const allowed = [
+      '/workspace/dashboard',
+      '/workspace/search',
+      '/workspace/repository',
+      '/workflow/tasks',
+      '/workflow/requests',
+      '/workflow/approvals',
+      '/workflow/review-retention',
+      '/governance/reports',
+      '/governance/audit-trail'
+    ];
+    return allowed.includes(itemPath);
+  }
+
+  if (role === 'Document Controller') {
+    const allowed = [
+      '/workspace/dashboard',
+      '/workspace/search',
+      '/workspace/repository',
+      '/workspace/upload',
+      '/workspace/bulk-upload',
+      '/workspace/scan-qr',
+      '/physical/storage-map',
+      '/physical/custody',
+      '/physical/checkout',
+      '/physical/audit',
+      '/workflow/tasks',
+      '/workflow/requests'
+    ];
+    return allowed.includes(itemPath);
+  }
+
+  if (role === 'Custodian') {
+    const allowed = [
+      '/workspace/dashboard',
+      '/workspace/search',
+      '/workspace/repository',
+      '/workspace/scan-qr',
+      '/physical/storage-map',
+      '/physical/custody',
+      '/physical/checkout',
+      '/workflow/tasks',
+      '/workflow/requests'
+    ];
+    return allowed.includes(itemPath);
+  }
+
+  if (role === 'User / Viewer' || role === 'Viewer' || role === 'Employee') {
+    const allowed = [
+      '/workspace/dashboard',
+      '/workspace/search',
+      '/workspace/repository',
+      '/workflow/tasks',
+      '/workflow/requests'
+    ];
+    return allowed.includes(itemPath);
+  }
+
+  return true;
+};
+
 export const Sidebar = () => {
+  const { user } = useAuth();
   const { unreadCount } = useNotifications();
+  const { t } = useLanguage();
+  const userRole = user?.role || 'User / Viewer';
+
+  // Toggle Collapse State (persists in localStorage)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem('vidyagxp_sidebar_collapsed') === 'true';
+  });
+
+  const toggleSidebar = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('vidyagxp_sidebar_collapsed', String(next));
+      return next;
+    });
+  };
+
+  // Filter navigation groups according to active persona's RBAC permissions
+  const filteredGroups = navigationGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => isRouteAllowedForRole(item.path, userRole))
+    }))
+    .filter(group => group.items.length > 0);
 
   return (
-    <aside className="w-64 bg-white text-slate-700 flex flex-col h-screen select-none border-r border-slate-200 shrink-0 shadow-sm">
+    <aside
+      className={`bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 flex flex-col h-screen select-none border-r border-slate-200 dark:border-slate-800 shrink-0 shadow-xs transition-all duration-300 ease-in-out ${
+        isCollapsed ? 'w-20' : 'w-64'
+      }`}
+    >
       {/* Brand Header */}
-      <div className="h-16 px-5 flex items-center justify-between border-b border-purple-100 bg-purple-50/40">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-purple-700 to-violet-500 flex items-center justify-center text-white shadow-md shadow-purple-600/20">
-            <Shield className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="font-bold text-slate-900 tracking-wide text-base flex items-center gap-1.5">
-              DocuShield
-              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">GxP</span>
+      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors duration-200">
+        {!isCollapsed ? (
+          <>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 shadow-xs shrink-0">
+                <Shield className="w-5 h-5 text-orange-500" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-bold text-slate-900 dark:text-white tracking-tight text-base flex items-center gap-1.5 truncate">
+                  VidyaGxP
+                  <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-950/80 text-orange-800 dark:text-orange-400 border border-orange-200 dark:border-orange-800 font-mono">
+                    GxP
+                  </span>
+                </div>
+                <div className="text-[11px] text-orange-600 dark:text-orange-400 font-semibold tracking-tight truncate">
+                  {t('Pharma Vault', 'Pharma Vault')}
+                </div>
+              </div>
             </div>
-            <div className="text-[11px] text-purple-600 font-medium tracking-tight">by VidyaGxP</div>
+
+            {/* Collapse Button Symbol */}
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              title="Collapse Sidebar (Symbols Only)"
+              className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
+            >
+              <PanelLeftClose className="w-4 h-4" />
+            </button>
+          </>
+        ) : (
+          /* Collapsed Header with Click to Expand */
+          <div className="w-full flex items-center justify-center">
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              title="Expand Sidebar"
+              className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 shadow-xs hover:bg-slate-800 transition cursor-pointer relative group"
+            >
+              <Shield className="w-5 h-5 text-orange-500" />
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white flex items-center justify-center text-[9px] shadow-xs">
+                <PanelLeftOpen className="w-2.5 h-2.5" />
+              </span>
+            </button>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Nav List */}
-      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-        {navigationGroups.map((group) => (
+      {/* Nav List - Strictly Filtered by Role Access */}
+      <div className="flex-1 overflow-y-auto py-4 px-2 space-y-5">
+        {filteredGroups.map((group) => (
           <div key={group.title}>
-            <div className="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">
-              {group.title}
-            </div>
+            {!isCollapsed ? (
+              <div className="px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase mb-2">
+                {t(group.title, group.title)}
+              </div>
+            ) : (
+              <div className="h-px bg-slate-200 dark:bg-slate-800 my-2.5 mx-2" title={t(group.title, group.title)} />
+            )}
+
             <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
+                const translatedName = t(item.name, item.name);
                 return (
                   <NavLink
                     key={item.path}
                     to={item.path}
+                    title={isCollapsed ? translatedName : undefined}
                     className={({ isActive }) => `
-                      flex items-center justify-between px-3 py-2 rounded-lg text-[13px] font-medium transition-all
-                      ${isActive
-                        ? 'bg-purple-100/70 text-purple-800 font-semibold border-l-4 border-purple-600 shadow-sm'
-                        : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50/60'}
-                      ${item.highlight ? 'text-purple-600 font-semibold' : ''}
+                      flex items-center transition-all rounded-xl
+                      ${isCollapsed ? 'justify-center w-12 h-10 mx-auto' : 'justify-between px-3 py-2 text-[13px] font-medium'}
+                      ${
+                        isActive
+                          ? 'bg-orange-50 dark:bg-orange-500/15 text-orange-950 dark:text-orange-300 font-bold border-l-4 border-orange-600 shadow-2xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-orange-900 dark:hover:text-orange-300 hover:bg-orange-50/40 dark:hover:bg-slate-800/60'
+                      }
+                      ${item.highlight ? 'text-orange-600 dark:text-orange-400 font-semibold' : ''}
                     `}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
                       <Icon className="w-4 h-4 shrink-0" />
-                      <span>{item.name}</span>
+                      {!isCollapsed && <span>{translatedName}</span>}
                     </div>
+
                     {item.hasBadge && unreadCount > 0 && (
-                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white">
-                        {unreadCount}
-                      </span>
+                      !isCollapsed ? (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+                          {unreadCount}
+                        </span>
+                      ) : (
+                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white dark:ring-slate-900" />
+                      )
                     )}
                   </NavLink>
                 );
@@ -125,15 +272,26 @@ export const Sidebar = () => {
         ))}
       </div>
 
-      {/* Footer GxP Status */}
-      <div className="p-3.5 border-t border-purple-100 bg-purple-50/30 text-xs text-slate-500 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></div>
-          <span className="font-medium text-slate-700">21 CFR Part 11</span>
-        </div>
-        <span className="text-[11px] text-slate-400 font-mono">v1.0.4-PROD</span>
+      {/* Bottom Quick Toggle Control */}
+      <div className="p-2.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex items-center justify-center transition-colors duration-200">
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          title={isCollapsed ? t('Expand Sidebar', 'Expand Sidebar') : t('Collapse Sidebar', 'Collapse Sidebar')}
+          className={`flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-orange-900 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition cursor-pointer ${
+            isCollapsed ? 'w-10 h-9' : 'w-full px-3'
+          }`}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="w-4 h-4 text-orange-600" />
+          ) : (
+            <>
+              <ChevronLeft className="w-4 h-4 text-orange-600" />
+              <span>{t('Collapse', 'Collapse')}</span>
+            </>
+          )}
+        </button>
       </div>
     </aside>
   );
 };
-

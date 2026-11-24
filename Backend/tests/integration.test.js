@@ -69,6 +69,24 @@ describe('DocuShield End-to-End API Integration Suite', () => {
     authToken = res.data.data.token;
   });
 
+  test('2b. Authentication: Register new GxP user', async () => {
+    const uniqueEmail = `qa.auditor.${Date.now()}@docushield.com`;
+    const res = await request('POST', '/api/auth/register', {
+      name: 'QA Auditor',
+      email: uniqueEmail,
+      password: 'AuditPassword@2026',
+      department: 'Quality Assurance',
+      employeeId: `EMP-AUD-${Date.now().toString().slice(-4)}`,
+      role: 'QA',
+      designation: 'Senior Auditor'
+    });
+    assert.strictEqual(res.status, 201);
+    assert.strictEqual(res.data.success, true);
+    assert.ok(res.data.data.token);
+    assert.strictEqual(res.data.data.user.email, uniqueEmail);
+    assert.strictEqual(res.data.data.user.role, 'QA');
+  });
+
   test('3. Document Repository: Fetch seeded documents', async () => {
     const res = await request('GET', '/api/documents', null, authToken);
     assert.strictEqual(res.status, 200);

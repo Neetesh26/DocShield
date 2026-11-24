@@ -131,7 +131,7 @@ export const PhysicalAudit = () => {
         </div>
         <button
           onClick={handleOpenScheduleModal}
-          className="flex items-center gap-1.5 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+          className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm"
         >
           <Plus className="w-4 h-4" /> Schedule New Audit
         </button>
@@ -149,14 +149,14 @@ export const PhysicalAudit = () => {
                   key={a._id}
                   onClick={() => handleInspectAudit(a._id)}
                   className={`p-3.5 rounded-xl border text-xs cursor-pointer transition ${
-                    isSelected ? 'border-teal-500 bg-teal-50/50 shadow-xs' : 'border-slate-200 hover:bg-slate-50'
+                    isSelected ? 'border-orange-500 bg-orange-50/50 shadow-xs' : 'border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-teal-800">{a.auditNumber}</span>
+                    <span className="font-mono font-bold text-orange-800">{a.auditNumber}</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                       a.status === 'Completed'
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        ? 'bg-orange-50 text-orange-800 border border-orange-200'
                         : a.status === 'Discrepancy Found'
                         ? 'bg-rose-50 text-rose-700 border-rose-200'
                         : 'bg-amber-50 text-amber-700 border-amber-200'
@@ -181,7 +181,7 @@ export const PhysicalAudit = () => {
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-teal-800 text-sm">{selectedAudit.auditNumber}</span>
+                    <span className="font-mono font-bold text-orange-950 text-sm">{selectedAudit.auditNumber}</span>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
                       {selectedAudit.status}
                     </span>
@@ -195,7 +195,7 @@ export const PhysicalAudit = () => {
                 {selectedAudit.status !== 'Completed' && (
                   <button
                     onClick={() => setShowCompleteModal(true)}
-                    className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-xs"
+                    className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer transition"
                   >
                     Finalize & Sign Audit
                   </button>
@@ -208,9 +208,9 @@ export const PhysicalAudit = () => {
                   <span className="text-slate-400 block text-[10px] uppercase font-semibold">Expected Records</span>
                   <span className="text-lg font-bold text-slate-900">{selectedAudit.summary?.expectedCount || 0}</span>
                 </div>
-                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
-                  <span className="text-emerald-700 block text-[10px] uppercase font-semibold">Found & Confirmed</span>
-                  <span className="text-lg font-bold text-emerald-800">{selectedAudit.summary?.foundCount || 0}</span>
+                <div className="p-3 bg-orange-50 rounded-xl border border-orange-200">
+                  <span className="text-orange-800 block text-[10px] uppercase font-semibold">Found & Confirmed</span>
+                  <span className="text-lg font-bold text-orange-950">{selectedAudit.summary?.foundCount || 0}</span>
                 </div>
                 <div className="p-3 bg-rose-50 rounded-xl border border-rose-200">
                   <span className="text-rose-700 block text-[10px] uppercase font-semibold">Missing Records</span>
@@ -242,19 +242,19 @@ export const PhysicalAudit = () => {
                       {selectedAudit.items?.map((item) => (
                         <tr key={item._id} className="hover:bg-slate-50">
                           <td className="py-2.5">
-                            <div className="font-mono font-bold text-teal-800">{item.document?.documentNumber}</div>
+                            <div className="font-mono font-bold text-orange-950">{item.document?.documentNumber}</div>
                             <div className="text-[11px] text-slate-500 truncate max-w-xs">{item.document?.title}</div>
                           </td>
                           <td className="py-2.5">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                              item.status === 'Found' ? 'bg-emerald-50 text-emerald-700' : item.status === 'Missing' ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600'
+                              item.status === 'Found' ? 'bg-orange-50 text-orange-800 border border-orange-200' : item.status === 'Missing' ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600'
                             }`}>
                               {item.status}
                             </span>
                           </td>
                           <td className="py-2.5 font-mono">
                             {item.qrVerified ? (
-                              <span className="text-emerald-600 flex items-center gap-1 font-semibold">
+                              <span className="text-orange-600 flex items-center gap-1 font-semibold">
                                 <CheckCircle className="w-3.5 h-3.5" /> Scanned
                               </span>
                             ) : (
@@ -267,7 +267,7 @@ export const PhysicalAudit = () => {
                               <div className="flex items-center justify-end gap-1">
                                 <button
                                   onClick={() => handleReconcileItem(item._id, 'Found', true, 'Good')}
-                                  className="px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded text-[10px] font-semibold border border-emerald-200"
+                                  className="px-2 py-1 bg-orange-50 text-orange-800 hover:bg-orange-100 rounded text-[10px] font-semibold border border-orange-200 cursor-pointer"
                                 >
                                   Mark Found (QR)
                                 </button>
@@ -354,7 +354,7 @@ export const PhysicalAudit = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg"
+                  className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg"
                 >
                   Confirm & Pull Records
                 </button>
@@ -406,7 +406,7 @@ export const PhysicalAudit = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg"
+                  className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg"
                 >
                   Sign & Finalize Audit Report
                 </button>

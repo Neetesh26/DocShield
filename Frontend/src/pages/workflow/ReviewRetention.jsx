@@ -81,7 +81,7 @@ export const ReviewRetention = () => {
                   return (
                     <tr key={doc._id} className="hover:bg-slate-50 transition">
                       <td className="py-3 px-4 truncate max-w-xs">
-                        <div className="font-mono font-bold text-teal-700">{doc.documentNumber}</div>
+                        <div className="font-mono font-bold text-orange-700">{doc.documentNumber}</div>
                         <div className="text-[11px] text-slate-600 truncate">{doc.title}</div>
                       </td>
                       <td className="py-3 px-3 text-slate-600">{doc.documentType}</td>

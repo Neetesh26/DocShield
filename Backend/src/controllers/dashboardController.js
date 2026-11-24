@@ -5,6 +5,7 @@ import CheckoutRecord from '../models/CheckoutRecord.js';
 import Handover from '../models/Handover.js';
 import AuditLog from '../models/AuditLog.js';
 import StorageLocation from '../models/StorageLocation.js';
+import User from '../models/User.js';
 import { sendSuccess } from '../utils/response.js';
 import { DOCUMENT_STATUSES } from '../constants/index.js';
 
@@ -69,8 +70,8 @@ export const getDashboardCharts = async (req, res, next) => {
       { $project: { name: '$_id', value: '$count', _id: 0 } }
     ]);
 
-    // 3. Document Upload Trends (Group by Month of current year)
-    const uploadTrends = await Document.aggregate([
+    // 3. Document Upload Trends (Group by Month of past 12 months)
+    const rawUploadTrends = await Document.aggregate([
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
@@ -81,27 +82,59 @@ export const getDashboardCharts = async (req, res, next) => {
       { $sort: { month: 1 } }
     ]);
 
-    // 4. Storage Utilization
-    const storageStats = await StorageLocation.aggregate([
-      {
-        $group: {
-          _id: '$building',
-          totalCapacity: { $sum: '$capacity' },
-          totalOccupancy: { $sum: '$currentOccupancy' }
-        }
-      },
-      {
-        $project: {
-          building: '$_id',
-          capacity: '$totalCapacity',
-          occupancy: '$totalOccupancy',
-          utilization: {
-            $round: [{ $multiply: [{ $divide: ['$totalOccupancy', { $cond: [{ $eq: ['$totalCapacity', 0] }, 1, '$totalCapacity'] }] }, 100] }, 1]
-          },
-          _id: 0
-        }
-      }
+    // Build rolling 12 months sequence (e.g. Dec, Jan, Feb... Nov)
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const trendMap = {};
+    rawUploadTrends.forEach(item => {
+      trendMap[item.month] = item.documents;
+    });
+
+    const uploadTrends = [];
+    const dateCursor = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(dateCursor.getFullYear(), dateCursor.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = monthNames[d.getMonth()];
+      uploadTrends.push({
+        month: label,
+        yearMonth: key,
+        documents: trendMap[key] || 0
+      });
+    }
+
+    // 4. Storage Utilization (Dynamically computed directly from actual Document records)
+    const [locations, docCounts] = await Promise.all([
+      StorageLocation.find().select('building capacity _id').lean(),
+      Document.aggregate([
+        { $group: { _id: '$storageLocation', count: { $sum: 1 } } }
+      ])
     ]);
+
+    const docCountMap = {};
+    docCounts.forEach(c => {
+      if (c._id) docCountMap[String(c._id)] = c.count;
+    });
+
+    const buildingMap = {};
+    locations.forEach(loc => {
+      if (!buildingMap[loc.building]) {
+        buildingMap[loc.building] = { capacity: 0, occupancy: 0 };
+      }
+      buildingMap[loc.building].capacity += (loc.capacity || 0);
+      buildingMap[loc.building].occupancy += (docCountMap[String(loc._id)] || 0);
+    });
+
+    const storageStats = Object.keys(buildingMap).sort().map(building => {
+      const cap = buildingMap[building].capacity;
+      const occ = buildingMap[building].occupancy;
+      const utilization = cap > 0 ? Math.round((occ / cap) * 1000) / 10 : 0;
+      return {
+        building,
+        capacity: cap,
+        occupancy: occ,
+        utilization
+      };
+    });
 
     // 5. Request Status Distribution
     const byRequestStatus = await DocumentRequest.aggregate([
@@ -126,6 +159,8 @@ export const getDashboardWidgets = async (req, res, next) => {
     const now = new Date();
     const in90Days = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 
+    const userId = req.user?._id || req.user?.id;
+
     const [recentDocuments, recentActivities, pendingTasks, upcomingReviews] = await Promise.all([
       Document.find()
         .populate('currentCustodian', 'name email')
@@ -144,12 +179,20 @@ export const getDashboardWidgets = async (req, res, next) => {
         Approval.find({ status: 'Pending' })
           .populate('document', 'documentNumber title version')
           .limit(4),
-        Handover.find({ newCustodian: req.user._id, status: 'Pending Acceptance' })
-          .populate('previousCustodian', 'name email')
-          .limit(4),
-        CheckoutRecord.find({ user: req.user._id, status: 'Active' })
-          .populate('document', 'documentNumber title')
-          .limit(4)
+        userId
+          ? Handover.find({ newCustodian: userId, status: 'Pending Acceptance' })
+              .populate('previousCustodian', 'name email')
+              .limit(4)
+          : Handover.find({ status: 'Pending Acceptance' })
+              .populate('previousCustodian', 'name email')
+              .limit(4),
+        userId
+          ? CheckoutRecord.find({ user: userId, status: 'Active' })
+              .populate('document', 'documentNumber title')
+              .limit(4)
+          : CheckoutRecord.find({ status: 'Active' })
+              .populate('document', 'documentNumber title')
+              .limit(4)
       ]).then(([approvals, handovers, myCheckouts]) => ({
         approvals,
         handovers,

@@ -107,58 +107,99 @@ export const seedDatabase = async () => {
 
     const users = await User.create([
       {
-        name: 'Dr. Sarah Jenkins',
-        email: 'admin@docushield.com',
+        name: 'Anita Sharma',
+        email: 'anita.sharma@docushield.com',
         password: demoPassword,
         role: ROLES.ADMIN,
-        department: 'Quality Assurance',
+        department: 'Executive Administration',
         employeeId: 'EMP-ADM-001',
-        designation: 'Head of Quality & Compliance',
-        phone: '+1 (555) 019-2831'
+        designation: 'System Administrator & Governance Lead',
+        phone: '+91 98201 10001'
       },
       {
-        name: 'Michael Chang',
-        email: 'qa@docushield.com',
+        name: 'Dr. Meera Iyer',
+        email: 'meera.iyer@docushield.com',
         password: demoPassword,
-        role: ROLES.QA,
+        role: ROLES.QA_MANAGER,
         department: 'Quality Assurance',
         employeeId: 'EMP-QA-002',
-        designation: 'QA Manager & Lead Auditor',
-        phone: '+1 (555) 019-2832'
+        designation: 'Head of QA & Regulatory Compliance',
+        phone: '+91 98201 10002'
       },
       {
-        name: 'Elena Rostova',
-        email: 'doccontrol@docushield.com',
+        name: 'Suresh Patil',
+        email: 'suresh.patil@docushield.com',
         password: demoPassword,
         role: ROLES.DOCUMENT_CONTROLLER,
         department: 'Document Control',
         employeeId: 'EMP-DC-003',
-        designation: 'Senior Document Controller',
-        phone: '+1 (555) 019-2833'
+        designation: 'Lead Document Controller',
+        phone: '+91 98201 10003'
       },
       {
-        name: 'Dr. Rajesh Patel',
-        email: 'depthead@docushield.com',
+        name: 'Rahul Verma',
+        email: 'rahul.verma@docushield.com',
         password: demoPassword,
-        role: ROLES.DEPARTMENT_HEAD,
+        role: ROLES.CUSTODIAN,
         department: 'Production',
-        employeeId: 'EMP-PRD-004',
-        designation: 'Director of Pharmaceutical Manufacturing',
-        phone: '+1 (555) 019-2834'
+        employeeId: 'EMP-CUST-004',
+        designation: 'Production Record Custodian',
+        phone: '+91 98201 10004'
       },
       {
-        name: 'Emily Davis',
-        email: 'analyst@docushield.com',
+        name: 'Priya Nair',
+        email: 'priya.nair@docushield.com',
         password: demoPassword,
-        role: ROLES.EMPLOYEE,
+        role: ROLES.CUSTODIAN,
         department: 'Quality Control',
-        employeeId: 'EMP-QC-005',
-        designation: 'Senior QC Analyst',
-        phone: '+1 (555) 019-2835'
+        employeeId: 'EMP-CUST-005',
+        designation: 'QC Analytical Records Custodian',
+        phone: '+91 98201 10005'
+      },
+      {
+        name: 'Amit Kumar',
+        email: 'amit.kumar@docushield.com',
+        password: demoPassword,
+        role: ROLES.VIEWER,
+        department: 'Operations & R&D',
+        employeeId: 'EMP-USR-006',
+        designation: 'Manufacturing Associate / Viewer',
+        phone: '+91 98201 10006'
+      },
+      // Convenience aliases for legacy credentials
+      {
+        name: 'Anita Sharma (Admin Alias)',
+        email: 'admin@docushield.com',
+        password: demoPassword,
+        role: ROLES.ADMIN,
+        department: 'Executive Administration',
+        employeeId: 'EMP-ADM-ALIAS',
+        designation: 'System Administrator',
+        phone: '+91 98201 10001'
+      },
+      {
+        name: 'Dr. Meera Iyer (QA Alias)',
+        email: 'qa@docushield.com',
+        password: demoPassword,
+        role: ROLES.QA_MANAGER,
+        department: 'Quality Assurance',
+        employeeId: 'EMP-QA-ALIAS',
+        designation: 'Head of QA',
+        phone: '+91 98201 10002'
+      },
+      {
+        name: 'Suresh Patil (DC Alias)',
+        email: 'doccontrol@docushield.com',
+        password: demoPassword,
+        role: ROLES.DOCUMENT_CONTROLLER,
+        department: 'Document Control',
+        employeeId: 'EMP-DC-ALIAS',
+        designation: 'Document Controller',
+        phone: '+91 98201 10003'
       }
     ]);
 
-    const [adminUser, qaUser, docCtrlUser, deptHeadUser, analystUser] = users;
+    const [adminUser, qaUser, docCtrlUser, deptHeadUser, analystUser, viewerUser] = users;
 
     console.log('[Seed] Creating master departments...');
     const departments = await Department.create([
@@ -180,82 +221,90 @@ export const seedDatabase = async () => {
       { name: 'Analytical Method (ATM)', code: 'ATM', prefix: 'ATM', retentionYears: 7, reviewIntervalMonths: 12, requiresPhysicalTracking: true }
     ]);
 
-    console.log('[Seed] Creating hierarchical physical storage locations...');
-    const locations = await StorageLocation.create([
+    console.log('[Seed] Creating hierarchical physical storage locations across Plant-1 and Plant-2...');
+    const gridLayout = [
       {
-        building: 'Building A',
-        area: 'Central Archive Vault 1',
+        building: 'Plant-1',
+        area: 'Production Document Room',
         room: '101',
-        rack: '01',
-        shelf: '01',
-        bin: '01',
-        box: 'BX-01',
-        code: 'BLD-A/V1/R101/RK-01/SH-01/BIN-01',
-        capacity: 50,
-        currentOccupancy: 0,
-        department: 'Quality Assurance',
-        status: 'Available',
-        remarks: 'Fire-resistant climate-controlled vault for master QA documents'
-      },
-      {
-        building: 'Building A',
-        area: 'Central Archive Vault 1',
-        room: '101',
-        rack: '01',
-        shelf: '02',
-        bin: '02',
-        code: 'BLD-A/V1/R101/RK-01/SH-02/BIN-02',
-        capacity: 40,
-        currentOccupancy: 0,
-        department: 'Quality Assurance',
-        status: 'Available',
-        remarks: 'Active SOP controlled copy binders'
-      },
-      {
-        building: 'Building B',
-        area: 'Production Records Room',
-        room: '201',
-        rack: '02',
-        shelf: '01',
-        bin: '01',
-        code: 'BLD-B/PRD/R201/RK-02/SH-01/BIN-01',
-        capacity: 60,
-        currentOccupancy: 0,
+        rack: 'R-01',
         department: 'Production',
-        status: 'Available',
-        remarks: 'Batch manufacturing records archive with biometric access'
+        prefix: 'PLT-1/PRD/R101/RK-R01',
+        capacity: 25,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
       },
       {
-        building: 'Building B',
-        area: 'Production Records Room',
+        building: 'Plant-1',
+        area: 'Production Document Room',
+        room: '102',
+        rack: 'R-02',
+        department: 'Engineering',
+        prefix: 'PLT-1/ENG/R102/RK-R02',
+        capacity: 25,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
+      },
+      {
+        building: 'Plant-1',
+        area: 'QC Lab Records',
         room: '201',
-        rack: '02',
-        shelf: '02',
-        bin: '02',
-        code: 'BLD-B/PRD/R201/RK-02/SH-02/BIN-02',
-        capacity: 50,
-        currentOccupancy: 0,
-        department: 'Production',
-        status: 'Available',
-        remarks: 'Secondary packaging records storage'
-      },
-      {
-        building: 'Building C',
-        area: 'QC Testing Documentation',
-        room: '301',
-        rack: '03',
-        shelf: '01',
-        bin: '01',
-        code: 'BLD-C/QC/R301/RK-03/SH-01/BIN-01',
-        capacity: 45,
-        currentOccupancy: 0,
+        rack: 'R-01',
         department: 'Quality Control',
-        status: 'Available',
-        remarks: 'Analytical method validations and raw data logs'
+        prefix: 'PLT-1/QC/R201/RK-R01',
+        capacity: 25,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
+      },
+      {
+        building: 'Plant-2',
+        area: 'Archive Room',
+        room: '301',
+        rack: 'R-01',
+        department: 'Quality Assurance',
+        prefix: 'PLT-2/QA/R301/RK-R01',
+        capacity: 25,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
+      },
+      {
+        building: 'Plant-2',
+        area: 'Archive Room',
+        room: '302',
+        rack: 'R-03',
+        department: 'Production Archive',
+        prefix: 'PLT-2/PRD/R302/RK-R03',
+        capacity: 40,
+        bins: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08']
       }
-    ]);
+    ];
 
-    const [loc1, loc2, loc3, loc4, loc5] = locations;
+    const locDocsToCreate = [];
+    for (const group of gridLayout) {
+      for (const b of group.bins) {
+        locDocsToCreate.push({
+          building: group.building,
+          area: group.area,
+          room: group.room,
+          rack: group.rack,
+          shelf: '01',
+          bin: b,
+          box: 'BX-01',
+          code: `${group.prefix}/SH-01/BIN-${b}`,
+          capacity: group.capacity,
+          currentOccupancy: 0,
+          department: group.department,
+          status: 'Available',
+          remarks: `${group.area} - Rack ${group.rack} Bin ${b}`
+        });
+      }
+    }
+
+    const locations = await StorageLocation.create(locDocsToCreate);
+    const locMap = {};
+    locations.forEach(l => { locMap[l.code] = l; });
+
+    const loc1 = locMap['PLT-2/QA/R301/RK-R01/SH-01/BIN-B01'] || locations[0];
+    const loc2 = locMap['PLT-2/QA/R301/RK-R01/SH-01/BIN-B02'] || locations[1];
+    const loc3 = locMap['PLT-1/PRD/R101/RK-R01/SH-01/BIN-B01'] || locations[2];
+    const loc4 = locMap['PLT-1/PRD/R101/RK-R01/SH-01/BIN-B02'] || locations[3];
+    const loc5 = locMap['PLT-1/QC/R201/RK-R01/SH-01/BIN-B01'] || locations[4];
 
     console.log('[Seed] Generating sample documents and PDF files...');
     const sampleFiles = [
@@ -269,7 +318,8 @@ export const seedDatabase = async () => {
         product: 'General Analytical Equipment',
         batch: 'N/A',
         loc: loc5,
-        custodian: analystUser
+        custodian: analystUser,
+        description: 'Standard operating procedure for the startup, routine calibration, column maintenance, and shutdown of Shimadzu Prominence HPLC systems in QC analytical laboratory.'
       },
       {
         filename: 'sample_bmr_tb_2024.pdf',
@@ -281,7 +331,8 @@ export const seedDatabase = async () => {
         product: 'Paracetamol 500mg Tablets',
         batch: 'BTH-2026-089',
         loc: loc3,
-        custodian: deptHeadUser
+        custodian: deptHeadUser,
+        description: 'Comprehensive batch production steps, dispensing verification, dry granulation, compression parameters, and yield reconciliation for Paracetamol 500mg tablets.'
       },
       {
         filename: 'sample_sop_pr_0105.pdf',
@@ -293,7 +344,8 @@ export const seedDatabase = async () => {
         product: 'Sterile Injectable Line 1',
         batch: 'MF-2026-01',
         loc: loc1,
-        custodian: qaUser
+        custodian: qaUser,
+        description: 'Mandatory standard testing procedure for aseptic media fill simulations, viable surface sampling, and non-viable particulate monitoring in ISO Class 5 cleanrooms.'
       },
       {
         filename: 'sample_val_pr_0012.pdf',
@@ -305,7 +357,8 @@ export const seedDatabase = async () => {
         product: 'Solid Oral Granulation Equipment',
         batch: 'VAL-CLN-2026',
         loc: loc4,
-        custodian: deptHeadUser
+        custodian: deptHeadUser,
+        description: 'Validation protocol evaluating clean-in-place rinse efficiency, swab recovery limits, and worst-case active residue limits for the Glatt Fluid Bed Dryer.'
       },
       {
         filename: 'sample_spec_qc_0089.pdf',
@@ -317,14 +370,164 @@ export const seedDatabase = async () => {
         product: 'Metformin Hydrochloride 850mg',
         batch: 'MET-FP-SPEC',
         loc: loc5,
-        custodian: analystUser
+        custodian: analystUser,
+        description: 'Official monograph specifications covering assay, dissolution profiles, related substances, uniformity of dosage units, and microbial limits for Metformin 850mg.'
+      },
+      {
+        filename: 'sample_sop_qa_0018.pdf',
+        docNum: 'SOP-QA-0018',
+        title: 'Good Documentation Practices (GDP) and Data Integrity Governance',
+        version: '5.0',
+        type: 'Standard Operating Procedure (SOP)',
+        dept: 'Quality Assurance',
+        product: 'Site-wide Compliance Governance',
+        batch: 'N/A',
+        loc: loc1,
+        custodian: qaUser,
+        description: 'Universal site guidelines covering real-time contemporaneous recording, ALCOA+ principles, audit trail reviews, and physical logbook issuance controls.'
+      },
+      {
+        filename: 'sample_sop_qc_0033.pdf',
+        docNum: 'SOP-QC-0033',
+        title: 'Out-of-Specification (OOS) and Out-of-Trend (OOT) Investigation Procedure',
+        version: '2.0',
+        type: 'Standard Operating Procedure (SOP)',
+        dept: 'Quality Control',
+        product: 'Analytical Chemistry and Microbiology',
+        batch: 'N/A',
+        loc: loc5,
+        custodian: analystUser,
+        description: 'Step-by-step procedure for Phase 1 laboratory investigation, hypothesis testing, analyst interview, Phase 2 manufacturing investigation, and final QA disposition.'
+      },
+      {
+        filename: 'sample_bmr_tb_3100.pdf',
+        docNum: 'BMR-TB-3100',
+        title: 'Batch Manufacturing Record for Amoxicillin 250mg Dispersible Tablets',
+        version: '2.0',
+        type: 'Batch Manufacturing Record (BMR)',
+        dept: 'Production',
+        product: 'Amoxicillin 250mg Dispersible Tablets',
+        batch: 'BTH-AMX-2026-04',
+        loc: loc3,
+        custodian: deptHeadUser,
+        description: 'Dedicated beta-lactam manufacturing facility batch execution document including double-check material dispensing, blending, compression, and in-process controls.'
+      },
+      {
+        filename: 'sample_bpr_pkg_1022.pdf',
+        docNum: 'BPR-PKG-1022',
+        title: 'Master Packaging Record for Ibuprofen 400mg Blister Packaging Line 2',
+        version: '1.2',
+        type: 'Batch Production Record (BPR)',
+        dept: 'Production',
+        product: 'Ibuprofen 400mg Blister Packs',
+        batch: 'BTH-IBU-PKG-09',
+        loc: loc4,
+        custodian: deptHeadUser,
+        description: 'Secondary and tertiary packaging execution instructions: foil printing, barcode verification, cartoning, blister seal integrity testing, and serialization coding.'
+      },
+      {
+        filename: 'sample_val_pr_0045.pdf',
+        docNum: 'VAL-PR-0045',
+        title: 'Purified Water System Generation and Loop Distribution Qualification Protocol',
+        version: '3.0',
+        type: 'Validation Protocol / Report',
+        dept: 'Quality Assurance',
+        product: 'Pharmaceutical Water Generation Plant',
+        batch: 'VAL-WTR-2026',
+        loc: loc2,
+        custodian: adminUser,
+        description: 'Phase 1, 2, and 3 water system performance qualification protocol evaluating microbial bioburden, total organic carbon (TOC), and conductivity at user points.'
+      },
+      {
+        filename: 'sample_dev_qa_2026_04.pdf',
+        docNum: 'DEV-QA-2026-04',
+        title: 'Critical Deviation Investigation: HVAC Differential Pressure Excursion in Grade B Filling Suite',
+        version: '1.0',
+        type: 'Deviation',
+        dept: 'Quality Assurance',
+        product: 'Sterile Filling Area A',
+        batch: 'DEV-HVAC-04',
+        loc: loc1,
+        custodian: qaUser,
+        description: 'Root cause analysis, environmental impact assessment, product risk evaluation, and immediate containment for an unexpected 25-minute differential pressure drop.'
+      },
+      {
+        filename: 'sample_capa_2026_0012.pdf',
+        docNum: 'CAPA-2026-0012',
+        title: 'Corrective and Preventive Action: Elimination of Particulate Contamination in Vials',
+        version: '1.0',
+        type: 'CAPA',
+        dept: 'Quality Assurance',
+        product: 'Sterile Injectable Line 1',
+        batch: 'CAPA-VIAL-012',
+        loc: loc2,
+        custodian: qaUser,
+        description: 'CAPA plan incorporating ultrasonic washing temperature upgrades, HEPA filter laminar flow re-balancing, and revised quarterly particulate inspection SOP.'
+      },
+      {
+        filename: 'sample_cc_qa_2026_008.pdf',
+        docNum: 'CC-QA-2026-008',
+        title: 'Change Control: Replacement of Primary Packaging Optical Character Recognition (OCR) Cameras',
+        version: '1.0',
+        type: 'Change Control',
+        dept: 'Quality Assurance',
+        product: 'High-speed Blister Packaging Machine',
+        batch: 'CC-OCR-2026',
+        loc: loc2,
+        custodian: adminUser,
+        description: 'Technical evaluation, computerized system validation re-challenge, and operator training requirements for high-resolution 2D barcode and expiry date verification.'
+      },
+      {
+        filename: 'sample_log_pr_2026_01.pdf',
+        docNum: 'LOG-PR-2026-01',
+        title: 'Autoclave Steam Sterilizer Operation & Biological Indicator Incubation Logbook',
+        version: '1.0',
+        type: 'Logbook',
+        dept: 'Production',
+        product: 'Terminal Sterilization Equipment AUT-01',
+        batch: 'LOG-AUT-2026',
+        loc: loc3,
+        custodian: deptHeadUser,
+        description: 'Daily operational run logs, vacuum leak rate testing, F0 lethality calculation sheets, and Geobacillus stearothermophilus biological indicator incubation records.'
+      },
+      {
+        filename: 'sample_spec_rm_0042.pdf',
+        docNum: 'SPEC-RM-0042',
+        title: 'Raw Material Analytical Specification for Microcrystalline Cellulose (Avicel PH-101)',
+        version: '3.0',
+        type: 'Specification (SPEC)',
+        dept: 'Quality Control',
+        product: 'Direct Compression Excipients',
+        batch: 'RM-MCC-SPEC',
+        loc: loc5,
+        custodian: analystUser,
+        description: 'USP / Ph. Eur. compendial specification detailing loss on drying, particle size distribution, bulk and tapped density, heavy metals, and infrared identification test.'
+      },
+      {
+        filename: 'sample_sop_it_0005.pdf',
+        docNum: 'SOP-IT-0005',
+        title: 'Computerized System Validation (CSV) and Electronic Records Compliance (21 CFR Part 11)',
+        version: '4.0',
+        type: 'Standard Operating Procedure (SOP)',
+        dept: 'Quality Assurance',
+        product: 'DocuShield GxP Electronic DMS Platform',
+        batch: 'N/A',
+        loc: loc1,
+        custodian: adminUser,
+        description: 'Policies on system life cycle, GAMP 5 risk assessment, automated backup integrity, time-stamped audit trails, user account deprovisioning, and disaster recovery.'
       }
     ];
 
     const createdDocs = [];
+    const now = new Date();
 
-    for (const item of sampleFiles) {
+    for (let i = 0; i < sampleFiles.length; i++) {
+      const item = sampleFiles[i];
       createSamplePdf(item.filename, item.title, item.docNum);
+
+      // Distribute creation dates realistically over the last 6 months
+      const monthsAgo = (i % 6);
+      const creationDate = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 10 + (i * 2));
 
       const newDoc = new Document({
         documentNumber: item.docNum,
@@ -337,6 +540,8 @@ export const seedDatabase = async () => {
         effectiveDate: new Date('2026-01-10'),
         reviewDate: new Date('2027-01-10'),
         expiryDate: new Date('2031-01-10'),
+        createdAt: creationDate,
+        updatedAt: creationDate,
         status: DOCUMENT_STATUSES.EFFECTIVE,
         physicalStatus: PHYSICAL_STATUSES.STORED,
         preparedBy: 'Dr. Rajesh Patel',
@@ -355,7 +560,7 @@ export const seedDatabase = async () => {
         fileHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         tags: ['GxP', 'Validated', item.dept.replace(/\s+/g, ''), 'Regulatory-Ready'],
         folder: 'Controlled Procedures',
-        description: `Official approved document for ${item.title}. Governed under 21 CFR Part 11.`,
+        description: item.description || `Official approved document for ${item.title}. Governed under 21 CFR Part 11.`,
         qrCodeData: `DOCUSHIELD:${item.docNum}`,
         legalHold: false,
         retentionYears: 7
@@ -554,12 +759,13 @@ export const seedDatabase = async () => {
     ]);
 
     console.log('[Seed] Database seeding successfully completed!');
-    console.log('Demo Login Credentials:');
-    console.log('1. Admin: admin@docushield.com / DocuShield@2026');
-    console.log('2. QA Lead: qa@docushield.com / DocuShield@2026');
-    console.log('3. Document Controller: doccontrol@docushield.com / DocuShield@2026');
-    console.log('4. Department Head: depthead@docushield.com / DocuShield@2026');
-    console.log('5. Analyst / Employee: analyst@docushield.com / DocuShield@2026');
+    console.log('Demo Login Credentials (6 Quick Sign-In Users):');
+    console.log('1. Anita Sharma (Admin): anita.sharma@docushield.com / DocuShield@2026');
+    console.log('2. Dr. Meera Iyer (QA Manager): meera.iyer@docushield.com / DocuShield@2026');
+    console.log('3. Suresh Patil (Document Controller): suresh.patil@docushield.com / DocuShield@2026');
+    console.log('4. Rahul Verma (Custodian): rahul.verma@docushield.com / DocuShield@2026');
+    console.log('5. Priya Nair (Custodian): priya.nair@docushield.com / DocuShield@2026');
+    console.log('6. Amit Kumar (User / Viewer): amit.kumar@docushield.com / DocuShield@2026');
 
     process.exit(0);
   } catch (error) {

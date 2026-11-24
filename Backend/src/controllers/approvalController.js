@@ -3,6 +3,7 @@ import DocumentRequest from '../models/DocumentRequest.js';
 import Notification from '../models/Notification.js';
 import CheckoutRecord from '../models/CheckoutRecord.js';
 import Document from '../models/Document.js';
+import User from '../models/User.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 import { logAuditEvent } from '../services/auditService.js';
 import { AUDIT_ACTIONS, REQUEST_STATUSES, PHYSICAL_STATUSES } from '../constants/index.js';
@@ -31,7 +32,13 @@ export const getApprovals = async (req, res, next) => {
 
 export const approveRequest = async (req, res, next) => {
   try {
-    const { comments = '', signatureMeaning = 'I approve this record in compliance with 21 CFR Part 11 requirements.' } = req.body;
+    const {
+      comments = '',
+      signatureMeaning = 'I approve this record in compliance with 21 CFR Part 11 requirements.',
+      password,
+      username
+    } = req.body;
+
     const approval = await Approval.findById(req.params.id)
       .populate('request')
       .populate('document');
@@ -44,12 +51,38 @@ export const approveRequest = async (req, res, next) => {
       return sendError(res, `Cannot approve: Item is already ${approval.status}`, 400);
     }
 
+    // 21 CFR Part 11 Dual-Factor Re-Authentication Check
+    const enteredEmail = (email || username || '').trim().toLowerCase();
+    if (!enteredEmail) {
+      return sendError(res, 'Authorized email is required for 21 CFR Part 11 electronic signature.', 400);
+    }
+
+    if (!password) {
+      return sendError(res, 'Security password is required for 21 CFR Part 11 electronic signature authentication.', 400);
+    }
+
+    const signingUser = await User.findById(req.user._id).select('+password');
+    if (!signingUser) {
+      return sendError(res, 'Authorized signing user not found', 404);
+    }
+
+    // Strict Email verification: Must match logged-in user's registered email
+    if (signingUser.email.toLowerCase() !== enteredEmail) {
+      return sendError(res, `Invalid Email: Entered email does not match your authorized account (${signingUser.email}).`, 401);
+    }
+
+    // Strict Password verification: Must match account password
+    const isMatch = await signingUser.comparePassword(password);
+    if (!isMatch) {
+      return sendError(res, 'Invalid Password: Authentication failed. Please enter your correct password.', 401);
+    }
+
     approval.status = 'Approved';
     approval.approver = req.user._id;
     approval.comments = comments;
     approval.actionDate = new Date();
     approval.electronicSignature = {
-      signedBy: `${req.user.name} (${req.user.employeeId})`,
+      signedBy: `${signingUser.name} (${signingUser.employeeId || signingUser.email})`,
       signedAt: new Date(),
       meaning: signatureMeaning
     };

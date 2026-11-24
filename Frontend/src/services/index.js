@@ -46,8 +46,14 @@ export const approvalService = {
     const res = await api.get('/approvals', { params });
     return res.data;
   },
-  approve: async (id, comments, signatureMeaning) => {
-    const res = await api.post(`/approvals/${id}/approve`, { comments, signatureMeaning });
+  approve: async (id, comments, signatureMeaning, password, email) => {
+    const res = await api.post(`/approvals/${id}/approve`, {
+      comments,
+      signatureMeaning,
+      password,
+      email,
+      username: email
+    });
     return res.data;
   },
   reject: async (id, comments) => {
@@ -181,3 +187,15 @@ export const masterDataService = {
     return res.data;
   }
 };
+
+export const settingService = {
+  getSettings: async () => {
+    const res = await api.get('/settings');
+    return res.data;
+  },
+  updateSettings: async (data) => {
+    const res = await api.put('/settings', data);
+    return res.data;
+  }
+};
+

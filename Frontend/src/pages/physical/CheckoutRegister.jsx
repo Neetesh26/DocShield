@@ -110,7 +110,7 @@ export const CheckoutRegister = () => {
           </select>
           <button
             onClick={handleOpenCheckoutModal}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Check Out Document
@@ -146,7 +146,7 @@ export const CheckoutRegister = () => {
               ) : (
                 checkouts.map((item) => (
                   <tr key={item._id} className="hover:bg-slate-50 transition">
-                    <td className="py-3 px-4 font-mono font-bold text-teal-700 whitespace-nowrap">{item.checkoutNumber}</td>
+                    <td className="py-3 px-4 font-mono font-bold text-orange-700 whitespace-nowrap">{item.checkoutNumber}</td>
                     <td className="py-3 px-4 font-medium text-slate-900 truncate max-w-xs">
                       <div className="font-mono font-bold text-slate-800">{item.document?.documentNumber}</div>
                       <div className="text-[11px] text-slate-500 truncate">{item.document?.title}</div>
@@ -174,7 +174,7 @@ export const CheckoutRegister = () => {
                       {item.status === 'Active' ? (
                         <button
                           onClick={() => setReturningItem(item)}
-                          className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded text-[11px] font-semibold flex items-center gap-1 ml-auto"
+                          className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded text-[11px] font-semibold flex items-center gap-1 ml-auto"
                         >
                           <CornerDownLeft className="w-3.5 h-3.5" /> Return & Inspect
                         </button>
@@ -201,7 +201,7 @@ export const CheckoutRegister = () => {
 
             <div className="text-xs bg-slate-50 p-3 rounded-lg space-y-1">
               <div><strong className="text-slate-700">Checkout #:</strong> <span className="font-mono">{returningItem.checkoutNumber}</span></div>
-              <div><strong className="text-slate-700">Document:</strong> <span className="font-mono font-bold text-teal-700">{returningItem.document?.documentNumber}</span></div>
+              <div><strong className="text-slate-700">Document:</strong> <span className="font-mono font-bold text-orange-700">{returningItem.document?.documentNumber}</span></div>
               <div><strong className="text-slate-700">Returned by:</strong> {returningItem.user?.name}</div>
             </div>
 
@@ -241,7 +241,7 @@ export const CheckoutRegister = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg"
+                  className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg"
                 >
                   Verify Return into Vault
                 </button>
@@ -312,7 +312,7 @@ export const CheckoutRegister = () => {
                 <button
                   type="submit"
                   disabled={!selectedDocId || !expectedReturnDate || !checkoutPurpose}
-                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg disabled:opacity-50"
+                  className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg disabled:opacity-50"
                 >
                   Confirm Check Out
                 </button>

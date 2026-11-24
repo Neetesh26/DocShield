@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BarChart3, Download, Calendar, Filter, FileSpreadsheet } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { reportService } from '../../services';
+import api from '../../services/api';
 
-const COLORS = ['#0D9488', '#0284C7', '#6366F1', '#EC4899', '#F59E0B', '#10B981'];
+const COLORS = ['#7C3AED', '#9333EA', '#A855F7', '#C084FC', '#F59E0B', '#E11D48'];
 
 export const Reports = () => {
   const [overview, setOverview] = useState(null);
@@ -11,6 +12,7 @@ export const Reports = () => {
   const [department, setDepartment] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   const fetchReports = async () => {
     try {
@@ -30,8 +32,24 @@ export const Reports = () => {
     fetchReports();
   }, [department, startDate, endDate]);
 
-  const handleExportCsv = () => {
-    window.open('/api/reports/export-csv', '_blank');
+  const handleExportCsv = async () => {
+    try {
+      setExporting(true);
+      const response = await api.get('/reports/export-csv', { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `VidyaGxP_Repository_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Failed to export CSV: ' + (err.message || 'Error'));
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -47,7 +65,7 @@ export const Reports = () => {
           onClick={handleExportCsv}
           className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-sm"
         >
-          <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+          <FileSpreadsheet className="w-4 h-4 text-orange-400" />
           Export Repository CSV
         </button>
       </div>

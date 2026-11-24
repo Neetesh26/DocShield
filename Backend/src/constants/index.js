@@ -1,8 +1,11 @@
 export const ROLES = {
   ADMIN: 'Admin',
+  QA_MANAGER: 'QA Manager',
   QA: 'QA',
   DOCUMENT_CONTROLLER: 'Document Controller',
+  CUSTODIAN: 'Custodian',
   DEPARTMENT_HEAD: 'Department Head',
+  VIEWER: 'User / Viewer',
   EMPLOYEE: 'Employee'
 };
 

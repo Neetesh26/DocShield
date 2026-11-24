@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud, Layers, FileText, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
 import { documentService } from '../../services';
+import { toast } from '../../context/ToastContext';
 
 export const BulkUpload = () => {
   const navigate = useNavigate();
@@ -36,6 +37,13 @@ export const BulkUpload = () => {
 
     setResults(processedResults);
     setProcessing(false);
+
+    const successCount = processedResults.filter(r => r.success).length;
+    if (successCount > 0) {
+      toast.success(`Batch extraction complete! ${successCount} of ${files.length} documents uploaded successfully.`);
+    } else {
+      toast.error('Batch upload failed. Check the error list below.');
+    }
   };
 
   return (
@@ -50,7 +58,7 @@ export const BulkUpload = () => {
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
         <div
           onClick={() => document.getElementById('bulk-input').click()}
-          className="border-2 border-dashed border-slate-300 hover:border-teal-500 rounded-xl p-8 text-center bg-slate-50/50 hover:bg-teal-50/20 transition cursor-pointer"
+          className="border-2 border-dashed border-slate-300 hover:border-orange-500 rounded-xl p-8 text-center bg-slate-50/50 hover:bg-orange-50/20 transition cursor-pointer"
         >
           <input
             id="bulk-input"
@@ -60,7 +68,7 @@ export const BulkUpload = () => {
             className="hidden"
             onChange={handleFileSelect}
           />
-          <div className="w-12 h-12 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center mx-auto mb-3">
             <Layers className="w-6 h-6" />
           </div>
           <div className="text-xs font-semibold text-slate-800">
@@ -78,7 +86,7 @@ export const BulkUpload = () => {
               <button
                 disabled={processing}
                 onClick={handleStartBatch}
-                className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-sm transition disabled:opacity-50"
+                className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg shadow-sm transition disabled:opacity-50"
               >
                 {processing ? 'Processing Batch...' : 'Start Extraction Batch'}
               </button>
@@ -93,7 +101,7 @@ export const BulkUpload = () => {
                     <span className="text-[10px] text-slate-400">({(item.size / 1024).toFixed(1)} KB)</span>
                   </div>
                   <span className={`text-[11px] font-mono px-2 py-0.5 rounded font-semibold ${
-                    item.status === 'Extracted' ? 'bg-emerald-50 text-emerald-700' : item.status === 'Extracting...' ? 'bg-amber-50 text-amber-700 animate-pulse' : 'bg-slate-100 text-slate-600'
+                    item.status === 'Extracted' ? 'bg-orange-50 text-orange-800 border border-orange-200' : item.status === 'Extracting...' ? 'bg-amber-50 text-amber-700 animate-pulse' : 'bg-slate-100 text-slate-600'
                   }`}>
                     {item.status}
                   </span>

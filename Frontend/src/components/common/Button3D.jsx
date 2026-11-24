@@ -36,13 +36,13 @@ export const Button3D = ({
 
   // 3D tactile color slabs (face + bottom bevel slab)
   const variantStyles = {
-    // Primary: Royal Purple/Violet (No dark, no green, no blue)
+    // Primary: Vibrant Bhagwa Saffron Orange
     primary: `
-      bg-gradient-to-b from-purple-500 to-purple-600 text-white
-      border-t border-purple-300/40
-      shadow-[0_4px_0_0_#581c87,0_6px_12px_rgba(88,28,135,0.25)]
-      hover:from-purple-400 hover:to-purple-500 hover:shadow-[0_4px_0_0_#581c87,0_8px_16px_rgba(88,28,135,0.3)]
-      active:shadow-[0_1px_0_0_#581c87,0_2px_4px_rgba(88,28,135,0.2)]
+      bg-gradient-to-b from-orange-500 to-orange-600 text-white
+      border-t border-orange-300/50
+      shadow-[0_4px_0_0_#9a3412,0_6px_12px_rgba(234,88,12,0.3)]
+      hover:from-orange-400 hover:to-orange-500 hover:shadow-[0_4px_0_0_#9a3412,0_8px_16px_rgba(234,88,12,0.35)]
+      active:shadow-[0_1px_0_0_#9a3412,0_2px_4px_rgba(234,88,12,0.2)]
     `,
     // Secondary / Light: Clean White-Pearl with Slate 3D Slab
     light: `
@@ -53,11 +53,11 @@ export const Button3D = ({
       active:shadow-[0_1px_0_0_#cbd5e1,0_1px_2px_rgba(0,0,0,0.05)]
     `,
     secondary: `
-      bg-gradient-to-b from-purple-50 to-purple-100 text-purple-900
-      border border-purple-200 border-t-white
-      shadow-[0_4px_0_0_#d8b4fe,0_4px_8px_rgba(147,51,234,0.12)]
-      hover:from-purple-100 hover:to-purple-200 hover:shadow-[0_4px_0_0_#c084fc,0_6px_12px_rgba(147,51,234,0.18)]
-      active:shadow-[0_1px_0_0_#d8b4fe,0_1px_2px_rgba(147,51,234,0.1)]
+      bg-gradient-to-b from-orange-50 to-orange-100 text-orange-950
+      border border-orange-200 border-t-white
+      shadow-[0_4px_0_0_#fed7aa,0_4px_8px_rgba(234,88,12,0.12)]
+      hover:from-orange-100 hover:to-orange-200 hover:shadow-[0_4px_0_0_#fdba74,0_6px_12px_rgba(234,88,12,0.18)]
+      active:shadow-[0_1px_0_0_#fed7aa,0_1px_2px_rgba(234,88,12,0.1)]
     `,
     // Amber / Golden Honey: Regulatory Warning & Highlights
     amber: `

@@ -22,6 +22,8 @@ import masterDataRoutes from './routes/masterDataRoutes.js';
 import auditLogRoutes from './routes/auditLogRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import assistantRoutes from './routes/assistantRoutes.js';
+import settingRoutes from './routes/settingRoutes.js';
+import translateRoutes from './routes/translateRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,7 +77,7 @@ app.use('/uploads', express.static(path.resolve(__dirname, 'uploads')));
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
-    message: 'DocuShield GxP Backend API is operational',
+    message: 'VidyaGxP Backend API is operational',
     timestamp: new Date().toISOString()
   });
 });
@@ -96,6 +98,8 @@ app.use('/api/master-data', masterDataRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/assistant', assistantRoutes);
+app.use('/api/settings', settingRoutes);
+app.use('/api/translate', translateRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

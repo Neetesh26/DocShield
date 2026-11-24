@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { Settings as SettingsIcon, ShieldCheck, Lock, Clock, FileCode, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings as SettingsIcon, ShieldCheck, Lock, Clock, FileCode, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { Button3D } from '../../components/common/Button3D';
+import { settingService } from '../../services';
 
 export const Settings = () => {
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   const [form, setForm] = useState({
     sessionTimeoutMin: '30',
@@ -15,25 +20,75 @@ export const Settings = () => {
     enforceBarcodeScanOnReturn: true
   });
 
-  const handleSave = (e) => {
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        setLoading(true);
+        const res = await settingService.getSettings();
+        if (res?.data) {
+          setForm({
+            sessionTimeoutMin: res.data.sessionTimeoutMin || '30',
+            maxPasswordAgeDays: res.data.maxPasswordAgeDays || '90',
+            electronicSignatureStatement: res.data.electronicSignatureStatement || 'I certify that this record has been reviewed and executed in compliance with 21 CFR Part 11 and current Good Manufacturing Practices (cGMP).',
+            autoArchiveExpiredYears: res.data.autoArchiveExpiredYears || '7',
+            requireDualSignOffForDestruction: res.data.requireDualSignOffForDestruction !== undefined ? res.data.requireDualSignOffForDestruction : true,
+            enforceBarcodeScanOnReturn: res.data.enforceBarcodeScanOnReturn !== undefined ? res.data.enforceBarcodeScanOnReturn : true
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load settings from DB:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      setSaving(true);
+      setError(null);
+      await settingService.updateSettings(form);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error('Failed to save settings:', err);
+      setError(err?.response?.data?.message || 'Failed to persist settings to database.');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
+        <span className="ml-2 text-xs text-slate-500 font-medium">Loading system compliance settings from MongoDB...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="text-xl font-bold text-slate-900 tracking-tight">System & Compliance Governance Settings</h1>
         <p className="text-xs text-slate-500">
-          Configure global 21 CFR Part 11 electronic records, audit trail retentions, and quality parameters.
+          Configure global 21 CFR Part 11 electronic records, audit trail retentions, and quality parameters (Synced dynamically with MongoDB).
         </p>
       </div>
 
       {saved && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          <span>System configuration parameters successfully updated and logged to audit trail.</span>
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>System configuration parameters successfully updated in MongoDB and logged to 21 CFR Part 11 audit trail.</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -41,7 +96,7 @@ export const Settings = () => {
         {/* Section 1: 21 CFR Part 11 Electronic Signature Statement */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-            <ShieldCheck className="w-4 h-4 text-teal-600" />
+            <ShieldCheck className="w-4 h-4 text-orange-600" />
             <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
               21 CFR Part 11 Electronic Signature Mandates
             </h2>
@@ -55,7 +110,7 @@ export const Settings = () => {
               rows="3"
               value={form.electronicSignatureStatement}
               onChange={(e) => setForm({ ...form, electronicSignatureStatement: e.target.value })}
-              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600"
+              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 transition"
             ></textarea>
             <span className="text-[11px] text-slate-400 mt-1 block">
               Required by 21 CFR § 11.50 (signature manifestations: printed name, date/time, and meaning).
@@ -68,7 +123,7 @@ export const Settings = () => {
                 type="checkbox"
                 checked={form.requireDualSignOffForDestruction}
                 onChange={(e) => setForm({ ...form, requireDualSignOffForDestruction: e.target.checked })}
-                className="rounded text-teal-600 border-slate-300"
+                className="rounded text-orange-600 border-slate-300 focus:ring-purple-500"
               />
               <span className="font-semibold text-slate-800">
                 Enforce Dual-Party QA Sign-Off for Record Destruction or De-accession
@@ -79,7 +134,7 @@ export const Settings = () => {
                 type="checkbox"
                 checked={form.enforceBarcodeScanOnReturn}
                 onChange={(e) => setForm({ ...form, enforceBarcodeScanOnReturn: e.target.checked })}
-                className="rounded text-teal-600 border-slate-300"
+                className="rounded text-orange-600 border-slate-300 focus:ring-purple-500"
               />
               <span className="font-semibold text-slate-800">
                 Enforce Physical QR Code Verification during Check-In Return
@@ -91,7 +146,7 @@ export const Settings = () => {
         {/* Section 2: Security & Session Controls */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-            <Lock className="w-4 h-4 text-teal-600" />
+            <Lock className="w-4 h-4 text-orange-600" />
             <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
               Security & Operator Session Governance
             </h2>
@@ -108,7 +163,7 @@ export const Settings = () => {
                 max="120"
                 value={form.sessionTimeoutMin}
                 onChange={(e) => setForm({ ...form, sessionTimeoutMin: e.target.value })}
-                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono"
+                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
               />
             </div>
             <div>
@@ -121,22 +176,23 @@ export const Settings = () => {
                 max="365"
                 value={form.maxPasswordAgeDays}
                 onChange={(e) => setForm({ ...form, maxPasswordAgeDays: e.target.value })}
-                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono"
+                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
               />
             </div>
           </div>
         </div>
 
         <div className="flex justify-end">
-          <button
+          <Button3D
             type="submit"
-            className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+            variant="primary"
+            size="md"
+            disabled={saving}
           >
-            Save Configuration Changes
-          </button>
+            {saving ? 'Saving to Database...' : 'Save Configuration Changes'}
+          </Button3D>
         </div>
       </form>
     </div>
   );
 };
-

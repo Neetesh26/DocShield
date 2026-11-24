@@ -114,14 +114,14 @@ export const CustodyHandovers = () => {
           <button
             onClick={() => setFilterMy(!filterMy)}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition ${
-              filterMy ? 'bg-teal-50 border-teal-500 text-teal-800' : 'bg-white border-slate-300 text-slate-700'
+              filterMy ? 'bg-orange-50 border-orange-500 text-orange-800' : 'bg-white border-slate-300 text-slate-700'
             }`}
           >
             {filterMy ? 'Showing My Handovers' : 'Show All Handovers'}
           </button>
           <button
             onClick={handleOpenCreateModal}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Initiate Custody Transfer
@@ -159,17 +159,17 @@ export const CustodyHandovers = () => {
                   const canAct = h.status === 'Pending Acceptance' && String(h.newCustodian?._id) === String(user?._id);
                   return (
                     <tr key={h._id} className="hover:bg-slate-50 transition">
-                      <td className="py-3 px-4 font-mono font-bold text-teal-700 whitespace-nowrap">{h.handoverNumber}</td>
+                      <td className="py-3 px-4 font-mono font-bold text-orange-700 whitespace-nowrap">{h.handoverNumber}</td>
                       <td className="py-3 px-4 font-medium text-slate-900">
                         {h.documents?.map(d => d.documentNumber).join(', ') || '1 Record'}
                       </td>
                       <td className="py-3 px-3 text-slate-700">{h.previousCustodian?.name}</td>
-                      <td className="py-3 px-3 font-semibold text-teal-800">{h.newCustodian?.name}</td>
+                      <td className="py-3 px-3 font-semibold text-orange-800">{h.newCustodian?.name}</td>
                       <td className="py-3 px-3 text-slate-600 truncate max-w-xs">{h.reason}</td>
                       <td className="py-3 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                           h.status === 'Accepted'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            ? 'bg-orange-50 text-orange-800 border-orange-200'
                             : h.status === 'Rejected'
                             ? 'bg-rose-50 text-rose-700 border-rose-200'
                             : 'bg-amber-50 text-amber-700 border-amber-200'
@@ -183,7 +183,7 @@ export const CustodyHandovers = () => {
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleAccept(h._id)}
-                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-semibold"
+                              className="px-2.5 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded text-[11px] font-semibold transition cursor-pointer"
                             >
                               Accept Custody
                             </button>
@@ -231,9 +231,9 @@ export const CustodyHandovers = () => {
                           if (e.target.checked) setSelectedDocIds([...selectedDocIds, doc._id]);
                           else setSelectedDocIds(selectedDocIds.filter(id => id !== doc._id));
                         }}
-                        className="rounded text-teal-600 border-slate-300"
+                        className="rounded text-orange-600 border-slate-300"
                       />
-                      <span className="font-mono font-bold text-teal-800">{doc.documentNumber}</span>
+                      <span className="font-mono font-bold text-orange-800">{doc.documentNumber}</span>
                       <span className="text-slate-700 truncate">{doc.title}</span>
                     </label>
                   ))}
@@ -280,7 +280,7 @@ export const CustodyHandovers = () => {
                 <button
                   type="submit"
                   disabled={submitting || selectedDocIds.length === 0 || !targetCustodianId}
-                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg disabled:opacity-50"
+                  className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg disabled:opacity-50"
                 >
                   {submitting ? 'Initiating...' : 'Submit Handover'}
                 </button>

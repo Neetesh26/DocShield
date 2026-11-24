@@ -4,7 +4,7 @@ export const generateDocumentQR = async (documentNumber, documentId) => {
   try {
     // Generate secure lookup URL/payload
     const qrPayload = JSON.stringify({
-      app: 'DocuShield-GxP',
+      app: 'VidyaGxP',
       docNum: documentNumber,
       id: documentId,
       url: `/documents/${documentId}`

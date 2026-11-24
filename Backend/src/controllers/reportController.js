@@ -110,7 +110,7 @@ export const exportDocumentsCSV = async (req, res, next) => {
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
 
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="docushield_repository_export.csv"');
+    res.setHeader('Content-Disposition', 'attachment; filename="vidyagxp_repository_export.csv"');
     return res.status(200).send(csvContent);
   } catch (error) {
     next(error);

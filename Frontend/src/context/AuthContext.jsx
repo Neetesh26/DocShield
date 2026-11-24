@@ -43,16 +43,36 @@ export const AuthProvider = ({ children }) => {
     return { success: false, message: res.message || 'Login failed' };
   };
 
+  const register = async (userData) => {
+    const res = await authService.register(userData);
+    if (res.success && res.data) {
+      setUser(res.data.user);
+      setToken(res.data.token);
+      localStorage.setItem('docushield_token', res.data.token);
+      localStorage.setItem('docushield_user', JSON.stringify(res.data.user));
+      return { success: true };
+    }
+    return { success: false, message: res.message || 'Registration failed' };
+  };
+
+  const clearLocalStorage = () => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {
+      // ignore
+    }
+    setUser(null);
+    setToken(null);
+  };
+
   const logout = async () => {
     try {
       await authService.logout();
     } catch (e) {
       // ignore
     } finally {
-      setUser(null);
-      setToken(null);
-      localStorage.removeItem('docushield_token');
-      localStorage.removeItem('docushield_user');
+      clearLocalStorage();
     }
   };
 
@@ -69,7 +89,9 @@ export const AuthProvider = ({ children }) => {
         loading,
         isAuthenticated: !!token && !!user,
         login,
+        register,
         logout,
+        clearLocalStorage,
         hasRole
       }}
     >
