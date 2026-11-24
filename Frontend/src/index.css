@@ -27,16 +27,16 @@
 }
 
 .btn-3d-primary {
-  background: linear-gradient(180deg, #9333ea 0%, #7e22ce 100%);
+  background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
   color: #ffffff;
-  border: 1px solid #6b21a8;
-  box-shadow: 0 4px 0 #581c87, 0 6px 12px rgba(126, 34, 206, 0.25);
+  border: 1px solid #c2410c;
+  box-shadow: 0 4px 0 #9a3412, 0 6px 12px rgba(234, 88, 12, 0.25);
 }
 .btn-3d-primary:hover {
-  background: linear-gradient(180deg, #a855f7 0%, #9333ea 100%);
+  background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
 }
 .btn-3d-primary:active {
-  box-shadow: 0 1px 0 #581c87, 0 2px 4px rgba(126, 34, 206, 0.2);
+  box-shadow: 0 1px 0 #9a3412, 0 2px 4px rgba(234, 88, 12, 0.2);
 }
 
 .btn-3d-amber {
@@ -278,19 +278,23 @@ html.dark table tbody tr:hover {
 }
 
 /* 10. Buttons (Button3D light variant in dark mode) */
-html.dark .btn-3d-light {
+html.dark .btn-3d-light,
+html.dark button[class*="from-white"] {
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
   color: #f1f5f9 !important;
   border: 1px solid #334155 !important;
+  border-top-color: #475569 !important;
   box-shadow: 0 4px 0 #020617, 0 4px 8px rgba(0, 0, 0, 0.5) !important;
 }
 
-html.dark .btn-3d-light:hover {
+html.dark .btn-3d-light:hover,
+html.dark button[class*="from-white"]:hover {
   background: linear-gradient(180deg, #334155 0%, #1e293b 100%) !important;
   color: #ffffff !important;
 }
 
-html.dark .btn-3d-light:active {
+html.dark .btn-3d-light:active,
+html.dark button[class*="from-white"]:active {
   box-shadow: 0 1px 0 #020617, 0 2px 3px rgba(0, 0, 0, 0.5) !important;
 }
 

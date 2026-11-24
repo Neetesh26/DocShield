@@ -62,7 +62,7 @@ export const createRequest = async (req, res, next) => {
     await approval.save();
 
     // Notify QA Users
-    const qaUsers = await User.find({ role: { $in: [ROLES.QA, ROLES.DOCUMENT_CONTROLLER, ROLES.ADMIN] } }).limit(5);
+    const qaUsers = await User.find({ role: { $in: [ROLES.QA, ROLES.QA_MANAGER, ROLES.DOCUMENT_CONTROLLER, ROLES.ADMIN] } }).limit(5);
     for (const qa of qaUsers) {
       await Notification.create({
         recipient: qa._id,

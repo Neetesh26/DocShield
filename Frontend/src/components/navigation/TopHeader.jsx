@@ -30,7 +30,7 @@ import { Button3D } from '../common/Button3D';
 export const TopHeader = ({ onOpenScanner }) => {
 
   const { user, logout } = useAuth();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDarkMode, toggleTheme, setDarkMode } = useTheme();
   const { language, setLanguage, languages, t } = useLanguage();
 
   const {
@@ -124,6 +124,8 @@ export const TopHeader = ({ onOpenScanner }) => {
 
   const handleLogout = () => {
     setShowUserMenu(false);
+    setDarkMode(false);
+    document.documentElement.classList.remove('dark');
     logout();
     navigate('/login');
   };
@@ -238,7 +240,7 @@ export const TopHeader = ({ onOpenScanner }) => {
           size="sm"
           title={t('Scan Document QR Code', 'Scan Document QR Code')}
         >
-          <QrCode className="w-4 h-4 text-orange-600 inline" />
+          <QrCode className="w-4 h-4 text-orange-600 dark:text-orange-400 inline" />
           <span className="hidden sm:inline">
             {t('Scan QR', 'Scan QR')}
           </span>

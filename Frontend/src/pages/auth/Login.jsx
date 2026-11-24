@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield,
@@ -12,11 +12,19 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Button3D } from '../../components/common/Button3D';
 
 export const Login = () => {
   const { login } = useAuth();
+  const { setDarkMode } = useTheme();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Reset to clean corporate light mode for the login portal
+    setDarkMode(false);
+    document.documentElement.classList.remove('dark');
+  }, [setDarkMode]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

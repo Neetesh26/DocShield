@@ -44,13 +44,15 @@ export const Button3D = ({
       hover:from-orange-400 hover:to-orange-500 hover:shadow-[0_4px_0_0_#9a3412,0_8px_16px_rgba(234,88,12,0.35)]
       active:shadow-[0_1px_0_0_#9a3412,0_2px_4px_rgba(234,88,12,0.2)]
     `,
-    // Secondary / Light: Clean White-Pearl with Slate 3D Slab
+    // Secondary / Light: Clean White-Pearl in light mode, Dark Slate in dark mode
     light: `
-      bg-gradient-to-b from-white to-slate-100 text-slate-800
-      border border-slate-200 border-t-white
-      shadow-[0_4px_0_0_#cbd5e1,0_4px_8px_rgba(0,0,0,0.06)]
-      hover:from-slate-50 hover:to-slate-100 hover:text-slate-900 hover:shadow-[0_4px_0_0_#94a3b8,0_6px_10px_rgba(0,0,0,0.08)]
-      active:shadow-[0_1px_0_0_#cbd5e1,0_1px_2px_rgba(0,0,0,0.05)]
+      bg-gradient-to-b from-white to-slate-100 dark:from-slate-800 dark:to-slate-900
+      text-slate-800 dark:text-slate-100
+      border border-slate-200 dark:border-slate-700 border-t-white dark:border-t-slate-600
+      shadow-[0_4px_0_0_#cbd5e1,0_4px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_0_0_#020617,0_4px_8px_rgba(0,0,0,0.4)]
+      hover:from-slate-50 hover:to-slate-100 dark:hover:from-slate-700 dark:hover:to-slate-800 hover:text-slate-900 dark:hover:text-white
+      hover:shadow-[0_4px_0_0_#94a3b8,0_6px_10px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_4px_0_0_#020617,0_6px_10px_rgba(0,0,0,0.5)]
+      active:shadow-[0_1px_0_0_#cbd5e1,0_1px_2px_rgba(0,0,0,0.05)] dark:active:shadow-[0_1px_0_0_#020617,0_1px_2px_rgba(0,0,0,0.2)]
     `,
     secondary: `
       bg-gradient-to-b from-orange-50 to-orange-100 text-orange-950
@@ -97,6 +99,7 @@ export const Button3D = ({
         font-sans tracking-wide uppercase tracking-wider
         select-none cursor-pointer outline-none
         transition-all duration-75 ease-out
+        btn-3d
         ${sizeStyles[size] || sizeStyles.md}
         ${variantStyles[variant] || variantStyles.primary}
         ${fullWidth ? 'w-full' : ''}
@@ -107,7 +110,7 @@ export const Button3D = ({
     >
       {/* Specular Top Sheen Overlay */}
       <span
-        className="pointer-events-none absolute inset-x-0 top-0 h-[35%] rounded-t-[inherit] bg-gradient-to-b from-white/25 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[35%] rounded-t-[inherit] bg-gradient-to-b from-white/25 to-transparent dark:from-white/10"
         aria-hidden="true"
       />
 

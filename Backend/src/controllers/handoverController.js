@@ -97,8 +97,11 @@ export const acceptHandover = async (req, res, next) => {
       return sendError(res, `Cannot accept handover in '${handover.status}' state`, 400);
     }
 
-    if (String(handover.newCustodian) !== String(req.user._id)) {
-      return sendError(res, 'Only the designated new custodian can accept this handover', 403);
+    const isNewCustodian = String(handover.newCustodian) === String(req.user._id);
+    const isAdminOrQA = req.user.role === 'Admin' || req.user.role === 'QA' || req.user.role === 'QA Manager';
+
+    if (!isNewCustodian && !isAdminOrQA) {
+      return sendError(res, 'Only the designated new custodian (or authorized Admin/QA) can accept this handover', 403);
     }
 
     handover.status = 'Accepted';
