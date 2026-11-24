@@ -39,6 +39,7 @@ import { useAuth } from '../../context/AuthContext';
 import { reportService } from '../../services';
 import { Button3D } from '../../components/common/Button3D';
 import { isRouteAllowedForRole } from '../../components/navigation/Sidebar';
+import { toast } from '../../context/ToastContext';
 
 // GxP Clinical Palette for dynamically returned API document types
 const DONUT_PALETTE = [
@@ -108,8 +109,14 @@ export const Dashboard = () => {
       if (widgetsRes.status === 'fulfilled' && widgetsRes.value?.success) {
         setWidgets(widgetsRes.value.data);
       }
+      if (isManual) {
+        toast.success('Live GxP KPIs successfully synchronized from database.');
+      }
     } catch (err) {
       console.error('Failed to load dashboard data from API', err);
+      if (isManual) {
+        toast.error('Failed to sync live dashboard data.');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -711,7 +718,7 @@ export const Dashboard = () => {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Recent Repository Ingestions (Live API Data)
+              Recent Document
             </h2>
             <button
               onClick={() => navigate('/workspace/repository')}

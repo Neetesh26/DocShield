@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, CheckCircle2, XCircle, Clock, FileText, AlertCircle, Lock, Mail, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { approvalService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from '../../context/ToastContext';
 
 export const Approvals = () => {
   const { user } = useAuth();
@@ -84,14 +85,17 @@ export const Approvals = () => {
           signerPassword,
           signerEmail.trim()
         );
+        toast.success('Record approved under 21 CFR Part 11 electronic signature.');
       } else {
         await approvalService.reject(activeApproval._id, comments);
+        toast.warning('Record rejected per compliance review.');
       }
       setActiveApproval(null);
       fetchApprovals();
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Approval action failed';
       setAuthError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }

@@ -22,6 +22,7 @@ import {
 import { documentService, storageService, masterDataService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import { Button3D } from '../../components/common/Button3D';
+import { toast } from '../../context/ToastContext';
 
 export const UploadWizard = () => {
   const { user } = useAuth();
@@ -165,10 +166,13 @@ export const UploadWizard = () => {
           setSelectedLocationId(res.data.storageRecommendation.locationId);
         }
 
+        toast.success(`PDF uploaded successfully: ${selectedFile.name}`);
         setCurrentStep(2);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Metadata extraction failed.');
+      const msg = err.response?.data?.message || 'Metadata extraction failed.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -228,9 +232,12 @@ export const UploadWizard = () => {
       const res = await documentService.createDocument(payload);
       if (res.success && res.data) {
         setCompletedDoc(res.data);
+        toast.success(`Document ${res.data.documentNumber || metadata.documentNumber} uploaded and archived successfully!`);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to finalize document ingestion.');
+      const msg = err.response?.data?.message || 'Failed to finalize document ingestion.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

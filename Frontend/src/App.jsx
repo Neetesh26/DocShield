@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ToastProvider } from './context/ToastContext';
 import { AppRoutes } from './routes/AppRoutes';
 
 export default function App() {
@@ -13,7 +14,9 @@ export default function App() {
         <LanguageProvider>
           <AuthProvider>
             <NotificationProvider>
-              <AppRoutes />
+              <ToastProvider>
+                <AppRoutes />
+              </ToastProvider>
             </NotificationProvider>
           </AuthProvider>
         </LanguageProvider>
