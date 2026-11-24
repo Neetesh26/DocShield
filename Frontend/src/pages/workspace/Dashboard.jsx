@@ -283,7 +283,7 @@ export const Dashboard = () => {
             </span> */}
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            {todayStr} • GxP Document Repository Active • Facility: Main Campus Vault
+            {todayStr}
           </p>
         </div>
         

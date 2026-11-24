@@ -241,10 +241,10 @@ export const Search = () => {
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
               Document Archive & Regulatory Repository Search
             </h1>
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-slate-900 text-orange-400 border border-slate-800">
+            {/* <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-slate-900 text-orange-400 border border-slate-800">
               <ShieldCheck className="w-3 h-3 text-orange-400" />
               Validated GxP Index
-            </span>
+            </span> */}
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Query pharmaceutical procedures, batch records, formulations, and physical vault coordinates across the repository.
@@ -253,7 +253,7 @@ export const Search = () => {
 
         {/* Mode Toggle Switcher */}
         <div className="inline-flex items-center p-1 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold">
-          <button
+          {/* <button
             type="button"
             onClick={() => setMode('ai')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer ${
@@ -264,7 +264,7 @@ export const Search = () => {
           >
             <SearchIcon className="w-3.5 h-3.5" />
             <span>Intelligent Search</span>
-          </button>
+          </button> */}
           <button
             type="button"
             onClick={() => setMode('standard')}
@@ -324,7 +324,7 @@ export const Search = () => {
                   size="sm"
                   disabled={loading}
                 >
-                  <SearchIcon className="w-3.5 h-3.5 mr-1" />
+                  <SearchIcon className="w-3.5 h-3.5 mr-1 inline" />
                   <span>Search</span>
                 </Button3D>
               </div>
@@ -526,7 +526,7 @@ export const Search = () => {
       </div>
 
       {/* Document Query Analysis & Synthesis Summary Box */}
-      {aiData?.aiSummary && (
+      {/* {aiData?.aiSummary && (
         <div className="bg-gradient-to-r from-orange-50 via-slate-50 to-white p-5 rounded-2xl border border-orange-200 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -547,7 +547,6 @@ export const Search = () => {
             {aiData.aiSummary}
           </p>
 
-          {/* Interpreted Entities Chips */}
           {aiData.interpreted && (
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-orange-100 text-[11px]">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Extracted Intent:</span>
@@ -579,7 +578,6 @@ export const Search = () => {
             </div>
           )}
 
-          {/* Follow-up suggestions */}
           {aiData.suggestedFollowUps && aiData.suggestedFollowUps.length > 0 && (
             <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Suggested Actions:</span>
@@ -596,9 +594,8 @@ export const Search = () => {
             </div>
           )}
         </div>
-      )}
+      )} */}
 
-      {/* Main Results Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between text-xs text-slate-500">
           <span>

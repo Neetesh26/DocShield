@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const navigationGroups = [
   {
@@ -138,6 +139,7 @@ export const isRouteAllowedForRole = (itemPath, role) => {
 export const Sidebar = () => {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
+  const { t } = useLanguage();
   const userRole = user?.role || 'User / Viewer';
 
   // Toggle Collapse State (persists in localStorage)
@@ -163,12 +165,12 @@ export const Sidebar = () => {
 
   return (
     <aside
-      className={`bg-white text-slate-700 flex flex-col h-screen select-none border-r border-slate-200 shrink-0 shadow-xs transition-all duration-300 ease-in-out ${
+      className={`bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 flex flex-col h-screen select-none border-r border-slate-200 dark:border-slate-800 shrink-0 shadow-xs transition-all duration-300 ease-in-out ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
       {/* Brand Header */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200/80 bg-white">
+      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors duration-200">
         {!isCollapsed ? (
           <>
             <div className="flex items-center gap-3 min-w-0">
@@ -176,14 +178,14 @@ export const Sidebar = () => {
                 <Shield className="w-5 h-5 text-orange-500" />
               </div>
               <div className="min-w-0">
-                <div className="font-bold text-slate-900 tracking-tight text-base flex items-center gap-1.5 truncate">
+                <div className="font-bold text-slate-900 dark:text-white tracking-tight text-base flex items-center gap-1.5 truncate">
                   VidyaGxP
-                  <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
+                  <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-950/80 text-orange-800 dark:text-orange-400 border border-orange-200 dark:border-orange-800 font-mono">
                     GxP
                   </span>
                 </div>
-                <div className="text-[11px] text-orange-600 font-semibold tracking-tight truncate">
-                  Pharma Vault
+                <div className="text-[11px] text-orange-600 dark:text-orange-400 font-semibold tracking-tight truncate">
+                  {t('Pharma Vault', 'Pharma Vault')}
                 </div>
               </div>
             </div>
@@ -193,7 +195,7 @@ export const Sidebar = () => {
               type="button"
               onClick={toggleSidebar}
               title="Collapse Sidebar (Symbols Only)"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 transition cursor-pointer shrink-0"
+              className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
             >
               <PanelLeftClose className="w-4 h-4" />
             </button>
@@ -221,35 +223,36 @@ export const Sidebar = () => {
         {filteredGroups.map((group) => (
           <div key={group.title}>
             {!isCollapsed ? (
-              <div className="px-3 text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">
-                {group.title}
+              <div className="px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase mb-2">
+                {t(group.title, group.title)}
               </div>
             ) : (
-              <div className="h-px bg-slate-200 my-2.5 mx-2" title={group.title} />
+              <div className="h-px bg-slate-200 dark:bg-slate-800 my-2.5 mx-2" title={t(group.title, group.title)} />
             )}
 
             <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
+                const translatedName = t(item.name, item.name);
                 return (
                   <NavLink
                     key={item.path}
                     to={item.path}
-                    title={isCollapsed ? item.name : undefined}
+                    title={isCollapsed ? translatedName : undefined}
                     className={({ isActive }) => `
                       flex items-center transition-all rounded-xl
                       ${isCollapsed ? 'justify-center w-12 h-10 mx-auto' : 'justify-between px-3 py-2 text-[13px] font-medium'}
                       ${
                         isActive
-                          ? 'bg-orange-50 text-orange-950 font-bold border-l-4 border-orange-600 shadow-2xs'
-                          : 'text-slate-600 hover:text-orange-900 hover:bg-orange-50/40'
+                          ? 'bg-orange-50 dark:bg-orange-500/15 text-orange-950 dark:text-orange-300 font-bold border-l-4 border-orange-600 shadow-2xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-orange-900 dark:hover:text-orange-300 hover:bg-orange-50/40 dark:hover:bg-slate-800/60'
                       }
-                      ${item.highlight ? 'text-orange-600 font-semibold' : ''}
+                      ${item.highlight ? 'text-orange-600 dark:text-orange-400 font-semibold' : ''}
                     `}
                   >
                     <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
                       <Icon className="w-4 h-4 shrink-0" />
-                      {!isCollapsed && <span>{item.name}</span>}
+                      {!isCollapsed && <span>{translatedName}</span>}
                     </div>
 
                     {item.hasBadge && unreadCount > 0 && (
@@ -258,7 +261,7 @@ export const Sidebar = () => {
                           {unreadCount}
                         </span>
                       ) : (
-                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white" />
+                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white dark:ring-slate-900" />
                       )
                     )}
                   </NavLink>
@@ -270,12 +273,12 @@ export const Sidebar = () => {
       </div>
 
       {/* Bottom Quick Toggle Control */}
-      <div className="p-2.5 border-t border-slate-200 bg-slate-50/70 flex items-center justify-center">
+      <div className="p-2.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex items-center justify-center transition-colors duration-200">
         <button
           type="button"
           onClick={toggleSidebar}
-          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-          className={`flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-orange-900 hover:bg-orange-50 border border-slate-200 transition cursor-pointer ${
+          title={isCollapsed ? t('Expand Sidebar', 'Expand Sidebar') : t('Collapse Sidebar', 'Collapse Sidebar')}
+          className={`flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-orange-900 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition cursor-pointer ${
             isCollapsed ? 'w-10 h-9' : 'w-full px-3'
           }`}
         >
@@ -284,7 +287,7 @@ export const Sidebar = () => {
           ) : (
             <>
               <ChevronLeft className="w-4 h-4 text-orange-600" />
-              <span>Collapse</span>
+              <span>{t('Collapse', 'Collapse')}</span>
             </>
           )}
         </button>
