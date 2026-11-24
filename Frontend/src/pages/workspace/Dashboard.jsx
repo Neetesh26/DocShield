@@ -305,7 +305,7 @@ export const Dashboard = () => {
             disabled={refreshing}
             title="Re-fetch live KPIs from API"
           >
-            <RotateCw className={`w-3.5 h-3.5 text-orange-700 mr-1.5 inline ${refreshing ? 'animate-spin' : ''}`} />
+            <RotateCw className={`w-3.5 h-3.5 text-orange-700 dark:text-orange-400 mr-1.5 inline ${refreshing ? 'animate-spin' : ''}`} />
             <span>{refreshing ? t('Syncing...') : t('Refresh')}</span>
           </Button3D>
 
