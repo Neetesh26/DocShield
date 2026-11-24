@@ -8,8 +8,8 @@ const router = express.Router();
 router.use(authenticate);
 
 router.get('/', getApprovals);
-router.post('/:id/approve', requireRole(ROLES.ADMIN, ROLES.QA, ROLES.DOCUMENT_CONTROLLER, ROLES.DEPARTMENT_HEAD), approveRequest);
-router.post('/:id/reject', requireRole(ROLES.ADMIN, ROLES.QA, ROLES.DOCUMENT_CONTROLLER, ROLES.DEPARTMENT_HEAD), rejectRequest);
+router.post('/:id/approve', requireRole(ROLES.ADMIN, ROLES.QA, ROLES.QA_MANAGER, ROLES.DOCUMENT_CONTROLLER, ROLES.DEPARTMENT_HEAD), approveRequest);
+router.post('/:id/reject', requireRole(ROLES.ADMIN, ROLES.QA, ROLES.QA_MANAGER, ROLES.DOCUMENT_CONTROLLER, ROLES.DEPARTMENT_HEAD), rejectRequest);
 
 export default router;
 

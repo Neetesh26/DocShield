@@ -36,7 +36,8 @@ export const approveRequest = async (req, res, next) => {
       comments = '',
       signatureMeaning = 'I approve this record in compliance with 21 CFR Part 11 requirements.',
       password,
-      username
+      username,
+      email
     } = req.body;
 
     const approval = await Approval.findById(req.params.id)
@@ -52,7 +53,7 @@ export const approveRequest = async (req, res, next) => {
     }
 
     // 21 CFR Part 11 Dual-Factor Re-Authentication Check
-    const enteredEmail = (email || username || '').trim().toLowerCase();
+    const enteredEmail = (email || username || req.body.email || req.body.username || '').trim().toLowerCase();
     if (!enteredEmail) {
       return sendError(res, 'Authorized email is required for 21 CFR Part 11 electronic signature.', 400);
     }

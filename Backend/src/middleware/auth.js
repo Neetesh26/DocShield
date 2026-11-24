@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { ROLES } from '../constants/index.js';
 import { sendError } from '../utils/response.js';
 
 export const authenticate = async (req, res, next) => {
@@ -35,10 +36,24 @@ export const requireRole = (...allowedRoles) => {
     if (!req.user) {
       return sendError(res, 'Unauthorized. Please authenticate.', 401);
     }
-    if (!allowedRoles.includes(req.user.role)) {
+
+    const userRole = req.user.role;
+
+    // Admin always has universal authorized access across all operations
+    if (userRole === 'Admin' || userRole === 'admin' || userRole === ROLES.ADMIN) {
+      return next();
+    }
+
+    // Treat 'QA' and 'QA Manager' as equivalent QA roles across the enterprise
+    const isUserQA = userRole === 'QA' || userRole === 'QA Manager' || userRole === ROLES.QA || userRole === ROLES.QA_MANAGER;
+    const allowsQA = allowedRoles.some(r => r === 'QA' || r === 'QA Manager' || r === ROLES.QA || r === ROLES.QA_MANAGER);
+
+    const isAuthorized = allowedRoles.includes(userRole) || (isUserQA && allowsQA);
+
+    if (!isAuthorized) {
       return sendError(
         res,
-        `Access denied. Role '${req.user.role}' is not authorized for this action.`,
+        `Access denied. Role '${userRole}' is not authorized for this action.`,
         403
       );
     }

@@ -99,7 +99,7 @@ export const Button3D = ({
         font-sans tracking-wide uppercase tracking-wider
         select-none cursor-pointer outline-none
         transition-all duration-75 ease-out
-        btn-3d btn-3d-${variant}
+        btn-3d
         ${sizeStyles[size] || sizeStyles.md}
         ${variantStyles[variant] || variantStyles.primary}
         ${fullWidth ? 'w-full' : ''}

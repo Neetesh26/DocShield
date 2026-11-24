@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }) => {
     try {
       localStorage.clear();
       sessionStorage.clear();
+      document.documentElement.classList.remove('dark');
     } catch (e) {
       // ignore
     }
