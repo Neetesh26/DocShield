@@ -278,19 +278,23 @@ html.dark table tbody tr:hover {
 }
 
 /* 10. Buttons (Button3D light variant in dark mode) */
-html.dark .btn-3d-light {
+html.dark .btn-3d-light,
+html.dark button[class*="from-white"] {
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
   color: #f1f5f9 !important;
   border: 1px solid #334155 !important;
+  border-top-color: #475569 !important;
   box-shadow: 0 4px 0 #020617, 0 4px 8px rgba(0, 0, 0, 0.5) !important;
 }
 
-html.dark .btn-3d-light:hover {
+html.dark .btn-3d-light:hover,
+html.dark button[class*="from-white"]:hover {
   background: linear-gradient(180deg, #334155 0%, #1e293b 100%) !important;
   color: #ffffff !important;
 }
 
-html.dark .btn-3d-light:active {
+html.dark .btn-3d-light:active,
+html.dark button[class*="from-white"]:active {
   box-shadow: 0 1px 0 #020617, 0 2px 3px rgba(0, 0, 0, 0.5) !important;
 }
 

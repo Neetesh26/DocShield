@@ -238,7 +238,7 @@ export const TopHeader = ({ onOpenScanner }) => {
           size="sm"
           title={t('Scan Document QR Code', 'Scan Document QR Code')}
         >
-          <QrCode className="w-4 h-4 text-orange-600 inline" />
+          <QrCode className="w-4 h-4 text-orange-600 dark:text-orange-400 inline" />
           <span className="hidden sm:inline">
             {t('Scan QR', 'Scan QR')}
           </span>
