@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud, Layers, FileText, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
 import { documentService } from '../../services';
+import { toast } from '../../context/ToastContext';
 
 export const BulkUpload = () => {
   const navigate = useNavigate();
@@ -36,6 +37,13 @@ export const BulkUpload = () => {
 
     setResults(processedResults);
     setProcessing(false);
+
+    const successCount = processedResults.filter(r => r.success).length;
+    if (successCount > 0) {
+      toast.success(`Batch extraction complete! ${successCount} of ${files.length} documents uploaded successfully.`);
+    } else {
+      toast.error('Batch upload failed. Check the error list below.');
+    }
   };
 
   return (
