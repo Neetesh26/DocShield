@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 const LanguageContext = createContext();
 
@@ -7,8 +7,8 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'hi', label: 'Hindi', native: 'हिन्दी' }
 ];
 
-// Enterprise GxP Instant Dictionary
-const TRANSLATIONS = {
+// Enterprise GxP Instant Bilingual Dictionary
+const INITIAL_TRANSLATIONS = {
   hi: {
     // Nav Groups
     'WORKSPACE': 'कार्यक्षेत्र',
@@ -35,11 +35,16 @@ const TRANSLATIONS = {
     'Master Data': 'मास्टर डेटा',
     'Audit Trail': 'ऑडिट ट्रेल',
     'Settings': 'सिस्टम सेटिंग्स',
+    'Collapse': 'संक्षिप्त करें',
+    'Expand': 'विस्तृत करें',
+    'Pharma Vault': 'फार्मा वॉल्ट',
 
     // Top Header & Common
     'Search repository by Doc #, title, or keywords...': 'दस्तावेज़ संख्या, शीर्षक या कीवर्ड द्वारा खोजें...',
     'Change Language': 'भाषा बदलें',
     'Select Language': 'अपनी पसंदीदा भाषा चुनें',
+    'Select your preferred language': 'अपनी पसंदीदा भाषा चुनें',
+    'Language': 'भाषा',
     'Switch to Light Mode': 'लाइट मोड में बदलें',
     'Switch to Dark Mode': 'डार्क मोड में बदलें',
     'Notifications': 'अधिसूचनाएं',
@@ -58,23 +63,50 @@ const TRANSLATIONS = {
     'Document': 'दस्तावेज़',
     'Department': 'विभाग',
     'Action': 'कार्रवाई',
+    'Actions': 'कार्रवाइयां',
     'Requester': 'अनुरोधकर्ता',
     'Submitted': 'जमा किया गया',
     'Decisions': 'निर्णय',
-    'Pharma Vault': 'फार्मा वॉल्ट',
     'Authorized Signer': 'अधिकृत हस्ताक्षरकर्ता',
     'Security Password': 'सुरक्षा पासवर्ड',
+    'Open': 'खोलें',
+    'Relocate': 'स्थानांतरित करें',
+    'Download': 'डाउनलोड करें',
+    'Print': 'प्रिंट करें',
+    'Close': 'बंद करें',
+    'Back': 'वापस',
+    'Next': 'आगे',
+    'Search...': 'खोजें...',
+    'Filter': 'फ़िल्टर',
+    'Reset': 'रीसेट करें',
+    'All Statuses': 'सभी स्थितियां',
+    'All Departments': 'सभी विभाग',
+    'All Types': 'सभी प्रकार',
+    'All Physical States': 'सभी भौतिक स्थितियां',
 
     // Dashboard & Metrics
     'Welcome back': 'पुनः स्वागत है',
+    'Welcome back,': 'पुनः स्वागत है,',
     'Total Documents': 'कुल दस्तावेज़',
-    'Approved Documents': 'स्वीकृत दस्तावेज़',
-    'Active Checkouts': 'सक्रिय चेक-आउट',
-    'Overdue Documents': 'विलंबित दस्तावेज़',
-    'Physical Archives': 'भौतिक अभिलेखागार',
-    'In Custody': 'कस्टडी में',
+    'All active indexed records': 'सभी सक्रिय अनुक्रमित रिकॉर्ड',
+    'Effective Documents': 'प्रभावी दस्तावेज़',
+    'Released & verified': 'जारी एवं सत्यापित',
+    'Pending Approvals': 'लंबित स्वीकृतियां',
+    '21 CFR sign-off needed': '21 CFR हस्ताक्षर आवश्यक',
+    'Pending Requests': 'लंबित अनुरोध',
+    'Issuance & revision queues': 'जारी एवं संशोधन कतार',
+    'Due for Review': 'समीक्षा हेतु देय',
+    'Approaching review cycle': 'समीक्षा चक्र निकट',
+    'Overdue Checkouts': 'विलंबित चेक-आउट',
+    'Physical loans past return date': 'वापसी तिथि से अधिक भौतिक ऋण',
+    'Pending Handovers': 'लंबित हैंडओवर',
+    'Custody transfer confirmations': 'कस्टडी हस्तांतरण पुष्टि',
     'Uploaded Recently': 'हाल ही में अपलोड',
-    'Quick Launch Actions (Clickable)': 'त्वरित कार्य (क्लिक करें)',
+    'Past 30 days intake': 'पिछले 30 दिनों का संग्रह',
+
+    // Quick Launch Actions
+    'QUICK LAUNCH ACTIONS (CLICKABLE)': 'त्वरित कार्य (क्लिक करें)',
+    'Quick Launch Actions': 'त्वरित कार्य',
     'Upload Document': 'दस्तावेज़ अपलोड करें',
     'Search Archive': 'अभिलेखागार खोजें',
     'Scan QR Label': 'क्यूआर लेबल स्कैन करें',
@@ -82,65 +114,53 @@ const TRANSLATIONS = {
     'New Request': 'नया अनुरोध',
     'Check Out Record': 'रिकॉर्ड चेक आउट करें',
     'Custody Handover': 'कस्टडी हस्तांतरण',
-    'Recent Ingestions': 'हाल के दस्तावेज़',
-    'Storage Utilization': 'भंडारण उपयोग',
-    'Quick Inquiries:': 'त्वरित पूछताछ:',
+
+    // Chart Titles & Widgets
+    'Documents by Type': 'दस्तावेज़ प्रकार अनुसार',
+    'Uploads over time': 'समय के साथ अपलोड',
+    'Physical Vault Utilization': 'भौतिक वॉल्ट उपयोग',
+    'Recent Repository Ingestions': 'हाल के दस्तावेज़ संग्रह',
+    'Recent Repository Ingestions (Live API Data)': 'हाल के दस्तावेज़ संग्रह (लाइव डेटा)',
+    'View all': 'सभी देखें',
     'Refresh': 'रिफ्रेश',
     'Syncing...': 'सिंक हो रहा है...',
-    'Past 30 days intake': 'पिछले 30 दिनों का इनटेक',
-    'Active GxP Repository': 'सक्रिय जीएक्सपी रिपॉजिटरी',
-    'Custody transfer confirmations': 'कस्टडी हस्तांतरण पुष्टि',
-    'Overdue return alerts': 'विलंबित वापसी अलर्ट',
-    'Physical secure location count': 'भौतिक सुरक्षित स्थान संख्या',
-    'Action required': 'कार्रवाई आवश्यक',
-    'Currently borrowed': 'वर्तमान में उधार लिया गया'
+    'GxP Document Repository Active': 'जीएक्सपी दस्तावेज़ रिपॉजिटरी सक्रिय',
+    'Facility: Main Campus Vault': 'सुविधा: मुख्य परिसर वॉल्ट',
+    'No storage facilities registered in database': 'डेटाबेस में कोई भंडारण सुविधा पंजीकृत नहीं है',
+    'No recent documents ingested yet': 'अभी तक कोई हालिया दस्तावेज़ अपलोड नहीं हुआ',
+    'Click to view vault coordinates': 'वॉल्ट निर्देशांक देखने के लिए क्लिक करें',
+    'Quick Inquiries:': 'त्वरित पूछताछ:',
+    'Search repository by document number, title, formulation, API, or department (e.g. \'HPLC SOP\', \'Paracetamol BMR\')...': 'दस्तावेज़ संख्या, शीर्षक, फ़ॉर्मूलेशन, एपीआई या विभाग द्वारा खोजें...',
+    'No documents indexed in database yet': 'डेटाबेस में अभी तक कोई दस्तावेज़ अनुक्रमित नहीं है',
+    'Documents Uploaded': 'दस्तावेज़ अपलोड किए गए',
+    'No recent document ingestions found in database': 'डेटाबेस में कोई हालिया दस्तावेज़ संग्रह नहीं मिला',
+    'View': 'देखें',
+    'Total': 'कुल',
+    'Browse': 'ब्राउज़ करें',
+    'last 12 months': 'पिछले 12 महीने',
+    'Doc #': 'दस्तावेज़ #',
+    'Rev': 'संस्करण',
+
+    // GxP Statuses
+    'Effective': 'प्रभावी (Effective)',
+    'Draft': 'प्रारूप (Draft)',
+    'In Review': 'समीक्षाधीन (In Review)',
+    'Obsolete': 'अप्रचलित (Obsolete)',
+    'Stored': 'संग्रहीत (Stored)',
+    'Checked Out': 'चेक आउट (Checked Out)',
+    'In Transit': 'पारगमन में (In Transit)',
+    'Archived': 'अभिलेखागार में (Archived)',
+    'Available': 'उपलब्ध (Available)',
+    'Full': 'पूर्ण (Full)',
+    'Near Full': 'लगभग पूर्ण (Near Full)'
   }
-};
-
-// MyMemory Translation API Service
-export const translateText = async (text, target = "hi") => {
-  if (!text || target === "en") return text;
-
-  // In-session caching to avoid repeated API requests
-  const cacheKey = `trans_${target}_${text}`;
-  try {
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) return cached;
-  } catch (_) {}
-
-  const params = new URLSearchParams({
-    q: text,
-    langpair: `en|${target}`
-  });
-
-  const response = await fetch(
-    `https://api.mymemory.translated.net/get?${params}`
-  );
-
-  if (!response.ok) {
-    throw new Error("Translation request failed");
-  }
-
-  const data = await response.json();
-
-  if (data.responseStatus !== 200) {
-    throw new Error(data.responseDetails || "Translation failed");
-  }
-
-  const result = data.responseData?.translatedText || text;
-  try {
-    sessionStorage.setItem(cacheKey, result);
-  } catch (_) {}
-
-  return result;
 };
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguageState] = useState(() => {
     try {
       const saved = localStorage.getItem('app-language');
-      // Guarantee English as the default language
-      if (saved && SUPPORTED_LANGUAGES.some(l => l.code === saved)) {
+      if (saved && (saved === 'en' || saved === 'hi')) {
         return saved;
       }
       return 'en';
@@ -149,152 +169,91 @@ export const LanguageProvider = ({ children }) => {
     }
   });
 
+  const [dictionary, setDictionary] = useState(INITIAL_TRANSLATIONS.hi);
+
+  // Sync dictionary from backend translation API on load
+  useEffect(() => {
+    const fetchDictionary = async () => {
+      try {
+        const res = await fetch('/api/translate/dictionary?target=hi');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            setDictionary(prev => ({
+              ...prev,
+              ...json.data
+            }));
+          }
+        }
+      } catch (e) {
+        // use local dictionary if offline
+      }
+    };
+    fetchDictionary();
+  }, []);
+
   const changeLanguage = (langCode) => {
+    if (langCode !== 'en' && langCode !== 'hi') return;
     setLanguageState(langCode);
     try {
       localStorage.setItem('app-language', langCode);
+      document.documentElement.lang = langCode;
     } catch (e) {
       console.warn(e);
     }
   };
 
-  // Automated Full-Project Real-Time DOM Translation Engine
-  useEffect(() => {
-    let isCancelled = false;
-    const textCache = new Map();
-    const ignoredTags = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'SVG', 'PATH']);
+  // Pure Translation API caller for real-time phrase resolution
+  const translateText = useCallback(async (text, target = 'hi') => {
+    if (!text || target === 'en') return text;
 
-    const translateNode = async (node) => {
-      if (isCancelled || !node || node.nodeType !== Node.TEXT_NODE) return;
-      const parent = node.parentNode;
-      if (!parent || ignoredTags.has(parent.nodeName) || parent.isContentEditable || parent.classList?.contains('notranslate')) {
-        return;
-      }
-
-      const text = (node.__originalText || node.textContent || '').trim();
-      if (!text || text.length <= 1 || /^[0-9\s.,/\\:\-–—%()#$@*+]+$/.test(text)) {
-        return;
-      }
-
-      if (!node.__originalText) {
-        node.__originalText = node.textContent;
-      }
-
-      if (language === 'en') {
-        if (node.textContent !== node.__originalText) {
-          node.textContent = node.__originalText;
-        }
-        return;
-      }
-
-      // 1. Instant GxP Dictionary Match
-      if (TRANSLATIONS.hi[text]) {
-        node.textContent = node.__originalText.replace(text, TRANSLATIONS.hi[text]);
-        return;
-      }
-
-      // Check partial match for phrases
-      for (const [enKey, hiVal] of Object.entries(TRANSLATIONS.hi)) {
-        if (text.includes(enKey)) {
-          node.textContent = node.__originalText.replace(enKey, hiVal);
-          return;
-        }
-      }
-
-      // 2. In-Memory & Session Storage Cache Match
-      const cacheKey = `trans_hi_${text}`;
-      if (textCache.has(cacheKey)) {
-        node.textContent = node.__originalText.replace(text, textCache.get(cacheKey));
-        return;
-      }
-      try {
-        const stored = sessionStorage.getItem(cacheKey);
-        if (stored) {
-          textCache.set(cacheKey, stored);
-          node.textContent = node.__originalText.replace(text, stored);
-          return;
-        }
-      } catch (_) {}
-
-      // 3. Dynamic MyMemory API Call
-      try {
-        const translated = await translateText(text, 'hi');
-        if (!isCancelled && translated && translated !== text && node.parentNode) {
-          textCache.set(cacheKey, translated);
-          node.textContent = node.__originalText.replace(text, translated);
-        }
-      } catch (_) {}
-    };
-
-    const walk = (root) => {
-      if (!root) return;
-      const walker = document.createTreeWalker(
-        root,
-        NodeFilter.SHOW_TEXT,
-        {
-          acceptNode: (n) => {
-            const p = n.parentNode;
-            if (!p || ignoredTags.has(p.nodeName) || p.classList?.contains('notranslate')) {
-              return NodeFilter.FILTER_REJECT;
-            }
-            return NodeFilter.FILTER_ACCEPT;
-          }
-        }
-      );
-
-      const nodes = [];
-      while (walker.nextNode()) {
-        nodes.push(walker.currentNode);
-      }
-      nodes.forEach(translateNode);
-    };
-
-    // Initial DOM walk
-    const rootEl = document.getElementById('root');
-    if (rootEl) {
-      walk(rootEl);
+    const trimmed = text.trim();
+    if (dictionary[trimmed]) {
+      return dictionary[trimmed];
     }
 
-    // Dynamic Mutation Observer for live route changes & API rendering
-    const observer = new MutationObserver((mutations) => {
-      if (language === 'en') return;
-      for (const mutation of mutations) {
-        for (const addedNode of mutation.addedNodes) {
-          if (addedNode.nodeType === Node.TEXT_NODE) {
-            translateNode(addedNode);
-          } else if (addedNode.nodeType === Node.ELEMENT_NODE) {
-            walk(addedNode);
-          }
+    try {
+      const res = await fetch(`/api/translate?text=${encodeURIComponent(trimmed)}&target=hi`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data?.translated) {
+          setDictionary(prev => ({
+            ...prev,
+            [trimmed]: json.data.translated
+          }));
+          return json.data.translated;
         }
       }
-    });
-
-    if (rootEl) {
-      observer.observe(rootEl, { childList: true, subtree: true });
+    } catch (e) {
+      // ignore
     }
 
-    return () => {
-      isCancelled = true;
-      observer.disconnect();
-    };
-  }, [language]);
+    return trimmed;
+  }, [dictionary]);
 
-  // Translate helper function for direct component usage
+  // Instant declarative translate function for React components
   const t = useCallback((text, fallback) => {
     if (!text) return '';
-    if (language === 'en') return text;
-    const langDict = TRANSLATIONS[language];
-    if (langDict && langDict[text]) {
-      return langDict[text];
+    if (language === 'en') {
+      return text;
     }
-    // Check sessionStorage cache for API translations
-    try {
-      const cached = sessionStorage.getItem(`trans_${language}_${text}`);
-      if (cached) return cached;
-    } catch (_) {}
+
+    const trimmed = String(text).trim();
+
+    if (dictionary[trimmed]) {
+      return dictionary[trimmed];
+    }
+
+    // Case-insensitive lookup
+    const lower = trimmed.toLowerCase();
+    for (const [k, v] of Object.entries(dictionary)) {
+      if (k.toLowerCase() === lower) {
+        return v;
+      }
+    }
 
     return fallback !== undefined ? fallback : text;
-  }, [language]);
+  }, [language, dictionary]);
 
   return (
     <LanguageContext.Provider
