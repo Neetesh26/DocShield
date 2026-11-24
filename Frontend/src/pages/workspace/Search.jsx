@@ -432,7 +432,6 @@ export const Search = () => {
             </div>
           )}
 
-          {/* Standard Field Filters */}
           {mode === 'standard' && (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs pt-2 border-t border-slate-100">
               <div>
@@ -447,23 +446,6 @@ export const Search = () => {
                   <option value="Quality Control">Quality Control</option>
                   <option value="Production">Production</option>
                   <option value="Warehouse & Logistics">Warehouse & Logistics</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Document Type</label>
-                <select
-                  value={documentType}
-                  onChange={(e) => setDocumentType(e.target.value)}
-                  className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white"
-                >
-                  <option value="">All Document Types</option>
-                  <option value="Standard Operating Procedure (SOP)">SOP</option>
-                  <option value="Batch Manufacturing Record (BMR)">BMR</option>
-                  <option value="Batch Production Record (BPR)">BPR</option>
-                  <option value="Validation Protocol / Report">Validation</option>
-                  <option value="Specification (SPEC)">Specification</option>
-                  <option value="Logbook">Logbook</option>
                 </select>
               </div>
 

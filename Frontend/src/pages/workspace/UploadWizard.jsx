@@ -116,19 +116,23 @@ export const UploadWizard = () => {
       setError('');
       setSelectedFile(file);
       setFilePreviewUrl(URL.createObjectURL(file));
+      toast.info(`PDF loaded: ${file.name}`);
     }
   };
 
   // Step 1 -> Step 2: Trigger backend extraction
   const handleProceedToExtraction = async () => {
     if (!selectedFile) {
-      setError('Please select or drop a valid PDF document to proceed.');
+      const msg = 'Please select or drop a valid PDF document to proceed.';
+      setError(msg);
+      toast.warning(msg);
       return;
     }
 
     try {
       setLoading(true);
       setError('');
+      toast.info('Extracting metadata and indexing document...');
       const res = await documentService.extractMetadata(selectedFile);
 
       if (res.success && res.data) {
