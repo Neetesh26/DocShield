@@ -102,27 +102,39 @@ export const getDashboardCharts = async (req, res, next) => {
       });
     }
 
-    // 4. Storage Utilization
-    const storageStats = await StorageLocation.aggregate([
-      {
-        $group: {
-          _id: '$building',
-          totalCapacity: { $sum: '$capacity' },
-          totalOccupancy: { $sum: '$currentOccupancy' }
-        }
-      },
-      {
-        $project: {
-          building: '$_id',
-          capacity: '$totalCapacity',
-          occupancy: '$totalOccupancy',
-          utilization: {
-            $round: [{ $multiply: [{ $divide: ['$totalOccupancy', { $cond: [{ $eq: ['$totalCapacity', 0] }, 1, '$totalCapacity'] }] }, 100] }, 1]
-          },
-          _id: 0
-        }
-      }
+    // 4. Storage Utilization (Dynamically computed directly from actual Document records)
+    const [locations, docCounts] = await Promise.all([
+      StorageLocation.find().select('building capacity _id').lean(),
+      Document.aggregate([
+        { $group: { _id: '$storageLocation', count: { $sum: 1 } } }
+      ])
     ]);
+
+    const docCountMap = {};
+    docCounts.forEach(c => {
+      if (c._id) docCountMap[String(c._id)] = c.count;
+    });
+
+    const buildingMap = {};
+    locations.forEach(loc => {
+      if (!buildingMap[loc.building]) {
+        buildingMap[loc.building] = { capacity: 0, occupancy: 0 };
+      }
+      buildingMap[loc.building].capacity += (loc.capacity || 0);
+      buildingMap[loc.building].occupancy += (docCountMap[String(loc._id)] || 0);
+    });
+
+    const storageStats = Object.keys(buildingMap).sort().map(building => {
+      const cap = buildingMap[building].capacity;
+      const occ = buildingMap[building].occupancy;
+      const utilization = cap > 0 ? Math.round((occ / cap) * 1000) / 10 : 0;
+      return {
+        building,
+        capacity: cap,
+        occupancy: occ,
+        utilization
+      };
+    });
 
     // 5. Request Status Distribution
     const byRequestStatus = await DocumentRequest.aggregate([
