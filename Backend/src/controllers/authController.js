@@ -132,9 +132,50 @@ export const getMe = async (req, res) => {
       role: req.user.role,
       department: req.user.department,
       employeeId: req.user.employeeId,
-      designation: req.user.designation
+      designation: req.user.designation,
+      avatar: req.user.avatar || null
     }
   });
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { name, avatar } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return sendError(res, 'User not found', 404);
+    }
+
+    if (name) user.name = name.trim();
+    if (avatar !== undefined) user.avatar = avatar;
+
+    await user.save();
+
+    await logAuditEvent({
+      user,
+      action: AUDIT_ACTIONS.PROFILE_UPDATE || 'PROFILE_UPDATE',
+      entity: 'User',
+      entityId: user._id,
+      details: `User ${user.email} updated profile settings and avatar`,
+      ipAddress: req.ip || '127.0.0.1'
+    });
+
+    return sendSuccess(res, 'Profile updated successfully', {
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department: user.department,
+        employeeId: user.employeeId,
+        designation: user.designation,
+        avatar: user.avatar || null
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const logout = async (req, res) => {

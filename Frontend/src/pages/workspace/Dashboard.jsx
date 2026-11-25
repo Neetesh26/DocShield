@@ -36,7 +36,6 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
-import { useLanguage } from '../../context/LanguageContext';
 import { reportService } from '../../services';
 import { Button3D } from '../../components/common/Button3D';
 import { isRouteAllowedForRole } from '../../components/navigation/Sidebar';
@@ -57,7 +56,7 @@ const DONUT_PALETTE = [
 
 export const Dashboard = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const t = (s, fallback) => fallback || s;
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);

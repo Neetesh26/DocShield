@@ -1,5 +1,6 @@
 import Approval from '../models/Approval.js';
 import DocumentRequest from '../models/DocumentRequest.js';
+import Handover from '../models/Handover.js';
 import Notification from '../models/Notification.js';
 import CheckoutRecord from '../models/CheckoutRecord.js';
 import Document from '../models/Document.js';
@@ -19,6 +20,14 @@ export const getApprovals = async (req, res, next) => {
       .populate({
         path: 'request',
         populate: { path: 'requester', select: 'name email department employeeId' }
+      })
+      .populate({
+        path: 'handover',
+        populate: [
+          { path: 'previousCustodian', select: 'name email department employeeId' },
+          { path: 'newCustodian', select: 'name email department employeeId' },
+          { path: 'documents', select: 'documentNumber title version department' }
+        ]
       })
       .populate('document', 'documentNumber title version status physicalStatus department')
       .populate('approver', 'name email role')
@@ -134,6 +143,29 @@ export const approveRequest = async (req, res, next) => {
       }
     }
 
+    // If attached to a Custody Handover, synchronize handover & document custody
+    if (approval.handover) {
+      const handover = await Handover.findById(approval.handover);
+      if (handover && handover.status === 'Pending Acceptance') {
+        handover.status = 'Accepted';
+        handover.acceptedDate = new Date();
+        await handover.save();
+
+        await Document.updateMany(
+          { _id: { $in: handover.documents } },
+          { currentCustodian: handover.newCustodian }
+        );
+
+        await Notification.create({
+          recipient: handover.previousCustodian,
+          title: `Custody Transfer Accepted: ${handover.handoverNumber}`,
+          message: `${req.user.name} accepted custody of ${handover.documents.length} document(s).`,
+          type: 'success',
+          link: '/physical/custody'
+        });
+      }
+    }
+
     // Log GxP Audit event
     await logAuditEvent({
       user: req.user,
@@ -185,6 +217,25 @@ export const rejectRequest = async (req, res, next) => {
           message: `Your ${request.requestType} request for ${approval.document?.documentNumber || 'document'} was rejected: ${comments}`,
           type: 'alert',
           link: '/workflow/requests'
+        });
+      }
+    }
+
+    // If attached to a Custody Handover, synchronize handover rejection
+    if (approval.handover) {
+      const handover = await Handover.findById(approval.handover);
+      if (handover && handover.status === 'Pending Acceptance') {
+        handover.status = 'Rejected';
+        handover.rejectedDate = new Date();
+        handover.rejectionReason = comments;
+        await handover.save();
+
+        await Notification.create({
+          recipient: handover.previousCustodian,
+          title: `Custody Transfer Rejected: ${handover.handoverNumber}`,
+          message: `Custody transfer for ${handover.handoverNumber} was rejected by ${req.user.name}. Reason: ${comments}`,
+          type: 'alert',
+          link: '/physical/custody'
         });
       }
     }

@@ -17,14 +17,13 @@ import { Button3D } from '../../components/common/Button3D';
 
 export const Login = () => {
   const { login } = useAuth();
-  const { setDarkMode } = useTheme();
+  const { setThemePreference } = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
     // Reset to clean corporate light mode for the login portal
-    setDarkMode(false);
-    document.documentElement.classList.remove('dark');
-  }, [setDarkMode]);
+    setThemePreference('light');
+  }, [setThemePreference]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -6,6 +6,11 @@ const approvalSchema = new mongoose.Schema({
     ref: 'DocumentRequest',
     default: null
   },
+  handover: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Handover',
+    default: null
+  },
   document: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Document',

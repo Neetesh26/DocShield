@@ -42,8 +42,8 @@ export const documentService = {
     return response.data;
   },
 
-  aiSearch: async (query) => {
-    const response = await api.post('/documents/ai-search', { query });
+  aiSearch: async (query, params = {}) => {
+    const response = await api.post('/documents/ai-search', { query, ...params });
     return response.data;
   },
 
