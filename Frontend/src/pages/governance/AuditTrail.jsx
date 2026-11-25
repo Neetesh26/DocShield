@@ -434,9 +434,7 @@ export const AuditTrail = () => {
 
                       {/* Time Stamp (IST) Column */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5 font-mono text-slate-700 dark:text-slate-300">
-                          <Clock className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-                          <span className="font-semibold text-xs tracking-tight">
+                        <div className="flex items-center gap-1.5 font-mono text-slate-700 dark:text-slate-300">                          <span className="font-semibold text-xs tracking-tight">
                             {formatIST(log.timestamp)}
                           </span>
                         </div>
