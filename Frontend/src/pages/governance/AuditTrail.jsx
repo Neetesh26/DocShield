@@ -185,10 +185,6 @@ export const AuditTrail = () => {
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <span>FDA 21 CFR Part 11 Audit Trail</span>
-            <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800/60 shadow-2xs">
-              <ShieldCheck className="w-3 h-3 text-orange-600 dark:text-orange-400" />
-              Immutable IST Log
-            </span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Cryptographically sealed, append-only GxP compliance logs in Indian Standard Time (IST).
@@ -522,11 +518,7 @@ export const AuditTrail = () => {
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400 font-mono mt-0.5">
-                          <Clock className="w-3 h-3 text-orange-500 shrink-0" />
                           <span className="font-semibold">{formatIST(log.timestamp)}</span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-orange-100/70 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400">
-                            IST
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -620,130 +612,6 @@ export const AuditTrail = () => {
           </div>
         </div>
       </div>
-
-      {/* ======================================================== */}
-      {/* MODAL: AUDIT TRAIL RECORD INSPECTOR (NO IP FIELD)        */}
-      {/* ======================================================== */}
-      {selectedEntry && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-xl w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            {/* Header: Audit Trail Record Inspector */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 flex items-center justify-center shadow-2xs">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    Audit Trail Record Inspector
-                  </h3>
-                  <p className="text-[11px] text-slate-400">
-                    GxP Event Details in Indian Standard Time (IST)
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedEntry(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Content Container (Matching Image 1 without IP field) */}
-            <div className="text-xs space-y-3 bg-slate-50/80 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700/80">
-              {/* Event Timestamp (IST) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-slate-100 dark:border-slate-750">
-                <span className="text-slate-500 dark:text-slate-400 font-medium">Time Stamp (IST):</span>
-                <div className="flex items-center gap-1.5 font-mono text-slate-800 dark:text-slate-200 font-bold">
-                  <Clock className="w-3.5 h-3.5 text-orange-500" />
-                  <span>{formatIST(selectedEntry.timestamp)}</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400">
-                    IST
-                  </span>
-                </div>
-              </div>
-
-              {/* Event Timestamp (ISO) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-slate-100 dark:border-slate-750">
-                <span className="text-slate-500 dark:text-slate-400 font-medium">Timestamp (UTC/ISO):</span>
-                <span className="font-mono text-slate-600 dark:text-slate-400 font-semibold text-[11px]">
-                  {new Date(selectedEntry.timestamp).toISOString()}
-                </span>
-              </div>
-
-              {/* Operator */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-slate-100 dark:border-slate-750">
-                <span className="text-slate-500 dark:text-slate-400 font-medium">Operator:</span>
-                <span className="font-semibold text-slate-900 dark:text-white">
-                  {selectedEntry.userName || 'System Agent'}{' '}
-                  <span className="text-slate-500 dark:text-slate-400 font-normal">
-                    ({selectedEntry.userRole || 'Automated'})
-                  </span>
-                </span>
-              </div>
-
-              {/* Action */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-slate-100 dark:border-slate-750">
-                <span className="text-slate-500 dark:text-slate-400 font-medium">Action:</span>
-                <span
-                  className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border border-b-2 shadow-2xs ${getActionBadgeClass(
-                    selectedEntry.action
-                  )}`}
-                >
-                  {selectedEntry.action}
-                </span>
-              </div>
-
-              {/* Target Entity */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-slate-100 dark:border-slate-750">
-                <span className="text-slate-500 dark:text-slate-400 font-medium">Target Entity:</span>
-                <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold">
-                  {selectedEntry.entity || 'General'}{' '}
-                  {selectedEntry.entityId && (
-                    <span className="text-slate-400 dark:text-slate-500 text-[11px] font-normal">
-                      (ID: {selectedEntry.entityId})
-                    </span>
-                  )}
-                </span>
-              </div>
-
-              {/* Details */}
-              <div className="pt-1">
-                <span className="text-slate-500 dark:text-slate-400 block mb-1 font-medium">Details:</span>
-                <p className="text-slate-800 dark:text-slate-200 leading-relaxed font-normal bg-white dark:bg-slate-900/60 p-2.5 rounded-lg border border-slate-200 dark:border-slate-750">
-                  {selectedEntry.details}
-                </p>
-              </div>
-
-              {/* Raw Event Metadata (if any) */}
-              {selectedEntry.metadata && Object.keys(selectedEntry.metadata).length > 0 && (
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-750">
-                  <span className="text-slate-500 dark:text-slate-400 block mb-1 font-medium">
-                    Raw Event Metadata:
-                  </span>
-                  <pre className="bg-slate-900 text-teal-300 p-3 rounded-lg text-[11px] font-mono overflow-x-auto max-h-48 border border-slate-800">
-                    {JSON.stringify(selectedEntry.metadata, null, 2)}
-                  </pre>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer: Close Inspector */}
-            <div className="flex items-center justify-end pt-2">
-              <button
-                type="button"
-                onClick={() => setSelectedEntry(null)}
-                className="px-5 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-semibold shadow-xs transition cursor-pointer"
-              >
-                Close Inspector
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
