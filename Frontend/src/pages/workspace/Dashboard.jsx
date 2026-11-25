@@ -21,7 +21,8 @@ import {
   RotateCw,
   FolderKanban,
   Compass,
-  Zap
+  Zap,
+  Building2
 } from 'lucide-react';
 import {
   PieChart,
@@ -661,110 +662,246 @@ export const Dashboard = () => {
 
       </div>
 
-      {/* Storage Utilization & Live Operational Tables (Pure API Data Only) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Storage Utilization & Live Operational Tables (Pure API Data Only - 3D Dynamic Tables) */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         
-        {/* Storage Capacity Overview - Strictly Real Data from charts.storageStats */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Physical Vault Utilization
-            </h2>
+        {/* 1. Physical Vault Utilization - 3D Dynamic Table */}
+        <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-[0_12px_32px_-8px_rgba(15,23,42,0.08),0_4px_12px_-4px_rgba(15,23,42,0.03)] dark:shadow-[0_12px_36px_-8px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-300 xl:col-span-5 flex flex-col">
+          {/* Card Top Header Bar */}
+          <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-gradient-to-r from-slate-50/60 via-white to-slate-50/40 dark:from-slate-850 dark:via-slate-900 dark:to-slate-850">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-xs">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">
+                  Physical Vault Utilization
+                </h2>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                  {storageStats.length} storage {storageStats.length === 1 ? 'facility' : 'facilities'} registered
+                </p>
+              </div>
+            </div>
             <button
               onClick={() => navigate('/physical/storage-map')}
-              className="text-xs font-semibold text-orange-700 hover:text-orange-800 hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-orange-700 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50/80 dark:bg-orange-950/40 border border-orange-200/70 dark:border-orange-900/50 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition cursor-pointer shadow-2xs"
             >
-              Storage Map <ChevronRight className="w-3.5 h-3.5" />
+              <span>Storage Map</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="space-y-4 pt-1">
-            {storageStats.length === 0 ? (
-              <div className="text-center text-xs text-slate-400 py-8">
-                No storage facilities registered in database
-              </div>
-            ) : (
-              storageStats.map((loc, i) => (
-                <div
-                  key={i}
-                  onClick={() => navigate(`/physical/storage-map?building=${encodeURIComponent(loc.building)}`)}
-                  className="space-y-1.5 p-2 rounded-lg hover:bg-orange-50/50 transition cursor-pointer"
-                  title="Click to view vault coordinates"
-                >
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-800">{loc.building}</span>
-                    <span className="text-slate-500 font-mono text-[11px]">
-                      {loc.occupancy} / {loc.capacity} ({loc.utilization}%)
-                    </span>
-                  </div>
-                  <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        loc.utilization > 80 ? 'bg-amber-500' : 'bg-orange-600'
-                      }`}
-                      style={{ width: `${Math.min(100, loc.utilization)}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))
-            )}
+
+          {/* 3D Dynamic Table Content */}
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead className="bg-gradient-to-b from-slate-100/90 via-slate-50 to-slate-100/70 dark:from-slate-800 dark:via-slate-850 dark:to-slate-800 border-b-2 border-slate-200/90 dark:border-slate-700 sticky top-0 z-10 shadow-2xs">
+                <tr className="text-slate-700 dark:text-slate-200 uppercase text-[10px] font-bold tracking-wider">
+                  <th className="py-3 px-4">Facility / Building</th>
+                  <th className="py-3 px-3">Occupancy</th>
+                  <th className="py-3 px-3">Utilization (%)</th>
+                  <th className="py-3 px-3 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                {storageStats.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-12 text-center text-xs text-slate-400 dark:text-slate-500">
+                      <Box className="w-7 h-7 mx-auto mb-2 text-slate-300 dark:text-slate-600" />
+                      No storage facilities registered in database
+                    </td>
+                  </tr>
+                ) : (
+                  storageStats.map((loc, i) => {
+                    const util = loc.utilization || 0;
+                    const isHigh = util >= 85;
+                    const isMedium = util >= 65 && util < 85;
+
+                    return (
+                      <tr
+                        key={i}
+                        onClick={() => navigate(`/physical/storage-map?building=${encodeURIComponent(loc.building)}`)}
+                        className="hover:bg-gradient-to-r hover:from-orange-50/50 hover:via-white hover:to-orange-50/20 dark:hover:from-slate-800/80 dark:hover:via-slate-800/40 dark:hover:to-slate-800/80 transition-all duration-150 group cursor-pointer"
+                        title={`Click to view vault coordinates for ${loc.building}`}
+                      >
+                        {/* Facility / Building */}
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-6 h-6 rounded-lg bg-orange-100/80 dark:bg-orange-950/60 border border-orange-200/60 dark:border-orange-800/60 flex items-center justify-center text-orange-700 dark:text-orange-400 shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                              <Box className="w-3.5 h-3.5" />
+                            </div>
+                            <div>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                                {loc.building}
+                              </span>
+                              <p className="text-[10px] text-slate-400 dark:text-slate-500">Vault Location</p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Occupancy */}
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <div className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
+                            {loc.occupancy} <span className="text-slate-400 font-normal">/</span> {loc.capacity}
+                          </div>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">units allocated</span>
+                        </td>
+
+                        {/* Utilization Bar + % */}
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 sm:w-24 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/60 dark:border-slate-700/60 shadow-inner">
+                              <div
+                                className={`h-full rounded-full transition-all duration-500 ${
+                                  isHigh
+                                    ? 'bg-gradient-to-r from-amber-500 to-rose-500 shadow-[0_1px_3px_rgba(244,63,94,0.4)]'
+                                    : isMedium
+                                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 shadow-[0_1px_3px_rgba(249,115,22,0.4)]'
+                                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[0_1px_3px_rgba(16,185,129,0.3)]'
+                                }`}
+                                style={{ width: `${Math.min(100, util)}%` }}
+                              />
+                            </div>
+                            <span className="font-mono font-bold text-xs text-slate-800 dark:text-slate-200 min-w-[42px]">
+                              {util}%
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Status Badge */}
+                        <td className="py-3 px-3 text-right whitespace-nowrap">
+                          <span
+                            className={`inline-block font-mono text-[10px] font-bold px-2 py-0.5 rounded-md border shadow-2xs ${
+                              isHigh
+                                ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800/60'
+                                : isMedium
+                                ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/60'
+                                : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60'
+                            }`}
+                          >
+                            {isHigh ? 'High' : isMedium ? 'Moderate' : 'Optimal'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Recent Repository Ingestions Table - Strictly Real Data from widgets.recentDocuments */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Recent Repository Ingestions
-            </h2>
+        {/* 2. Recent Repository Ingestions - 3D Dynamic Table */}
+        <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-[0_12px_32px_-8px_rgba(15,23,42,0.08),0_4px_12px_-4px_rgba(15,23,42,0.03)] dark:shadow-[0_12px_36px_-8px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-300 xl:col-span-7 flex flex-col">
+          {/* Card Top Header Bar */}
+          <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-gradient-to-r from-slate-50/60 via-white to-slate-50/40 dark:from-slate-850 dark:via-slate-900 dark:to-slate-850">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white shadow-xs">
+                <Layers className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">
+                  Recent Repository Ingestions
+                </h2>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                  {recentDocs.length} latest verified documents from repository
+                </p>
+              </div>
+            </div>
             <button
               onClick={() => navigate('/workspace/repository')}
-              className="text-xs font-semibold text-orange-700 hover:text-orange-800 flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-orange-700 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50/80 dark:bg-orange-950/40 border border-orange-200/70 dark:border-orange-900/50 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition cursor-pointer shadow-2xs"
             >
-              View all <ChevronRight className="w-3.5 h-3.5" />
+              <span>View Repository</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* 3D Dynamic Table Content */}
+          <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-slate-100 text-[11px] font-semibold text-slate-400 uppercase">
-                  <th className="pb-2">Doc #</th>
-                  <th className="pb-2">Title</th>
-                  <th className="pb-2">Rev</th>
-                  <th className="pb-2">Location</th>
-                  <th className="pb-2 text-right">Action</th>
+              <thead className="bg-gradient-to-b from-slate-100/90 via-slate-50 to-slate-100/70 dark:from-slate-800 dark:via-slate-850 dark:to-slate-800 border-b-2 border-slate-200/90 dark:border-slate-700 sticky top-0 z-10 shadow-2xs">
+                <tr className="text-slate-700 dark:text-slate-200 uppercase text-[10px] font-bold tracking-wider">
+                  <th className="py-3 px-4">Doc #</th>
+                  <th className="py-3 px-3">Document Title</th>
+                  <th className="py-3 px-3 text-center">Rev</th>
+                  <th className="py-3 px-3">Status</th>
+                  <th className="py-3 px-3">Vault Coordinate</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
                 {recentDocs.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-xs text-slate-400">
+                    <td colSpan={6} className="py-12 text-center text-xs text-slate-400 dark:text-slate-500">
+                      <FolderKanban className="w-7 h-7 mx-auto mb-2 text-slate-300 dark:text-slate-600" />
                       No recent document ingestions found in database
                     </td>
                   </tr>
                 ) : (
-                  recentDocs.map((doc) => (
-                    <tr
-                      key={doc._id}
-                      onClick={() => navigate(`/documents/${doc._id}`)}
-                      className="hover:bg-orange-50/50 transition cursor-pointer"
-                      title={`Open ${doc.documentNumber}`}
-                    >
-                      <td className="py-2.5 font-mono font-bold text-orange-700">{doc.documentNumber}</td>
-                      <td className="py-2.5 text-slate-800 font-medium truncate max-w-[220px]" title={doc.title}>
-                        {doc.title}
-                      </td>
-                      <td className="py-2.5 text-slate-500 font-mono">{doc.version}</td>
-                      <td className="py-2.5 text-slate-500 font-mono text-[11px]">
-                        {doc.storageLocation?.code || 'Vault Coordinate'}
-                      </td>
-                      <td className="py-2.5 text-right">
-                        <span className="p-1 text-slate-400 hover:text-orange-700 inline-flex items-center gap-1">
-                          View <ExternalLink className="w-3.5 h-3.5" />
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                  recentDocs.map((doc) => {
+                    const statusColor =
+                      doc.status === 'Effective'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60'
+                        : doc.status === 'Under Review' || doc.status === 'In Review'
+                        ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/60'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+
+                    return (
+                      <tr
+                        key={doc._id}
+                        onClick={() => navigate(`/documents/${doc._id}`)}
+                        className="hover:bg-gradient-to-r hover:from-orange-50/50 hover:via-white hover:to-orange-50/20 dark:hover:from-slate-800/80 dark:hover:via-slate-800/40 dark:hover:to-slate-800/80 transition-all duration-150 group cursor-pointer"
+                        title={`Open document ${doc.documentNumber}`}
+                      >
+                        {/* Doc Number 3D Mono Badge */}
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border border-orange-200/80 dark:border-orange-800/60 shadow-2xs group-hover:border-orange-400 group-hover:shadow-xs transition-all inline-block">
+                            {doc.documentNumber}
+                          </span>
+                        </td>
+
+                        {/* Title & Department */}
+                        <td className="py-3 px-3">
+                          <div className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors line-clamp-1 max-w-[200px] xl:max-w-[260px]" title={doc.title}>
+                            {doc.title}
+                          </div>
+                          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                            {doc.department || 'GxP Controlled Document'}
+                          </p>
+                        </td>
+
+                        {/* Rev */}
+                        <td className="py-3 px-3 text-center whitespace-nowrap">
+                          <span className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                            {doc.version ? `v${doc.version}` : 'v01'}
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <span className={`inline-block font-mono text-[10px] font-bold px-2 py-0.5 rounded-md border shadow-2xs ${statusColor}`}>
+                            {doc.status || 'Active'}
+                          </span>
+                        </td>
+
+                        {/* Location */}
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5 font-mono text-xs text-slate-600 dark:text-slate-400">
+                            <Box className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                            <span>{doc.storageLocation?.code || 'Vault Coordinate'}</span>
+                          </div>
+                        </td>
+
+                        {/* Action */}
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-orange-600 group-hover:text-white dark:group-hover:bg-orange-600 dark:group-hover:text-white border border-slate-200 dark:border-slate-700 shadow-2xs transition-all text-xs font-semibold">
+                            <span>View</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
