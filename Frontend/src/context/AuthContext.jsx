@@ -81,6 +81,14 @@ export const AuthProvider = ({ children }) => {
     return roles.includes(user.role);
   };
 
+  const updateUser = (updatedUserData) => {
+    setUser((prev) => {
+      const merged = { ...prev, ...updatedUserData };
+      localStorage.setItem('docushield_user', JSON.stringify(merged));
+      return merged;
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -91,6 +99,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        updateUser,
         clearLocalStorage,
         hasRole
       }}

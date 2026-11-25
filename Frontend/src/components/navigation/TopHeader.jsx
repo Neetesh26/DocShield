@@ -647,7 +647,6 @@ export const TopHeader = ({ onOpenScanner }) => {
           >
 
             {/* AVATAR */}
-
             <div className="
               w-9 h-9
               rounded-full
@@ -656,8 +655,17 @@ export const TopHeader = ({ onOpenScanner }) => {
               font-bold text-sm
               flex items-center justify-center
               shadow-sm
+              overflow-hidden
             ">
-              {userInitial}
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user?.name || 'User Avatar'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                userInitial
+              )}
             </div>
 
             {/* USER DETAILS */}
