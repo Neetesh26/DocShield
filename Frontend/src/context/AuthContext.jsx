@@ -5,30 +5,55 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('docushield_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('docushield_user');
+      if (!saved || saved === 'undefined' || saved === 'null') return null;
+      return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Error reading docushield_user from localStorage:', e);
+      return null;
+    }
   });
-  const [token, setToken] = useState(() => localStorage.getItem('docushield_token'));
+  const [token, setToken] = useState(() => {
+    try {
+      const savedToken = localStorage.getItem('docushield_token');
+      if (!savedToken || savedToken === 'undefined' || savedToken === 'null') return null;
+      return savedToken;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const verifyUser = async () => {
       if (token) {
         try {
-          const res = await authService.getMe();
-          if (res.success && res.data?.user) {
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Session verification timeout')), 3500)
+          );
+          const res = await Promise.race([authService.getMe(), timeoutPromise]);
+          if (isMounted && res && res.success && res.data?.user) {
             setUser(res.data.user);
             localStorage.setItem('docushield_user', JSON.stringify(res.data.user));
           }
         } catch (err) {
           console.warn('Session verification failed, signing out', err);
-          logout();
+          if (isMounted && err?.response?.status === 401) {
+            logout();
+          }
         }
       }
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     };
 
     verifyUser();
+    return () => {
+      isMounted = false;
+    };
   }, [token]);
 
   const login = async (email, password) => {
@@ -82,6 +107,14 @@ export const AuthProvider = ({ children }) => {
     return roles.includes(user.role);
   };
 
+  const updateUser = (updatedUserData) => {
+    setUser((prev) => {
+      const merged = { ...prev, ...updatedUserData };
+      localStorage.setItem('docushield_user', JSON.stringify(merged));
+      return merged;
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -92,6 +125,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        updateUser,
         clearLocalStorage,
         hasRole
       }}

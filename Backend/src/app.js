@@ -23,7 +23,6 @@ import auditLogRoutes from './routes/auditLogRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import assistantRoutes from './routes/assistantRoutes.js';
 import settingRoutes from './routes/settingRoutes.js';
-import translateRoutes from './routes/translateRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -99,7 +98,6 @@ app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/assistant', assistantRoutes);
 app.use('/api/settings', settingRoutes);
-app.use('/api/translate', translateRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
