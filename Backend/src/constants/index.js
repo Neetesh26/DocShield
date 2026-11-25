@@ -14,6 +14,7 @@ export const DOCUMENT_STATUSES = {
   IN_REVIEW: 'In Review',
   PENDING_APPROVAL: 'Pending Approval',
   EFFECTIVE: 'Effective',
+  EXPIRED: 'Expired',
   SUPERSEDED: 'Superseded',
   ARCHIVED: 'Archived',
   OBSOLETE: 'Obsolete'

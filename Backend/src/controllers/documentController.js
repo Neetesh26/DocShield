@@ -295,6 +295,20 @@ export const createDocument = async (req, res, next) => {
  */
 export const getDocuments = async (req, res, next) => {
   try {
+    const now = new Date();
+
+    // Auto-transition lapsed Effective documents to Expired under GxP / 21 CFR Part 11 rules
+    await Document.updateMany(
+      {
+        status: DOCUMENT_STATUSES.EFFECTIVE,
+        $or: [
+          { expiryDate: { $ne: null, $lt: now } },
+          { reviewDate: { $ne: null, $lt: now } }
+        ]
+      },
+      { $set: { status: DOCUMENT_STATUSES.EXPIRED } }
+    );
+
     const {
       search,
       status,
@@ -445,6 +459,15 @@ export const getDocumentById = async (req, res, next) => {
       return sendError(res, 'Document not found', 404);
     }
 
+    // Auto-expire document if next review date or expiry date has passed under GxP governance
+    const now = new Date();
+    const isReviewLapsed = doc.reviewDate && new Date(doc.reviewDate) < now;
+    const isExpiryLapsed = doc.expiryDate && new Date(doc.expiryDate) < now;
+    if ((isReviewLapsed || isExpiryLapsed) && doc.status === DOCUMENT_STATUSES.EFFECTIVE) {
+      doc.status = DOCUMENT_STATUSES.EXPIRED;
+      await doc.save();
+    }
+
     // Fetch related records in parallel
     const [versions, requests, auditLogs, relatedDocs] = await Promise.all([
       DocumentVersion.find({ document: doc._id }).populate('uploadedBy', 'name email').sort({ createdAt: -1 }),
@@ -480,6 +503,15 @@ export const updateDocumentMetadata = async (req, res, next) => {
     const doc = await Document.findById(req.params.id);
     if (!doc) {
       return sendError(res, 'Document not found', 404);
+    }
+
+    // Auto-expire document if next review date or expiry date has passed under GxP governance
+    const now = new Date();
+    const isReviewLapsed = doc.reviewDate && new Date(doc.reviewDate) < now;
+    const isExpiryLapsed = doc.expiryDate && new Date(doc.expiryDate) < now;
+    if ((isReviewLapsed || isExpiryLapsed) && doc.status === DOCUMENT_STATUSES.EFFECTIVE) {
+      doc.status = DOCUMENT_STATUSES.EXPIRED;
+      await doc.save();
     }
 
     const previousData = {
@@ -524,6 +556,15 @@ export const getDocumentQR = async (req, res, next) => {
     const doc = await Document.findById(req.params.id).select('documentNumber qrCodeData qrCodeImage title version');
     if (!doc) {
       return sendError(res, 'Document not found', 404);
+    }
+
+    // Auto-expire document if next review date or expiry date has passed under GxP governance
+    const now = new Date();
+    const isReviewLapsed = doc.reviewDate && new Date(doc.reviewDate) < now;
+    const isExpiryLapsed = doc.expiryDate && new Date(doc.expiryDate) < now;
+    if ((isReviewLapsed || isExpiryLapsed) && doc.status === DOCUMENT_STATUSES.EFFECTIVE) {
+      doc.status = DOCUMENT_STATUSES.EXPIRED;
+      await doc.save();
     }
     return sendSuccess(res, 'QR code retrieved', {
       documentNumber: doc.documentNumber,

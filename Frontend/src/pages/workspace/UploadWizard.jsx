@@ -582,6 +582,7 @@ export const UploadWizard = () => {
                     <option value="Validation Protocol / Report">Validation Protocol / Report</option>
                     <option value="Specification (SPEC)">Specification (SPEC)</option>
                     <option value="Analytical Method (ATM)">Analytical Method (ATM)</option>
+                    <option value="Custody Handover Note">Custody Handover Note</option>
                   </select>
                 </div>
 
