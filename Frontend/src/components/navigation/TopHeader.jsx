@@ -27,8 +27,8 @@ import { Button3D } from '../common/Button3D';
 export const TopHeader = ({ onOpenScanner }) => {
 
   const { user, logout } = useAuth();
-  const { isDarkMode, toggleTheme, setDarkMode } = useTheme();
-  const { language, setLanguage, languages, t } = useLanguage();
+  const { isDarkMode, toggleTheme, setThemePreference } = useTheme();
+  // const { language, setLanguage, languages, t } = useLanguage();
 
   const {
     notifications,
@@ -105,8 +105,7 @@ export const TopHeader = ({ onOpenScanner }) => {
 
   const handleLogout = () => {
     setShowUserMenu(false);
-    setDarkMode(false);
-    document.documentElement.classList.remove('dark');
+    setThemePreference('light');
     logout();
     navigate('/login');
   };
