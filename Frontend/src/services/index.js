@@ -71,8 +71,12 @@ export const checkoutService = {
     const res = await api.post('/checkouts', data);
     return res.data;
   },
-  returnDocument: async (id, conditionOnReturn, remarks) => {
-    const res = await api.post(`/checkouts/${id}/return`, { conditionOnReturn, remarks });
+  returnDocument: async (id, conditionOnReturn, remarks, binScanned) => {
+    const res = await api.post(`/checkouts/${id}/return`, { conditionOnReturn, remarks, binScanned });
+    return res.data;
+  },
+  remindBorrower: async (id) => {
+    const res = await api.post(`/checkouts/${id}/remind`);
     return res.data;
   }
 };

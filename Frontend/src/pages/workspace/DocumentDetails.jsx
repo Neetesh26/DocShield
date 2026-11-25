@@ -167,6 +167,11 @@ export const DocumentDetails = () => {
 
   const { document: doc, versions = [], requests = [], auditLogs = [], relatedDocs = [] } = docData;
 
+  const now = new Date();
+  const isReviewPast = doc.reviewDate && new Date(doc.reviewDate) < now;
+  const isExpiryPast = doc.expiryDate && new Date(doc.expiryDate) < now;
+  const isExpired = doc.status === 'Expired' || isReviewPast || isExpiryPast;
+
   const tabs = [
     { id: 'viewer', label: 'Viewer', icon: FileText },
     { id: 'metadata', label: 'Metadata', icon: FileCheck2 },
@@ -198,9 +203,20 @@ export const DocumentDetails = () => {
             <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
               Rev {doc.version}
             </span>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200">
-              {doc.status}
-            </span>
+            {isExpired ? (
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-300 flex items-center gap-1 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></span>
+                Expired
+              </span>
+            ) : doc.status === 'Effective' ? (
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Effective
+              </span>
+            ) : (
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200">
+                {doc.status}
+              </span>
+            )}
             <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
               Physical: {doc.physicalStatus}
             </span>
@@ -240,6 +256,26 @@ export const DocumentDetails = () => {
           </button>
         </div>
       </div>
+
+      {/* GxP Compliance Warning Alert for Expired / Overdue Document */}
+      {isExpired && (
+        <div className="bg-rose-50 border border-rose-300 rounded-2xl p-4 flex items-start gap-3.5 text-rose-900 shadow-xs">
+          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wide text-rose-800">
+                GxP Compliance Alert: Controlled Document Expired / Periodic Review Lapsed
+              </span>
+              <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-rose-200/80 text-rose-900 uppercase">
+                Invalid for Operational Use
+              </span>
+            </div>
+            <p className="text-xs text-rose-700 leading-relaxed">
+              This controlled document has passed its designated <strong>Next Review Date ({doc.reviewDate ? new Date(doc.reviewDate).toLocaleDateString() : 'Lapsed'})</strong>{doc.expiryDate ? ` / Expiry Date (${new Date(doc.expiryDate).toLocaleDateString()})` : ''}. Under 21 CFR Part 11 and Good Documentation Practices (GDP), this procedure is legally invalid for active batch manufacturing, QC testing, or product release until formally re-assessed, revised, and re-approved by QA.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Tabs Navigation */}
       <div className="flex border-b border-slate-200 space-x-1 overflow-x-auto bg-white px-4 rounded-xl shadow-xs">
@@ -330,8 +366,28 @@ export const DocumentDetails = () => {
             </div>
             <div>
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Next Review Date</span>
-              <span className="font-mono text-slate-700">{doc.reviewDate ? new Date(doc.reviewDate).toLocaleDateString() : 'N/A'}</span>
+              <span className={`font-mono flex items-center gap-1.5 ${isReviewPast ? 'text-rose-600 font-bold' : 'text-slate-700'}`}>
+                {doc.reviewDate ? new Date(doc.reviewDate).toLocaleDateString() : 'N/A'}
+                {isReviewPast && (
+                  <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-100 text-rose-800 uppercase">
+                    Overdue
+                  </span>
+                )}
+              </span>
             </div>
+            {doc.expiryDate && (
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Expiry Date</span>
+                <span className={`font-mono flex items-center gap-1.5 ${isExpiryPast ? 'text-rose-600 font-bold' : 'text-slate-700'}`}>
+                  {new Date(doc.expiryDate).toLocaleDateString()}
+                  {isExpiryPast && (
+                    <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-100 text-rose-800 uppercase">
+                      Expired
+                    </span>
+                  )}
+                </span>
+              </div>
+            )}
             <div>
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Author / Prepared By</span>
               <span className="text-slate-700">{doc.preparedBy || 'Unspecified'}</span>
