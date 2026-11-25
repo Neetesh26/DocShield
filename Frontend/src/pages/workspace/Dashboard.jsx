@@ -111,7 +111,7 @@ export const Dashboard = () => {
         setWidgets(widgetsRes.value.data);
       }
       if (isManual) {
-        toast.success('Live GxP KPIs successfully synchronized from database.');
+        toast.success('Refreshed data successfully.');
       }
     } catch (err) {
       console.error('Failed to load dashboard data from API', err);
@@ -337,7 +337,7 @@ export const Dashboard = () => {
                 setShowTypeahead(true);
               }}
               onFocus={() => setShowTypeahead(true)}
-              placeholder={t("Search repository by document number, title, formulation, API, or department (e.g. 'HPLC SOP', 'Paracetamol BMR')...")}
+              placeholder={t("Search repository")}
               className="w-full pl-11 pr-28 py-2.5 text-xs md:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 font-medium text-slate-800 placeholder:text-slate-400 transition shadow-2xs"
             />
             <div className="absolute right-1.5">

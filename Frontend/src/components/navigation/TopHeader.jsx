@@ -148,9 +148,9 @@ export const TopHeader = ({ onOpenScanner }) => {
 
           <input
             type="text"
-            placeholder={`Search repository by ${
+            placeholder={`Search repository ${
               searchMode === 'All'
-                ? 'Doc #, title, or keywords...'
+                ? ' '
                 : searchMode + '...'
             }`}
             value={searchQuery}

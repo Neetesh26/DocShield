@@ -60,14 +60,11 @@ export const AuditTrail = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">FDA 21 CFR Part 11 Audit Trail</h1>
-          <p className="text-xs text-slate-500">
-            Immutable, time-stamped, operator-attributed audit trail logging all repository, approval, and physical movements.
-          </p>
         </div>
-        <div className="flex items-center gap-2 text-xs font-mono bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 shadow-xs">
+        {/* <div className="flex items-center gap-2 text-xs font-mono bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 shadow-xs">
           <ShieldCheck className="w-4 h-4 text-orange-600" />
           <span>Integrity Verification Active (Append-Only)</span>
-        </div>
+        </div> */}
       </div>
 
       {/* Filter Row */}

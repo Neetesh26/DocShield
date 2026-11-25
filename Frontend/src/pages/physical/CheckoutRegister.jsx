@@ -94,7 +94,7 @@ export const CheckoutRegister = () => {
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Physical Check-Out Register</h1>
           <p className="text-xs text-slate-500">
-            Chain-of-custody tracking for physical binder borrowing, overdue enforcement, and return condition inspections.
+            Physical issue / return of documents. Returns are verified by bin QR scan.
           </p>
         </div>
         <div className="flex items-center gap-2">

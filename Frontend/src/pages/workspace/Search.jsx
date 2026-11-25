@@ -354,7 +354,7 @@ export const Search = () => {
                   setShowTypeahead(true);
                 }}
                 onFocus={() => setShowTypeahead(true)}
-                placeholder="Search repository by document number, title, formulation, API, department, or vault..."
+                placeholder="Search repository "
                 className="w-full pl-12 pr-32 py-3.5 text-sm bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 dark:focus:border-orange-500 font-medium text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 transition"
               />
               <div className="absolute right-2 flex items-center gap-1.5">

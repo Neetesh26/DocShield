@@ -3,6 +3,7 @@ import { Settings as SettingsIcon, ShieldCheck, Lock, Clock, FileCode, CheckCirc
 import { useAuth } from '../../context/AuthContext';
 import { Button3D } from '../../components/common/Button3D';
 import { settingService } from '../../services';
+import { toast } from '../../context/ToastContext';
 
 export const Settings = () => {
   const { user } = useAuth();
@@ -73,16 +74,9 @@ export const Settings = () => {
     <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">System & Compliance Governance Settings</h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          Configure global 21 CFR Part 11 electronic records, audit trail retentions, and quality parameters (Synced dynamically with MongoDB).
-        </p>
       </div>
-
       {saved && (
-        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-emerald-900 dark:text-emerald-300 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>System configuration parameters successfully updated in MongoDB and logged to 21 CFR Part 11 audit trail.</span>
-        </div>
+        toast.success('Settings saved successfully.')
       )}
 
       {error && (

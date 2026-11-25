@@ -560,11 +560,11 @@ export const BulkUpload = () => {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Bulk Document Ingestion Queue
+              Bulk Document Queue
             </h1>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            High-throughput intelligent OCR document ingestion with automated AI classification, vault coordinate recommendation, and custody assignment.
+            Drop many scans. Each file is extracted, classified and placed — fix any row, then import the Ready ones.
           </p>
         </div>
 
