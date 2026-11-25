@@ -24,7 +24,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    // Only redirect to login if session token is expired/invalid, not for electronic signature password checks
+    const isSignatureAction =
+      error.config?.url?.includes('periodic-review') ||
+      error.config?.url?.includes('destruction') ||
+      error.config?.url?.includes('approve');
+
+    if (error.response && error.response.status === 401 && !isSignatureAction) {
       // Clear token and redirect to login if session expired
       localStorage.removeItem('docushield_token');
       localStorage.removeItem('docushield_user');

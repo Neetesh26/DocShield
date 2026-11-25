@@ -593,7 +593,7 @@ export const BulkUpload = () => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 rounded-2xl p-12 text-center bg-white dark:bg-slate-900 transition cursor-pointer group shadow-xs"
+          className="border-2 border-solid border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 rounded-2xl p-12 text-center bg-white dark:bg-slate-900 transition cursor-pointer group shadow-xs"
         >
           <div className="w-16 h-16 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition">
             <Layers className="w-8 h-8" />

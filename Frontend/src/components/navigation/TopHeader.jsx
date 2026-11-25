@@ -13,7 +13,6 @@ import {
   ChevronDown,
   Moon,
   Sun,
-  Check,
   Settings,
   ExternalLink,
   X
@@ -28,7 +27,6 @@ export const TopHeader = ({ onOpenScanner }) => {
 
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme, setThemePreference } = useTheme();
-  // const { language, setLanguage, languages, t } = useLanguage();
 
   const {
     notifications,

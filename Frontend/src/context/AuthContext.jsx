@@ -31,17 +31,27 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Session verification timeout')), 3500)
+            setTimeout(() => reject(new Error('Session verification timeout')), 3000)
           );
           const res = await Promise.race([authService.getMe(), timeoutPromise]);
           if (isMounted && res && res.success && res.data?.user) {
             setUser(res.data.user);
             localStorage.setItem('docushield_user', JSON.stringify(res.data.user));
+          } else {
+            throw new Error('Session invalid');
           }
         } catch (err) {
-          console.warn('Session verification failed, signing out', err);
-          if (isMounted && err?.response?.status === 401) {
-            logout();
+          console.warn('Session verification failed or server is offline, routing to login:', err.message);
+          // When server is offline or session is invalid, reset authentication so the app defaults to /login
+          if (isMounted) {
+            setUser(null);
+            setToken(null);
+            try {
+              localStorage.removeItem('docushield_token');
+              localStorage.removeItem('docushield_user');
+            } catch (e) {
+              // ignore
+            }
           }
         }
       }

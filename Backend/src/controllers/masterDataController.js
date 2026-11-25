@@ -117,3 +117,34 @@ export const createStorageLocation = async (req, res, next) => {
   }
 };
 
+export const updateDocumentType = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, code, prefix, retentionYears, reviewIntervalMonths, requiresPhysicalTracking } = req.body;
+    const docType = await DocumentType.findById(id);
+    if (!docType) return sendError(res, 'Document Type not found', 404);
+
+    if (name) docType.name = name;
+    if (code) docType.code = code.toUpperCase();
+    if (prefix) docType.prefix = prefix.toUpperCase();
+    if (retentionYears !== undefined) docType.retentionYears = Number(retentionYears);
+    if (reviewIntervalMonths !== undefined) docType.reviewIntervalMonths = Number(reviewIntervalMonths);
+    if (requiresPhysicalTracking !== undefined) docType.requiresPhysicalTracking = Boolean(requiresPhysicalTracking);
+
+    await docType.save();
+
+    await logAuditEvent({
+      user: req.user,
+      action: AUDIT_ACTIONS.MASTER_DATA_CHANGE,
+      entity: 'DocumentType',
+      entityId: docType._id,
+      details: `Updated Retention & Review policy for Document Type ${docType.code}: Retention ${docType.retentionYears}y, Review ${docType.reviewIntervalMonths}m`,
+      ipAddress: req.ip || '127.0.0.1'
+    });
+
+    return sendSuccess(res, 'Document Type policy updated successfully', docType);
+  } catch (error) {
+    next(error);
+  }
+};
+

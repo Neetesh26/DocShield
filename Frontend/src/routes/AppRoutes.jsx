@@ -60,24 +60,38 @@ const RoleRoute = ({ routePath, children }) => {
 };
 
 export const AppRoutes = () => {
+  const { isAuthenticated, loading } = useAuth();
+
   return (
     <Routes>
+      {/* Root Route: Default to /login if not authenticated or server off */}
+      <Route
+        path="/"
+        element={
+          loading ? (
+            <div className="flex items-center justify-center min-h-screen bg-slate-900 text-slate-300">
+              <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : isAuthenticated ? (
+            <Navigate to="/workspace/dashboard" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Login initialRegister={true} />} />
 
       {/* Protected Routes inside MainLayout */}
       <Route
-        path="/"
         element={
           <ProtectedRoute>
             <MainLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/workspace/dashboard" replace />} />
-        
-        {/* Workspace */}
         <Route path="workspace/dashboard" element={<RoleRoute routePath="/workspace/dashboard"><Dashboard /></RoleRoute>} />
         <Route path="workspace/search" element={<RoleRoute routePath="/workspace/search"><Search /></RoleRoute>} />
         <Route path="workspace/repository" element={<RoleRoute routePath="/workspace/repository"><Repository /></RoleRoute>} />
@@ -104,9 +118,12 @@ export const AppRoutes = () => {
         <Route path="governance/audit-trail" element={<RoleRoute routePath="/governance/audit-trail"><AuditTrail /></RoleRoute>} />
         <Route path="governance/settings" element={<RoleRoute routePath="/governance/settings"><Settings /></RoleRoute>} />
 
-        {/* Fallback */}
+        {/* Protected Inner Fallback */}
         <Route path="*" element={<Navigate to="/workspace/dashboard" replace />} />
       </Route>
+
+      {/* Global Fallback: Route to /login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };
