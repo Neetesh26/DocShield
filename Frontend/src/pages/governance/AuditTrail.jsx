@@ -402,8 +402,8 @@ export const AuditTrail = () => {
               <thead className="bg-gradient-to-b from-slate-100/90 via-slate-50 to-slate-100/70 dark:from-slate-800 dark:via-slate-850 dark:to-slate-800 border-b-2 border-slate-200/90 dark:border-slate-700 sticky top-0 z-10 shadow-2xs">
                 <tr className="text-slate-700 dark:text-slate-200 uppercase text-[11px] font-bold tracking-wider">
                   <th className="py-3.5 px-4 text-center whitespace-nowrap w-16">S.No</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap">Time Stamp (IST)</th>
-                  <th className="py-3.5 px-3">Operator</th>
+                  <th className="py-3.5 px-4 text-center whitespace-nowrap">Time</th>
+                  <th className="py-3.5 px-3 text-center">Operator</th>
                   <th className="py-3.5 px-3">Role</th>
                   <th className="py-3.5 px-3">Action</th>
                   <th className="py-3.5 px-3">Target Entity</th>
@@ -438,9 +438,6 @@ export const AuditTrail = () => {
                           <Clock className="w-3.5 h-3.5 text-orange-500 shrink-0" />
                           <span className="font-semibold text-xs tracking-tight">
                             {formatIST(log.timestamp)}
-                          </span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-orange-100/70 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800/60">
-                            IST
                           </span>
                         </div>
                       </td>
