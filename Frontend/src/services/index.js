@@ -86,8 +86,8 @@ export const handoverService = {
     const res = await api.post('/handovers', data);
     return res.data;
   },
-  acceptHandover: async (id) => {
-    const res = await api.post(`/handovers/${id}/accept`);
+  acceptHandover: async (id, remarks = '') => {
+    const res = await api.post(`/handovers/${id}/accept`, { remarks });
     return res.data;
   },
   rejectHandover: async (id, reason) => {

@@ -153,14 +153,14 @@ export const Approvals = () => {
                     <td className="py-3 px-4 font-semibold text-slate-900">{item.type}</td>
                     <td className="py-3 px-4 truncate max-w-xs">
                       <div className="font-mono font-bold text-orange-700">
-                        {item.document?.documentNumber || item.request?.document?.documentNumber || item.request?.documentNumber || 'System Record'}
+                        {item.document?.documentNumber || item.request?.document?.documentNumber || item.handover?.documents?.map(d => d.documentNumber).join(', ') || item.handover?.handoverNumber || 'System Record'}
                       </div>
                       <div className="text-[11px] text-slate-500 truncate">
-                        {item.document?.title || item.request?.document?.title || item.request?.title || 'GxP Process Record'}
+                        {item.document?.title || item.request?.document?.title || (item.handover ? `Handover: ${item.handover.reason}` : item.comments) || 'GxP Process Record'}
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-slate-700">{item.request?.requester?.name || item.request?.requesterName || 'Authorized Staff'}</td>
-                    <td className="py-3 px-3 text-slate-600">{item.document?.department || item.request?.document?.department || item.request?.department || 'GxP Operations'}</td>
+                    <td className="py-3 px-3 text-slate-700">{item.request?.requester?.name || item.handover?.previousCustodian?.name || item.request?.requesterName || 'Authorized Staff'}</td>
+                    <td className="py-3 px-3 text-slate-600">{item.document?.department || item.request?.document?.department || item.handover?.previousCustodian?.department || item.request?.department || 'GxP Operations'}</td>
                     <td className="py-3 px-3">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                         item.status === 'Approved'
@@ -222,17 +222,17 @@ export const Approvals = () => {
               <div>
                 <strong className="text-slate-700">Document:</strong>{' '}
                 <span className="font-mono font-bold text-orange-700">
-                  {activeApproval.document?.documentNumber || activeApproval.request?.document?.documentNumber || activeApproval.request?.documentNumber || 'System Record'}
+                  {activeApproval.document?.documentNumber || activeApproval.request?.document?.documentNumber || activeApproval.handover?.documents?.map(d => d.documentNumber).join(', ') || activeApproval.handover?.handoverNumber || 'System Record'}
                 </span>
-                {(activeApproval.document?.title || activeApproval.request?.document?.title || activeApproval.request?.title) && (
+                {(activeApproval.document?.title || activeApproval.request?.document?.title || activeApproval.handover?.reason) && (
                   <span className="text-slate-600">
-                    {' '}({activeApproval.document?.title || activeApproval.request?.document?.title || activeApproval.request?.title})
+                    {' '}({activeApproval.document?.title || activeApproval.request?.document?.title || activeApproval.handover?.reason})
                   </span>
                 )}
               </div>
               <div>
                 <strong className="text-slate-700">Department:</strong>{' '}
-                {activeApproval.document?.department || activeApproval.request?.document?.department || activeApproval.request?.department || user?.department || 'GxP Operations'}
+                {activeApproval.document?.department || activeApproval.request?.document?.department || activeApproval.handover?.previousCustodian?.department || user?.department || 'GxP Operations'}
               </div>
             </div>
 

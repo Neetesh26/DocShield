@@ -1,5 +1,6 @@
 import Handover from '../models/Handover.js';
 import Document from '../models/Document.js';
+import Approval from '../models/Approval.js';
 import Notification from '../models/Notification.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 import { logAuditEvent } from '../services/auditService.js';
@@ -64,6 +65,17 @@ export const createHandover = async (req, res, next) => {
 
     await handover.save();
 
+    // Create synchronized Approval entry for 21 CFR Part 11 Approval Cockpit
+    const approval = new Approval({
+      handover: handover._id,
+      document: docs[0]._id,
+      type: 'Custody Transfer',
+      approver: newCustodianId,
+      status: 'Pending',
+      comments: `Custody Transfer ${handoverNumber} initiated by ${req.user.name}. Reason: ${reason}`
+    });
+    await approval.save();
+
     // Send notification to the new custodian
     await Notification.create({
       recipient: newCustodianId,
@@ -104,9 +116,28 @@ export const acceptHandover = async (req, res, next) => {
       return sendError(res, 'Only the designated new custodian (or authorized Admin/QA) can accept this handover', 403);
     }
 
+    const { remarks = '' } = req.body;
+
     handover.status = 'Accepted';
     handover.acceptedDate = new Date();
+    if (remarks) {
+      handover.remarks = handover.remarks ? `${handover.remarks} | ${remarks}` : remarks;
+    }
     await handover.save();
+
+    // Synchronize linked Approval record if exists
+    await Approval.updateMany(
+      { handover: handover._id, status: 'Pending' },
+      {
+        status: 'Approved',
+        actionDate: new Date(),
+        electronicSignature: {
+          signedBy: `${req.user.name} (${req.user.employeeId || req.user.email})`,
+          signedAt: new Date(),
+          meaning: 'I accept custody of this record in compliance with 21 CFR Part 11 requirements.'
+        }
+      }
+    );
 
     // Update currentCustodian on all related documents
     await Document.updateMany(
@@ -143,6 +174,12 @@ export const rejectHandover = async (req, res, next) => {
     handover.rejectedDate = new Date();
     handover.rejectionReason = reason;
     await handover.save();
+
+    // Synchronize linked Approval record if exists
+    await Approval.updateMany(
+      { handover: handover._id, status: 'Pending' },
+      { status: 'Rejected', actionDate: new Date(), comments: reason }
+    );
 
     await logAuditEvent({
       user: req.user,
