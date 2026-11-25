@@ -29,6 +29,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Disable ETags and caching on dynamic GxP API responses to guarantee real-time data sync
+app.set('etag', false);
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
 // Security Headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }

@@ -19,10 +19,13 @@ import {
 } from 'lucide-react';
 import { checkoutService, documentService, masterDataService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../context/NotificationContext';
 import { generateOverduePdfReport, generateDueDatePdfReport } from '../../utils/checkoutPdfReports';
 
 export const CheckoutRegister = () => {
   const { user } = useAuth();
+  const { refreshNotifications } = useNotifications();
+  const [remindingId, setRemindingId] = useState(null);
   const [checkouts, setCheckouts] = useState([]);
   const [counts, setCounts] = useState({ checkedOut: 0, overdue: 0, returned: 0, all: 0 });
   const [loading, setLoading] = useState(true);
@@ -179,14 +182,30 @@ export const CheckoutRegister = () => {
 
   const handleRemind = async (record) => {
     try {
+      setRemindingId(record._id);
       const res = await checkoutService.remindBorrower(record._id);
       if (res.success) {
         const borrowerName = record.user?.name || 'Borrower';
         const docNum = record.document?.documentNumber || 'Document';
-        showToast(`Reminder sent to ${borrowerName} for ${docNum}`);
+        showToast(`Compliance reminder successfully dispatched to ${borrowerName} for ${docNum}`);
+        if (typeof refreshNotifications === 'function') {
+          refreshNotifications();
+        }
+        setCheckouts(prev => prev.map(item => {
+          if (item._id === record._id) {
+            return {
+              ...item,
+              reminderCount: (item.reminderCount || 0) + 1,
+              lastReminderSentAt: new Date().toISOString()
+            };
+          }
+          return item;
+        }));
       }
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to send reminder', 'error');
+    } finally {
+      setRemindingId(null);
     }
   };
 
@@ -406,9 +425,9 @@ export const CheckoutRegister = () => {
                     <tr key={item._id} className="hover:bg-slate-50/60 transition-colors">
                       {/* Document Column */}
                       <td className="py-3.5 px-5 align-top">
-                        <div className="font-mono text-cyan-600 font-medium text-xs tracking-tight hover:underline cursor-pointer">
+                        <div className="font-mono text-[#ea580c] font-medium text-xs tracking-tight hover:underline cursor-pointer">
                           {item.document?.documentNumber}{' '}
-                          <span className="text-cyan-600 font-mono">
+                          <span className="text-[#ea580c] font-mono">
                             {item.document?.version ? `v${item.document.version}` : 'v01'}
                           </span>
                         </div>
@@ -420,7 +439,7 @@ export const CheckoutRegister = () => {
                       {/* Borrower Column with Initials Circle Badge */}
                       <td className="py-3.5 px-4 align-top whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-[#115e59] text-teal-100 flex items-center justify-center font-bold text-[10px] shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-[#ea580c] text-teal-100 flex items-center justify-center font-bold text-[10px] shrink-0">
                             {borrowerInitials}
                           </div>
                           <span className="text-slate-800 text-xs font-normal">
@@ -487,11 +506,12 @@ export const CheckoutRegister = () => {
                             {isItemOverdue && (
                               <button
                                 onClick={() => handleRemind(item)}
-                                className="px-2.5 py-1 rounded border border-teal-500/80 bg-white hover:bg-teal-50 text-teal-800 text-xs font-medium flex items-center gap-1 shadow-2xs transition"
-                                title="Send compliance reminder notification to borrower"
+                                disabled={remindingId === item._id}
+                                className="px-2.5 py-1 rounded border border-teal-500/80 bg-white hover:bg-teal-50 active:scale-[0.98] text-teal-800 text-xs font-medium flex items-center gap-1 shadow-2xs transition disabled:opacity-60 cursor-pointer"
+                                title={`Send compliance reminder notification to ${item.user?.name || 'borrower'}`}
                               >
-                                <Bell className="w-3.5 h-3.5 text-teal-600" />
-                                <span>Remind</span>
+                                <Bell className={`w-3.5 h-3.5 text-teal-600 ${remindingId === item._id ? 'animate-bounce' : ''}`} />
+                                <span>{remindingId === item._id ? 'Sending...' : item.reminderCount ? `Remind (${item.reminderCount})` : 'Remind'}</span>
                               </button>
                             )}
                           </div>
