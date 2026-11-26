@@ -170,7 +170,7 @@ export const Repository = () => {
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Regulated repository of pharmaceutical standard procedures, batch records, specifications, and validation reports.
+            Browse auto-classified folders
           </p>
         </div>
 
@@ -222,7 +222,7 @@ export const Repository = () => {
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by Document Number (e.g. SOP-QA-0042), title, product, batch #, or tag..."
+              placeholder="Search "
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-8 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600"

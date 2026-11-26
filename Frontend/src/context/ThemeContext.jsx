@@ -3,94 +3,48 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // themePreference: 'light' | 'dark' | 'system'
-  const [themePreference, setThemePreferenceState] = useState(() => {
+  // STRICT DEFAULT: 'light' mode. Only 'dark' if user explicitly clicked/chose dark mode.
+  const [theme, setThemeState] = useState(() => {
     try {
-      const saved = localStorage.getItem('docushield_theme_preference');
-      if (saved === 'dark' || saved === 'light' || saved === 'system') return saved;
-      return 'system';
+      const saved = localStorage.getItem('docushield_theme_preference') || localStorage.getItem('theme');
+      return saved === 'dark' ? 'dark' : 'light';
     } catch {
-      return 'system';
+      return 'light';
     }
   });
 
-  // Calculate actual applied theme ('light' or 'dark')
-  const getSystemTheme = () => {
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'light';
-  };
-
-  const [actualTheme, setActualTheme] = useState(() => {
-    if (themePreference === 'system') return getSystemTheme();
-    return themePreference;
-  });
-
-  // Update DOM when actualTheme changes
+  // Apply theme to DOM and persist
   useEffect(() => {
     const root = document.documentElement;
-    if (actualTheme === 'dark') {
+    if (theme === 'dark') {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
     try {
-      localStorage.setItem('theme', actualTheme);
-      localStorage.setItem('docushield_theme_preference', themePreference);
+      localStorage.setItem('theme', theme);
+      localStorage.setItem('docushield_theme_preference', theme);
     } catch (e) {
-      console.warn(e);
+      console.warn('Error saving theme preference:', e);
     }
-  }, [actualTheme, themePreference]);
-
-  // Handle system color scheme change dynamically
-  useEffect(() => {
-    if (themePreference !== 'system') {
-      setActualTheme(themePreference);
-      return;
-    }
-
-    setActualTheme(getSystemTheme());
-
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = (e) => {
-        if (themePreference === 'system') {
-          setActualTheme(e.matches ? 'dark' : 'light');
-        }
-      };
-
-      if (mediaQuery.addEventListener) {
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
-      } else if (mediaQuery.addListener) {
-        mediaQuery.addListener(handleChange);
-        return () => mediaQuery.removeListener(handleChange);
-      }
-    }
-  }, [themePreference]);
+  }, [theme]);
 
   const setThemePreference = useCallback((pref) => {
-    if (pref !== 'light' && pref !== 'dark' && pref !== 'system') return;
-    setThemePreferenceState(pref);
-    if (pref === 'system') {
-      setActualTheme(getSystemTheme());
-    } else {
-      setActualTheme(pref);
-    }
+    const validTheme = pref === 'dark' ? 'dark' : 'light';
+    setThemeState(validTheme);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemePreference(actualTheme === 'dark' ? 'light' : 'dark');
-  }, [actualTheme, setThemePreference]);
+    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  }, []);
 
   return (
     <ThemeContext.Provider
       value={{
-        theme: actualTheme,
-        themePreference,
+        theme,
+        themePreference: theme,
         setThemePreference,
-        isDarkMode: actualTheme === 'dark',
+        isDarkMode: theme === 'dark',
         toggleTheme
       }}
     >
@@ -106,3 +60,4 @@ export const useTheme = () => {
   }
   return context;
 };
+

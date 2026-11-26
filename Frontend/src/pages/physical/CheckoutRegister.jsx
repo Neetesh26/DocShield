@@ -321,8 +321,8 @@ export const CheckoutRegister = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Check-out register</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Physical Check-Out Register</h1>
+          <p className="text-xs text-slate-500">
             Physical issue / return of documents. Returns are verified by bin QR scan.
           </p>
         </div>

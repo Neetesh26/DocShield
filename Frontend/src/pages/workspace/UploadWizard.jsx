@@ -351,7 +351,7 @@ export const UploadWizard = () => {
           <div>
             <h1 className="text-lg font-bold text-slate-900 tracking-tight">GxP Document Ingestion Pipeline</h1>
             <p className="text-xs text-slate-500">
-              Four-step regulated ingestion with intelligent OCR extraction and physical location assignment.
+              Scan → Auto-extract header → Auto-classify → Store physically → E-Sign.    
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold text-orange-700 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200">

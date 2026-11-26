@@ -174,6 +174,10 @@ export const masterDataService = {
     const res = await api.post('/master-data/document-types', data);
     return res.data;
   },
+  updateDocumentType: async (id, data) => {
+    const res = await api.put(`/master-data/document-types/${id}`, data);
+    return res.data;
+  },
   createStorageLocation: async (data) => {
     const res = await api.post('/master-data/locations', data);
     return res.data;

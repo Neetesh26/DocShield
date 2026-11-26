@@ -50,6 +50,21 @@ export const documentService = {
   askAssistant: async (documentId, prompt, mode = 'qa') => {
     const response = await api.post('/assistant/chat', { documentId, prompt, mode });
     return response.data;
+  },
+
+  recordPeriodicReview: async (id, data) => {
+    const response = await api.post(`/documents/${id}/periodic-review`, data);
+    return response.data;
+  },
+
+  authorizeDestruction: async (id, data) => {
+    const response = await api.post(`/documents/${id}/destruction`, data);
+    return response.data;
+  },
+
+  getDestructionLogs: async () => {
+    const response = await api.get('/documents/destruction-logs');
+    return response.data;
   }
 };
 

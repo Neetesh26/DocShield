@@ -560,11 +560,11 @@ export const BulkUpload = () => {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Bulk Document Ingestion Queue
+              Bulk Document Queue
             </h1>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            High-throughput intelligent OCR document ingestion with automated AI classification, vault coordinate recommendation, and custody assignment.
+            Drop many scans. Each file is extracted, classified and placed — fix any row, then import the Ready ones.
           </p>
         </div>
 
@@ -593,7 +593,7 @@ export const BulkUpload = () => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 rounded-2xl p-12 text-center bg-white dark:bg-slate-900 transition cursor-pointer group shadow-xs"
+          className="border-2 border-solid border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 rounded-2xl p-12 text-center bg-white dark:bg-slate-900 transition cursor-pointer group shadow-xs"
         >
           <div className="w-16 h-16 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition">
             <Layers className="w-8 h-8" />
