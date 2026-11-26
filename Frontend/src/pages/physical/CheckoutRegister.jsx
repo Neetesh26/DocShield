@@ -54,6 +54,7 @@ export const CheckoutRegister = () => {
 
   const currentUserId = String(user?._id || user?.id || '');
   const userRole = user?.role || '';
+  const displayRole = ['Employee', 'User / Viewer', 'Viewer'].includes(userRole) ? 'User' : (userRole || 'User');
   const isManagerRole = ['Admin', 'QA', 'QA Manager', 'Document Controller'].includes(userRole);
   const isCustodianRole = userRole === 'Custodian';
 
@@ -72,6 +73,7 @@ export const CheckoutRegister = () => {
   };
 
   const canUseScanReturn = isManagerRole || checkouts.some(canReturnRecord);
+  const showActionsColumn = isManagerRole || checkouts.some(canReturnRecord);
 
   // Toast / feedback message
   const [toastMessage, setToastMessage] = useState(null);
@@ -349,7 +351,7 @@ export const CheckoutRegister = () => {
                 ? 'bg-slate-100 text-slate-700 border-slate-200'
                 : 'bg-orange-50 text-orange-700 border-orange-200'
             }`}>
-              {isManagerRole ? `Full Register (${userRole})` : `My & Custody Scope (${userRole || 'User'})`}
+              {isManagerRole ? `Full Register (${displayRole})` : `My & Custody Scope (${displayRole})`}
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -381,15 +383,13 @@ export const CheckoutRegister = () => {
             </button>
           )}
 
-          {isManagerRole && (
-            <button
-              onClick={() => setShowReportModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg shadow-2xs transition"
-            >
-              <Download className="w-4 h-4 text-slate-600" />
-              <span>Overdue report</span>
-            </button>
-          )}
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg shadow-2xs transition"
+          >
+            <Download className="w-4 h-4 text-slate-600" />
+            <span>Overdue report</span>
+          </button>
         </div>
       </div>
 
@@ -430,13 +430,13 @@ export const CheckoutRegister = () => {
                 <th className="py-3 px-4">ISSUED</th>
                 <th className="py-3 px-4">DUE</th>
                 <th className="py-3 px-4">STATUS</th>
-                <th className="py-3 px-5 text-right">ACTIONS</th>
+                {showActionsColumn && <th className="py-3 px-5 text-right">ACTIONS</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="py-16 text-center text-slate-400">
+                  <td colSpan={showActionsColumn ? 7 : 6} className="py-16 text-center text-slate-400">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-slate-300 border-t-teal-600 rounded-full animate-spin"></div>
                       <span className="text-xs">Loading check-out register...</span>
@@ -445,7 +445,7 @@ export const CheckoutRegister = () => {
                 </tr>
               ) : checkouts.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-16 text-center text-slate-400">
+                  <td colSpan={showActionsColumn ? 7 : 6} className="py-16 text-center text-slate-400">
                     No checkout records found for {activeTab}.
                   </td>
                 </tr>
@@ -534,42 +534,44 @@ export const CheckoutRegister = () => {
                       </td>
 
                       {/* Actions Column */}
-                      <td className="py-3.5 px-5 align-top text-right whitespace-nowrap">
-                        {!isItemReturned ? (
-                          showReturnBtn || showRemindBtn ? (
-                            <div className="flex items-center justify-end gap-1.5">
-                              {showReturnBtn && (
-                                <button
-                                  onClick={() => handleOpenReturnModal(item)}
-                                  className="px-3 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium shadow-2xs transition"
-                                >
-                                  Return
-                                </button>
-                              )}
+                      {showActionsColumn && (
+                        <td className="py-3.5 px-5 align-top text-right whitespace-nowrap">
+                          {!isItemReturned ? (
+                            showReturnBtn || showRemindBtn ? (
+                              <div className="flex items-center justify-end gap-1.5">
+                                {showReturnBtn && (
+                                  <button
+                                    onClick={() => handleOpenReturnModal(item)}
+                                    className="px-3 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium shadow-2xs transition"
+                                  >
+                                    Return
+                                  </button>
+                                )}
 
-                              {showRemindBtn && (
-                                <button
-                                  onClick={() => handleRemind(item)}
-                                  disabled={remindingId === item._id}
-                                  className="px-2.5 py-1 rounded border border-teal-500/80 bg-white hover:bg-teal-50 active:scale-[0.98] text-teal-800 text-xs font-medium flex items-center gap-1 shadow-2xs transition disabled:opacity-60 cursor-pointer"
-                                  title={`Send compliance reminder notification to ${item.user?.name || 'borrower'}`}
-                                >
-                                  <Bell className={`w-3.5 h-3.5 text-teal-600 ${remindingId === item._id ? 'animate-bounce' : ''}`} />
-                                  <span>{remindingId === item._id ? 'Sending...' : item.reminderCount ? `Remind (${item.reminderCount})` : 'Remind'}</span>
-                                </button>
-                              )}
-                            </div>
+                                {showRemindBtn && (
+                                  <button
+                                    onClick={() => handleRemind(item)}
+                                    disabled={remindingId === item._id}
+                                    className="px-2.5 py-1 rounded border border-teal-500/80 bg-white hover:bg-teal-50 active:scale-[0.98] text-teal-800 text-xs font-medium flex items-center gap-1 shadow-2xs transition disabled:opacity-60 cursor-pointer"
+                                    title={`Send compliance reminder notification to ${item.user?.name || 'borrower'}`}
+                                  >
+                                    <Bell className={`w-3.5 h-3.5 text-teal-600 ${remindingId === item._id ? 'animate-bounce' : ''}`} />
+                                    <span>{remindingId === item._id ? 'Sending...' : item.reminderCount ? `Remind (${item.reminderCount})` : 'Remind'}</span>
+                                  </button>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-[11px] text-slate-400 font-medium">
+                                {isSelfBorrower ? 'Awaiting Vault Return' : 'View Only'}
+                              </span>
+                            )
                           ) : (
-                            <span className="text-[11px] text-slate-400 font-medium">
-                              {isSelfBorrower ? 'Awaiting Vault Return' : 'View Only'}
+                            <span className="text-[11px] text-slate-400 font-mono">
+                              {item.actualReturnDate ? formatDateOnly(item.actualReturnDate) : 'Completed'}
                             </span>
-                          )
-                        ) : (
-                          <span className="text-[11px] text-slate-400 font-mono">
-                            {item.actualReturnDate ? formatDateOnly(item.actualReturnDate) : 'Completed'}
-                          </span>
-                        )}
-                      </td>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })
@@ -628,11 +630,14 @@ export const CheckoutRegister = () => {
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-medium focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                 >
                   {usersList.length > 0 ? (
-                    usersList.map((u) => (
-                      <option key={u._id} value={u._id}>
-                        {u.name} ({u.department || 'General'})
-                      </option>
-                    ))
+                    usersList.map((u) => {
+                      const roleLabel = ['Employee', 'User / Viewer', 'Viewer'].includes(u.role) ? 'User' : (u.role || 'User');
+                      return (
+                        <option key={u._id} value={u._id}>
+                          {u.name} ({roleLabel} - {u.department || 'General'})
+                        </option>
+                      );
+                    })
                   ) : (
                     <>
                       <option value="">Priya Nair (Quality Control)</option>

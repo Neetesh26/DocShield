@@ -52,7 +52,7 @@ const ProtectedRoute = ({ children }) => {
 // Guard individual routes based on user GxP role
 const RoleRoute = ({ routePath, children }) => {
   const { user } = useAuth();
-  const role = user?.role || 'Employee';
+  const role = user?.role || 'User';
   if (!isRouteAllowedForRole(routePath, role)) {
     return <Navigate to="/workspace/dashboard" replace />;
   }

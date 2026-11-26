@@ -17,6 +17,7 @@ const DEFAULT_SIGNATURE =
 
 export const Settings = () => {
   const { user } = useAuth();
+  const canEditSettings = ['Admin', 'QA', 'QA Manager'].includes(user?.role);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -152,10 +153,15 @@ export const Settings = () => {
     <div className="max-w-4xl space-y-6">
 
       {/* Page Header */}
-      <div>
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
           System & Compliance Governance Settings
         </h1>
+        {!canEditSettings && (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+            <Lock className="w-3 h-3" /> Read-Only Policy View
+          </span>
+        )}
       </div>
 
       {/* Error Message */}
@@ -167,6 +173,7 @@ export const Settings = () => {
       )}
 
       <form onSubmit={handleSave} className="space-y-6">
+        <fieldset disabled={!canEditSettings} className="space-y-6 disabled:opacity-85">
 
         {/* Section 1: Electronic Signature */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
@@ -280,19 +287,23 @@ export const Settings = () => {
           </div>
         </div>
 
+        </fieldset>
+
         {/* Save Button */}
-        <div className="flex justify-end">
-          <Button3D
-            type="submit"
-            variant="primary"
-            size="md"
-            disabled={saving}
-          >
-            {saving
-              ? 'Saving to Database...'
-              : 'Save Configuration Changes'}
-          </Button3D>
-        </div>
+        {canEditSettings && (
+          <div className="flex justify-end">
+            <Button3D
+              type="submit"
+              variant="primary"
+              size="md"
+              disabled={saving}
+            >
+              {saving
+                ? 'Saving to Database...'
+                : 'Save Configuration Changes'}
+            </Button3D>
+          </div>
+        )}
 
       </form>
     </div>

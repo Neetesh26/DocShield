@@ -22,7 +22,7 @@ export const register = async (req, res, next) => {
     }
 
     const validRoles = Object.values(ROLES);
-    const assignedRole = role && validRoles.includes(role) ? role : ROLES.EMPLOYEE;
+    const assignedRole = role && validRoles.includes(role) ? role : ROLES.USER;
 
     const user = new User({
       name: name.trim(),

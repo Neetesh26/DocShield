@@ -557,7 +557,7 @@ export const TopHeader = ({ onOpenScanner }) => {
                 text-[11px] mt-1
                 text-slate-500 dark:text-slate-400
               ">
-                {user?.role || 'Employee'}
+                {['Employee', 'User / Viewer', 'Viewer'].includes(user?.role) ? 'User' : (user?.role || 'User')}
               </p>
 
             </div>
@@ -595,7 +595,7 @@ export const TopHeader = ({ onOpenScanner }) => {
                 <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                   <span>ID: {user?.employeeId || 'EMP-000'}</span>
                   <span className="px-1.5 py-0.2 rounded bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-400 font-semibold border border-orange-200 dark:border-orange-800/60">
-                    {user?.role || 'Staff'}
+                    {['Employee', 'User / Viewer', 'Viewer'].includes(user?.role) ? 'User' : (user?.role || 'User')}
                   </span>
                 </div>
               </div>
