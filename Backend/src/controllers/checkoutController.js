@@ -7,19 +7,56 @@ import { sendSuccess, sendError } from '../utils/response.js';
 import { logAuditEvent } from '../services/auditService.js';
 import { AUDIT_ACTIONS, PHYSICAL_STATUSES, ROLES } from '../constants/index.js';
 
+const CHECKOUT_MANAGER_ROLES = new Set([
+  'Admin',
+  'admin',
+  ROLES.ADMIN,
+  ROLES.QA,
+  ROLES.QA_MANAGER,
+  ROLES.DOCUMENT_CONTROLLER
+]);
+
+const isCheckoutManagerRole = (role) => CHECKOUT_MANAGER_ROLES.has(role);
+
 export const getCheckouts = async (req, res, next) => {
   try {
-
-    const { status, user, search } = req.query;
+    const { status, user } = req.query;
     const now = new Date();
+    const currentUserId = req.user?._id;
+    const isManager = isCheckoutManagerRole(req.user?.role);
 
-    // Compute live synchronized counts across all records
-    const allRecords = await CheckoutRecord.find({});
+    // Build role-based visibility scope
+    let scopeFilter = {};
+    if (isManager) {
+      if (user) {
+        scopeFilter = { user };
+      }
+    } else {
+      if (user && String(user) !== String(currentUserId)) {
+        return sendSuccess(res, 'Checkout records retrieved', {
+          records: [],
+          counts: { checkedOut: 0, overdue: 0, returned: 0, all: 0 }
+        });
+      }
+
+      if (user) {
+        scopeFilter = { user: currentUserId };
+      } else {
+        const custodyDocs = await Document.find({ currentCustodian: currentUserId }).select('_id');
+        const custodyDocIds = custodyDocs.map(d => d._id);
+        scopeFilter = custodyDocIds.length > 0
+          ? { $or: [{ user: currentUserId }, { document: { $in: custodyDocIds } }] }
+          : { user: currentUserId };
+      }
+    }
+
+    // Compute live synchronized counts within the user's authorized scope
+    const scopedRecords = await CheckoutRecord.find(scopeFilter);
     let checkedOutCount = 0;
     let overdueCount = 0;
     let returnedCount = 0;
 
-    allRecords.forEach(rec => {
+    scopedRecords.forEach(rec => {
       if (rec.status === 'Active') {
         checkedOutCount++;
         if (new Date(rec.expectedReturnDate) < now) {
@@ -34,28 +71,29 @@ export const getCheckouts = async (req, res, next) => {
       checkedOut: checkedOutCount,
       overdue: overdueCount,
       returned: returnedCount,
-      all: allRecords.length
+      all: scopedRecords.length
     };
 
-    const filter = {};
-
+    const statusFilter = {};
     if (status) {
       if (status === 'Checked out' || status === 'Active') {
-        filter.status = 'Active';
+        statusFilter.status = 'Active';
       } else if (status === 'Overdue') {
-        filter.status = 'Active';
-        filter.expectedReturnDate = { $lt: now };
+        statusFilter.status = 'Active';
+        statusFilter.expectedReturnDate = { $lt: now };
       } else if (status === 'Returned') {
-        filter.status = 'Returned';
+        statusFilter.status = 'Returned';
       }
       // 'All' or empty applies no status filter
     }
 
-    if (user) filter.user = user;
+    const queryFilter = Object.keys(scopeFilter).length > 0 && Object.keys(statusFilter).length > 0
+      ? { $and: [scopeFilter, statusFilter] }
+      : { ...scopeFilter, ...statusFilter };
 
-    const checkouts = await CheckoutRecord.find(filter)
-      .populate('document', 'documentNumber title version status physicalStatus storageLocation')
-      .populate('user', 'name email department employeeId')
+    const checkouts = await CheckoutRecord.find(queryFilter)
+      .populate('document', 'documentNumber title version status physicalStatus storageLocation currentCustodian')
+      .populate('user', 'name email department employeeId role')
       .populate('approvedBy', 'name email')
       .populate('returnVerifiedBy', 'name email')
       .sort({ checkoutDate: -1, createdAt: -1 });
@@ -106,6 +144,10 @@ export const getCheckouts = async (req, res, next) => {
 
 export const createCheckout = async (req, res, next) => {
   try {
+    if (!isCheckoutManagerRole(req.user?.role)) {
+      return sendError(res, `Access denied. Role '${req.user?.role}' is not authorized to issue physical check-outs.`, 403);
+    }
+
     const { documentId, expectedReturnDate, purpose, condition = 'Good', borrowerId } = req.body;
 
     if (!documentId || !expectedReturnDate || !purpose) {
@@ -173,6 +215,17 @@ export const returnCheckout = async (req, res, next) => {
       return sendError(res, 'Checkout record not found', 404);
     }
 
+    const isManager = isCheckoutManagerRole(req.user?.role);
+    const isDocCustodian = checkout.document?.currentCustodian && String(checkout.document.currentCustodian) === String(req.user?._id);
+    const isBorrower = String(checkout.user?._id || checkout.user) === String(req.user?._id);
+    if (!isManager && !(req.user?.role === ROLES.CUSTODIAN && isDocCustodian && !isBorrower)) {
+      return sendError(
+        res,
+        'Access denied. Only authorized Vault/Document Control personnel or the assigned Document Custodian may verify return.',
+        403
+      );
+    }
+
     if (checkout.status === 'Returned') {
       return sendError(res, 'Document has already been recorded as returned', 400);
     }
@@ -208,12 +261,24 @@ export const returnCheckout = async (req, res, next) => {
 
 export const remindCheckout = async (req, res, next) => {
   try {
+    if (!isCheckoutManagerRole(req.user?.role)) {
+      return sendError(res, `Access denied. Role '${req.user?.role}' is not authorized to send overdue reminders.`, 403);
+    }
+
     const checkout = await CheckoutRecord.findById(req.params.id)
       .populate('document')
       .populate('user');
 
     if (!checkout) {
       return sendError(res, 'Checkout record not found', 404);
+    }
+
+    if (checkout.status === 'Returned') {
+      return sendError(res, 'Cannot send reminder for an already returned document', 400);
+    }
+
+    if (String(checkout.user?._id || checkout.user) === String(req.user?._id)) {
+      return sendError(res, 'Cannot send an overdue compliance reminder to yourself', 400);
     }
 
     const borrower = checkout.user;

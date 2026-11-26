@@ -156,47 +156,47 @@ export const seedDatabase = async () => {
         designation: 'QC Analytical Records Custodian',
         phone: '+91 98201 10005'
       },
-      {
-        name: 'Amit Kumar',
-        email: 'amit.kumar@docushield.com',
-        password: demoPassword,
-        role: ROLES.VIEWER,
-        department: 'Operations & R&D',
-        employeeId: 'EMP-USR-006',
-        designation: 'Manufacturing Associate / Viewer',
-        phone: '+91 98201 10006'
-      },
+      // {
+      //   name: 'Amit Kumar',
+      //   email: 'amit.kumar@docushield.com',
+      //   password: demoPassword,
+      //   role: ROLES.EMPLOYEE,
+      //   department: 'Operations & R&D',
+      //   employeeId: 'EMP-USR-006',
+      //   designation: 'Manufacturing Associate',
+      //   phone: '+91 98201 10006'
+      // },
       // Convenience aliases for legacy credentials
-      {
-        name: 'Anita Sharma (Admin Alias)',
-        email: 'admin@docushield.com',
-        password: demoPassword,
-        role: ROLES.ADMIN,
-        department: 'Executive Administration',
-        employeeId: 'EMP-ADM-ALIAS',
-        designation: 'System Administrator',
-        phone: '+91 98201 10001'
-      },
-      {
-        name: 'Dr. Meera Iyer (QA Alias)',
-        email: 'qa@docushield.com',
-        password: demoPassword,
-        role: ROLES.QA_MANAGER,
-        department: 'Quality Assurance',
-        employeeId: 'EMP-QA-ALIAS',
-        designation: 'Head of QA',
-        phone: '+91 98201 10002'
-      },
-      {
-        name: 'Suresh Patil (DC Alias)',
-        email: 'doccontrol@docushield.com',
-        password: demoPassword,
-        role: ROLES.DOCUMENT_CONTROLLER,
-        department: 'Document Control',
-        employeeId: 'EMP-DC-ALIAS',
-        designation: 'Document Controller',
-        phone: '+91 98201 10003'
-      }
+      // {
+      //   name: 'Anita Sharma (Admin Alias)',
+      //   email: 'admin@docushield.com',
+      //   password: demoPassword,
+      //   role: ROLES.ADMIN,
+      //   department: 'Executive Administration',
+      //   employeeId: 'EMP-ADM-ALIAS',
+      //   designation: 'System Administrator',
+      //   phone: '+91 98201 10001'
+      // },
+      // {
+      //   name: 'Dr. Meera Iyer (QA Alias)',
+      //   email: 'qa@docushield.com',
+      //   password: demoPassword,
+      //   role: ROLES.QA_MANAGER,
+      //   department: 'Quality Assurance',
+      //   employeeId: 'EMP-QA-ALIAS',
+      //   designation: 'Head of QA',
+      //   phone: '+91 98201 10002'
+      // },
+      // {
+      //   name: 'Suresh Patil (DC Alias)',
+      //   email: 'doccontrol@docushield.com',
+      //   password: demoPassword,
+      //   role: ROLES.DOCUMENT_CONTROLLER,
+      //   department: 'Document Control',
+      //   employeeId: 'EMP-DC-ALIAS',
+      //   designation: 'Document Controller',
+      //   phone: '+91 98201 10003'
+      // }
     ]);
 
     const [adminUser, qaUser, docCtrlUser, deptHeadUser, analystUser, viewerUser] = users;
@@ -938,14 +938,14 @@ export const seedDatabase = async () => {
       }
     ]);
 
-    console.log('[Seed] Database seeding successfully completed!');
-    console.log('Demo Login Credentials (6 Quick Sign-In Users):');
-    console.log('1. Anita Sharma (Admin): anita.sharma@docushield.com / DocuShield@2026');
-    console.log('2. Dr. Meera Iyer (QA Manager): meera.iyer@docushield.com / DocuShield@2026');
-    console.log('3. Suresh Patil (Document Controller): suresh.patil@docushield.com / DocuShield@2026');
-    console.log('4. Rahul Verma (Custodian): rahul.verma@docushield.com / DocuShield@2026');
-    console.log('5. Priya Nair (Custodian): priya.nair@docushield.com / DocuShield@2026');
-    console.log('6. Amit Kumar (User / Viewer): amit.kumar@docushield.com / DocuShield@2026');
+    // console.log('[Seed] Database seeding successfully completed!');
+    // console.log('Demo Login Credentials (6 Quick Sign-In Users):');
+    // console.log('1. Anita Sharma (Admin): anita.sharma@docushield.com / DocuShield@2026');
+    // console.log('2. Dr. Meera Iyer (QA Manager): meera.iyer@docushield.com / DocuShield@2026');
+    // console.log('3. Suresh Patil (Document Controller): suresh.patil@docushield.com / DocuShield@2026');
+    // console.log('4. Rahul Verma (Custodian): rahul.verma@docushield.com / DocuShield@2026');
+    // console.log('5. Priya Nair (Custodian): priya.nair@docushield.com / DocuShield@2026');
+    // console.log('6. Amit Kumar (User / Viewer): amit.kumar@docushield.com / DocuShield@2026');
 
     process.exit(0);
   } catch (error) {

@@ -47,7 +47,11 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-      }
+      },
+      backdropBlur: {
+        '2xs': '4px',
+        xs: '6px',
+      },
     },
   },
   plugins: [],
