@@ -170,8 +170,26 @@ export const createDocument = async (req, res, next) => {
       extractedMetadata = {},
       status = DOCUMENT_STATUSES.EFFECTIVE,
       legalHold = false,
-      retentionYears = 5
+      retentionYears = 5,
+      password,
+      signatureMeaning = 'Author / Ingestion Attestation',
+      reason = 'Initial GxP Master Ingestion & Physical Vault Archival'
     } = req.body;
+
+    // Strict 21 CFR Part 11 Electronic Signature Password Re-Authentication
+    if (!password || !password.trim()) {
+      return sendError(res, 'Security password is required for 21 CFR Part 11 electronic signature authentication.', 400);
+    }
+
+    const signingUser = await User.findById(req.user._id).select('+password');
+    if (!signingUser || !signingUser.password) {
+      return sendError(res, 'Authorized signing user not found in database.', 404);
+    }
+
+    const isMatch = await signingUser.comparePassword(password.trim());
+    if (!isMatch) {
+      return sendError(res, 'Invalid Password: Authentication failed. Please enter your correct account password.', 400);
+    }
 
     if (!documentNumber || !title || !documentType || !department || !fileUrl) {
       return sendError(res, 'Missing required document fields (Number, Title, Type, Department, File)', 400);
@@ -263,13 +281,28 @@ export const createDocument = async (req, res, next) => {
     });
     await docVersion.save();
 
-    // Immutable GxP Audit log
+    // Immutable GxP Audit log with 21 CFR Part 11 ALCOA+ dimensions
     await logAuditEvent({
       user: req.user,
       action: AUDIT_ACTIONS.UPLOAD,
       entity: 'Document',
       entityId: newDoc._id,
       details: `Created Document '${newDoc.documentNumber}' (Rev ${newDoc.version}) titled '${newDoc.title}' stored at ${loc.code}.`,
+      previousValue: 'None (Initial Ingestion)',
+      newValue: {
+        documentNumber: newDoc.documentNumber,
+        version: newDoc.version,
+        status: newDoc.status,
+        vaultLocation: loc.code,
+        custodian: req.user.name
+      },
+      reason: reason || 'Initial GxP Master Document Registration & Vault Archival',
+      signature: {
+        signerName: `${signingUser.name} (${signingUser.employeeId || signingUser.email})`,
+        signerRole: signingUser.role,
+        meaning: signatureMeaning,
+        signedAt: new Date()
+      },
       metadata: {
         documentNumber: newDoc.documentNumber,
         version: newDoc.version,
@@ -1014,6 +1047,20 @@ export const recordPeriodicReview = async (req, res, next) => {
       entity: 'Document',
       entityId: doc._id,
       details: `21 CFR Part 11 electronic signature verified for ${doc.documentNumber}. Meaning: ${signatureMeaning}. Outcome: ${outcomeText}. Next review scheduled for ${updatedReviewDate.toISOString().split('T')[0]}.`,
+      previousValue: {
+        reviewDate: previousReviewDate ? previousReviewDate.toISOString().split('T')[0] : null
+      },
+      newValue: {
+        reviewDate: updatedReviewDate.toISOString().split('T')[0],
+        status: doc.status
+      },
+      reason: outcomeText,
+      signature: {
+        signerName: `${signingUser.name} (${signingUser.employeeId || signingUser.email})`,
+        signerRole: signingUser.role,
+        meaning: signatureMeaning,
+        signedAt: new Date()
+      },
       metadata: {
         previousReviewDate,
         newReviewDate: updatedReviewDate,

@@ -673,7 +673,7 @@ export const BulkUpload = () => {
             <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
               <div className="flex items-center gap-3 flex-wrap">
                 {/* Needs review only filter */}
-                <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                {/* <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={filterNeedsReview}
@@ -681,7 +681,7 @@ export const BulkUpload = () => {
                     className="w-3.5 h-3.5 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                   />
                   <span>Needs review only</span>
-                </label>
+                </label> */}
 
                 {/* Auto-place all */}
                 <button

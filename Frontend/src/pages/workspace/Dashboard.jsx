@@ -153,7 +153,7 @@ export const Dashboard = () => {
       color: 'text-orange-700',
       bg: 'bg-orange-50',
       link: '/workspace/repository',
-      desc: 'All active indexed records'
+      desc: ''
     },
     {
       label: 'Effective Documents',
@@ -162,7 +162,7 @@ export const Dashboard = () => {
       color: 'text-amber-700',
       bg: 'bg-amber-50',
       link: '/workspace/repository?status=Effective',
-      desc: 'Released & verified'
+      desc: ''
     },
     {
       label: 'Pending Approvals',
@@ -171,7 +171,7 @@ export const Dashboard = () => {
       color: 'text-amber-700',
       bg: 'bg-amber-50',
       link: '/workflow/approvals',
-      desc: '21 CFR sign-off needed'
+      desc: ''
     },
     {
       label: 'Pending Requests',
@@ -180,7 +180,7 @@ export const Dashboard = () => {
       color: 'text-orange-800',
       bg: 'bg-orange-50',
       link: '/workflow/requests',
-      desc: 'Issuance & revision queues'
+      desc: ''
     },
     {
       label: 'Due for Review',
@@ -189,7 +189,7 @@ export const Dashboard = () => {
       color: 'text-rose-700',
       bg: 'bg-rose-50',
       link: '/workflow/review-retention',
-      desc: 'Approaching review cycle'
+      desc: ''
     },
     {
       label: 'Overdue Checkouts',
@@ -198,7 +198,7 @@ export const Dashboard = () => {
       color: 'text-rose-800',
       bg: 'bg-rose-50',
       link: '/physical/checkout',
-      desc: 'Physical loans past return date'
+      desc: ''
     },
     {
       label: 'Pending Handovers',
@@ -207,7 +207,7 @@ export const Dashboard = () => {
       color: 'text-orange-600',
       bg: 'bg-orange-50',
       link: '/physical/custody',
-      desc: 'Custody transfer confirmations'
+      desc: ''
     },
     {
       label: 'Uploaded Recently',
@@ -216,7 +216,7 @@ export const Dashboard = () => {
       color: 'text-amber-800',
       bg: 'bg-amber-50',
       link: '/workspace/repository?sort=newest',
-      desc: 'Past 30 days intake'
+      desc: ''
     }
   ];
 

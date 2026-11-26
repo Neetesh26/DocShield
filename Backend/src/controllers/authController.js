@@ -101,6 +101,9 @@ export const login = async (req, res, next) => {
       entity: 'Authentication',
       entityId: user._id,
       details: `User ${user.name} (${user.email}) successfully logged in with role [${user.role}].`,
+      previousValue: 'Session Inactive / Logged Out',
+      newValue: `Session Active [Role: ${user.role}]`,
+      reason: 'User authentication via credentials',
       ipAddress: req.ip || '127.0.0.1'
     });
 
@@ -186,6 +189,9 @@ export const logout = async (req, res) => {
       entity: 'Authentication',
       entityId: req.user._id,
       details: `User ${req.user.name} logged out.`,
+      previousValue: `Session Active [${req.user.email}]`,
+      newValue: 'Session Terminated / Logged Out',
+      reason: 'User initiated secure session sign-out',
       ipAddress: req.ip || '127.0.0.1'
     });
   }

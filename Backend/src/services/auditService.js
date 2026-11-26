@@ -8,6 +8,10 @@ export const logAuditEvent = async ({
   entity,
   entityId = '',
   details,
+  previousValue = null,
+  newValue = null,
+  reason = '',
+  signature = null,
   metadata = {},
   ipAddress = '127.0.0.1'
 }) => {
@@ -20,6 +24,15 @@ export const logAuditEvent = async ({
       entity,
       entityId: String(entityId),
       details,
+      previousValue,
+      newValue,
+      reason,
+      signature: signature || {
+        signerName: user?.name || userName,
+        signerRole: user?.role || userRole,
+        meaning: action,
+        signedAt: new Date()
+      },
       metadata,
       ipAddress
     });

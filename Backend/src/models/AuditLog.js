@@ -35,6 +35,25 @@ const auditLogSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // 21 CFR Part 11 ALCOA+ Fields: Previous Value, New Value & Reason for Change
+  previousValue: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null
+  },
+  newValue: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null
+  },
+  reason: {
+    type: String,
+    default: ''
+  },
+  signature: {
+    signerName: { type: String, default: '' },
+    signerRole: { type: String, default: '' },
+    meaning: { type: String, default: '' },
+    signedAt: { type: Date, default: null }
+  },
   metadata: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
