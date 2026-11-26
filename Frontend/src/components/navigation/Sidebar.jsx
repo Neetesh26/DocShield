@@ -143,7 +143,7 @@ export const isRouteAllowedForRole = (itemPath, role) => {
 export const Sidebar = () => {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
-  const userRole = user?.role || 'User / Viewer';
+  const userRole = user?.role || 'Employee';
 
   // Toggle Collapse State (persists in localStorage)
   const [isCollapsed, setIsCollapsed] = useState(() => {

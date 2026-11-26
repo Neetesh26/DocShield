@@ -52,6 +52,27 @@ export const CheckoutRegister = () => {
   const [returnRemarks, setReturnRemarks] = useState('');
   const [binScannedCode, setBinScannedCode] = useState('PLT-1/PRD/R101/RK-R01/SH-01/BIN-B01');
 
+  const currentUserId = String(user?._id || user?.id || '');
+  const userRole = user?.role || '';
+  const isManagerRole = ['Admin', 'QA', 'QA Manager', 'Document Controller'].includes(userRole);
+  const isCustodianRole = userRole === 'Custodian';
+
+  const isBorrowerOfRecord = (item) => String(item.user?._id || item.user || '') === currentUserId;
+  const isCustodianOfRecord = (item) => String(item.document?.currentCustodian?._id || item.document?.currentCustodian || '') === currentUserId;
+
+  const canReturnRecord = (item) => {
+    if (!item || item.status === 'Returned') return false;
+    if (isManagerRole) return true;
+    return isCustodianRole && isCustodianOfRecord(item) && !isBorrowerOfRecord(item);
+  };
+
+  const canRemindRecord = (item, isItemOverdue) => {
+    if (!item || item.status === 'Returned' || !isItemOverdue) return false;
+    return isManagerRole && !isBorrowerOfRecord(item);
+  };
+
+  const canUseScanReturn = isManagerRole || checkouts.some(canReturnRecord);
+
   // Toast / feedback message
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -155,7 +176,7 @@ export const CheckoutRegister = () => {
 
   const handleConfirmReturnSubmit = async (e) => {
     e.preventDefault();
-    const targetRecordId = selectedRecordForReturn?._id || checkouts.find(c => c.status === 'Active')?._id;
+    const targetRecordId = selectedRecordForReturn?._id || checkouts.find(canReturnRecord)?._id;
     if (!targetRecordId) {
       showToast('Please select a checked-out record to return', 'error');
       return;
@@ -255,7 +276,7 @@ export const CheckoutRegister = () => {
         `"${r.user?.name || ''}"`,
         `"${r.department || ''}"`,
         `"${formatDateTime(r.checkoutDate)}"`,
-        `"${r.approvedBy?.name || 'Anita Sharma'}"`,
+        `"${r.approvedBy?.name || 'Document Control'}"`,
         `"${formatDateOnly(r.expectedReturnDate)}"`,
         `"${r.badge?.label || r.status}"`,
         `"${r.conditionOnCheckout || 'Good'}"`
@@ -285,7 +306,7 @@ export const CheckoutRegister = () => {
         `"${r.user?.name || ''}"`,
         `"${r.department || ''}"`,
         `"${formatDateTime(r.checkoutDate)}"`,
-        `"${r.approvedBy?.name || 'Anita Sharma'}"`,
+        `"${r.approvedBy?.name || 'Document Control'}"`,
         `"${formatDateOnly(r.expectedReturnDate)}"`,
         `"${r.badge?.label || 'Active'}"`,
         `"${(r.purpose || '').replace(/"/g, '""')}"`,
@@ -321,40 +342,54 @@ export const CheckoutRegister = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Physical Check-Out Register</h1>
-          <p className="text-xs text-slate-500">
-            Physical issue / return of documents. Returns are verified by bin QR scan.
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Physical Check-Out Register</h1>
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+              isManagerRole
+                ? 'bg-slate-100 text-slate-700 border-slate-200'
+                : 'bg-orange-50 text-orange-700 border-orange-200'
+            }`}>
+              {isManagerRole ? `Full Register (${userRole})` : `My & Custody Scope (${userRole || 'User'})`}
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isManagerRole
+              ? 'Physical issue / return of documents. Returns are verified by bin QR scan.'
+              : 'Showing physical documents borrowed by you or assigned to your custody. Returns are verified by Vault / Document Control.'}
           </p>
         </div>
 
-        {/* Action Buttons Matching Screenshot 1 */}
+        {/* Role-gated Action Buttons */}
         <div className="flex items-center gap-2">
-          {/* Check out button */}
-          <button
-            onClick={handleOpenCheckoutModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#0b192c] hover:bg-[#1a2d47] active:scale-[0.98] text-white text-xs font-medium rounded-lg shadow-xs transition"
-          >
-            <FileSpreadsheet className="w-4 h-4 text-slate-200" />
-            <span>Check out</span>
-          </button>
+          {isManagerRole && (
+            <button
+              onClick={handleOpenCheckoutModal}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#0b192c] hover:bg-[#1a2d47] active:scale-[0.98] text-white text-xs font-medium rounded-lg shadow-xs transition"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-slate-200" />
+              <span>Check out</span>
+            </button>
+          )}
 
-          {/* Return (scan) button */}
-          <button
-            onClick={() => handleOpenReturnModal(null)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#ea580c] hover:bg-[#ea580c] active:scale-[0.98] text-white text-xs font-medium rounded-lg shadow-xs transition"
-          >
-            <RotateCcw className="w-4 h-4 text-white" />
-            <span>Return (scan)</span>
-          </button>
+          {canUseScanReturn && (
+            <button
+              onClick={() => handleOpenReturnModal(null)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#ea580c] hover:bg-[#ea580c] active:scale-[0.98] text-white text-xs font-medium rounded-lg shadow-xs transition"
+            >
+              <RotateCcw className="w-4 h-4 text-white" />
+              <span>Return (scan)</span>
+            </button>
+          )}
 
-          {/* Overdue report button */}
-          <button
-            onClick={() => setShowReportModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg shadow-2xs transition"
-          >
-            <Download className="w-4 h-4 text-slate-600" />
-            <span>Overdue report</span>
-          </button>
+          {isManagerRole && (
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium rounded-lg shadow-2xs transition"
+            >
+              <Download className="w-4 h-4 text-slate-600" />
+              <span>Overdue report</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -419,7 +454,10 @@ export const CheckoutRegister = () => {
                   const isItemOverdue = item.isOverdue || (item.badge && item.badge.type === 'overdue');
                   const isItemReturned = item.status === 'Returned';
                   const borrowerInitials = getInitials(item.user?.name);
-                  const issuedByName = item.approvedBy?.name || 'Anita Sharma';
+                  const issuedByName = item.approvedBy?.name || 'Document Control';
+                  const showReturnBtn = canReturnRecord(item);
+                  const showRemindBtn = canRemindRecord(item, isItemOverdue);
+                  const isSelfBorrower = isBorrowerOfRecord(item);
 
                   return (
                     <tr key={item._id} className="hover:bg-slate-50/60 transition-colors">
@@ -444,6 +482,9 @@ export const CheckoutRegister = () => {
                           </div>
                           <span className="text-slate-800 text-xs font-normal">
                             {item.user?.name || 'Borrower'}
+                            {isSelfBorrower && (
+                              <span className="ml-1.5 text-[10px] font-semibold text-orange-600">(You)</span>
+                            )}
                           </span>
                         </div>
                       </td>
@@ -495,26 +536,34 @@ export const CheckoutRegister = () => {
                       {/* Actions Column */}
                       <td className="py-3.5 px-5 align-top text-right whitespace-nowrap">
                         {!isItemReturned ? (
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => handleOpenReturnModal(item)}
-                              className="px-3 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium shadow-2xs transition"
-                            >
-                              Return
-                            </button>
+                          showReturnBtn || showRemindBtn ? (
+                            <div className="flex items-center justify-end gap-1.5">
+                              {showReturnBtn && (
+                                <button
+                                  onClick={() => handleOpenReturnModal(item)}
+                                  className="px-3 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium shadow-2xs transition"
+                                >
+                                  Return
+                                </button>
+                              )}
 
-                            {isItemOverdue && (
-                              <button
-                                onClick={() => handleRemind(item)}
-                                disabled={remindingId === item._id}
-                                className="px-2.5 py-1 rounded border border-teal-500/80 bg-white hover:bg-teal-50 active:scale-[0.98] text-teal-800 text-xs font-medium flex items-center gap-1 shadow-2xs transition disabled:opacity-60 cursor-pointer"
-                                title={`Send compliance reminder notification to ${item.user?.name || 'borrower'}`}
-                              >
-                                <Bell className={`w-3.5 h-3.5 text-teal-600 ${remindingId === item._id ? 'animate-bounce' : ''}`} />
-                                <span>{remindingId === item._id ? 'Sending...' : item.reminderCount ? `Remind (${item.reminderCount})` : 'Remind'}</span>
-                              </button>
-                            )}
-                          </div>
+                              {showRemindBtn && (
+                                <button
+                                  onClick={() => handleRemind(item)}
+                                  disabled={remindingId === item._id}
+                                  className="px-2.5 py-1 rounded border border-teal-500/80 bg-white hover:bg-teal-50 active:scale-[0.98] text-teal-800 text-xs font-medium flex items-center gap-1 shadow-2xs transition disabled:opacity-60 cursor-pointer"
+                                  title={`Send compliance reminder notification to ${item.user?.name || 'borrower'}`}
+                                >
+                                  <Bell className={`w-3.5 h-3.5 text-teal-600 ${remindingId === item._id ? 'animate-bounce' : ''}`} />
+                                  <span>{remindingId === item._id ? 'Sending...' : item.reminderCount ? `Remind (${item.reminderCount})` : 'Remind'}</span>
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-[11px] text-slate-400 font-medium">
+                              {isSelfBorrower ? 'Awaiting Vault Return' : 'View Only'}
+                            </span>
+                          )
                         ) : (
                           <span className="text-[11px] text-slate-400 font-mono">
                             {item.actualReturnDate ? formatDateOnly(item.actualReturnDate) : 'Completed'}

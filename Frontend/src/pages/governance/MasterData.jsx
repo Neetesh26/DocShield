@@ -256,9 +256,12 @@ export const MasterData = () => {
       case 'Admin':
         return 'bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800';
       case 'QA':
+      case 'QA Manager':
         return 'bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-800';
       case 'Document Controller':
         return 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800';
+      case 'Custodian':
+        return 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
       case 'Department Head':
         return 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800';
       default:
@@ -267,6 +270,7 @@ export const MasterData = () => {
   };
 
   return (
+    <>
     <div className="space-y-6 animate-fade-in">
       
       {/* Executive Header */}
@@ -750,6 +754,7 @@ export const MasterData = () => {
         )}
 
       </div>
+    </div>
 
       {/* ========================================================
           MODAL: ADD DEPARTMENT
@@ -1127,7 +1132,9 @@ export const MasterData = () => {
                   >
                     <option value="Admin">Admin</option>
                     <option value="QA">QA</option>
+                    <option value="QA Manager">QA Manager</option>
                     <option value="Document Controller">Document Controller</option>
+                    <option value="Custodian">Custodian</option>
                     <option value="Department Head">Department Head</option>
                     <option value="Employee">Employee</option>
                   </select>
@@ -1198,7 +1205,6 @@ export const MasterData = () => {
           </div>
         </div>
       )}
-
-    </div>
+    </>
   );
 };

@@ -421,6 +421,10 @@ html.dark .recharts-default-tooltip {
 }
 
 /* 12. Modals & Dialog Backdrops */
+.fixed.inset-0 {
+  margin: 0 !important;
+}
+
 html.dark .bg-slate-900\/60 {
   background-color: rgba(2, 6, 23, 0.85) !important;
 }
@@ -437,12 +441,12 @@ html.dark ::-webkit-scrollbar-thumb:hover {
 /* 13. Reports & Analytics Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes pulseSubtle {
