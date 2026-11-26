@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Clock, CheckCircle, XCircle, Search, Filter } from 'lucide-react';
 import { requestService, documentService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from '../../context/ToastContext';
 
 export const Requests = () => {
   const { user } = useAuth();
@@ -17,6 +18,10 @@ export const Requests = () => {
   const [requestType, setRequestType] = useState('Print');
   const [reason, setReason] = useState('');
   const [urgency, setUrgency] = useState('Normal');
+
+  // Cancel Confirmation Modal
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
 
   const fetchRequests = async () => {
     try {
@@ -58,23 +63,31 @@ export const Requests = () => {
         urgency
       });
       if (res.success) {
+        toast.success(`Request ${res.data?.requestNumber || ''} submitted successfully`);
         setShowModal(false);
         setSelectedDocId('');
         setReason('');
         fetchRequests();
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to submit request');
+      toast.error(err.response?.data?.message || 'Failed to submit request');
     }
   };
 
-  const handleCancelRequest = async (id) => {
-    if (!window.confirm('Cancel this request?')) return;
+  const handleConfirmCancel = async () => {
+    if (!cancelTarget?._id) return;
     try {
-      const res = await requestService.cancelRequest(id);
-      if (res.success) fetchRequests();
+      setCancelling(true);
+      const res = await requestService.cancelRequest(cancelTarget._id);
+      if (res.success) {
+        toast.success(`Request ${cancelTarget.requestNumber || ''} cancelled`);
+        setCancelTarget(null);
+        fetchRequests();
+      }
     } catch (err) {
-      alert(err.response?.data?.message || 'Cancel failed');
+      toast.error(err.response?.data?.message || 'Cancel failed');
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -171,8 +184,8 @@ export const Requests = () => {
                       <td className="py-3 px-4 text-right">
                         {canCancel ? (
                           <button
-                            onClick={() => handleCancelRequest(r._id)}
-                            className="px-2.5 py-1 text-rose-600 hover:bg-rose-50 rounded text-[11px] font-semibold"
+                            onClick={() => setCancelTarget(r)}
+                            className="px-2.5 py-1 text-rose-600 hover:bg-rose-50 rounded text-[11px] font-semibold cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -271,6 +284,56 @@ export const Requests = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Cancel Request Confirmation Modal */}
+      {cancelTarget && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 max-w-sm w-full p-6 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <XCircle className="w-4 h-4 text-rose-600" />
+                <h3 className="text-sm font-bold text-slate-900">Cancel Request</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCancelTarget(null)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-600 space-y-2">
+              <p>Are you sure you want to cancel this request?</p>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div className="font-mono font-bold text-orange-700">{cancelTarget.requestNumber}</div>
+                <div className="font-medium text-slate-800 truncate">
+                  {cancelTarget.document?.documentNumber} — {cancelTarget.document?.title}
+                </div>
+                <div className="text-[11px] text-slate-500">Type: {cancelTarget.requestType}</div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                disabled={cancelling}
+                onClick={() => setCancelTarget(null)}
+                className="px-3.5 py-1.5 border border-slate-300 rounded-lg text-slate-700 text-xs font-medium hover:bg-slate-50 cursor-pointer"
+              >
+                Keep Request
+              </button>
+              <button
+                type="button"
+                disabled={cancelling}
+                onClick={handleConfirmCancel}
+                className="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-xs disabled:opacity-60 cursor-pointer"
+              >
+                {cancelling ? 'Cancelling...' : 'Yes, Cancel Request'}
+              </button>
+            </div>
           </div>
         </div>
       )}
