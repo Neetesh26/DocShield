@@ -30,6 +30,18 @@ export const ReviewRetention = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const userRole = user?.role || '';
+
+  // Strict 21 CFR Part 11 & GxP Role-Based Access Control (RBAC)
+  // 1. Periodic Review: QA, Custodian, Document Controller, Admin
+  const canPerformReview = ['Admin', 'QA Manager', 'QA', 'Document Controller', 'Custodian'].includes(userRole);
+  // 2. Authorize Destruction: QA, Document Controller, Admin (Custodians and Viewers cannot authorize disposal)
+  const canAuthorizeDestruction = ['Admin', 'QA Manager', 'QA', 'Document Controller'].includes(userRole);
+  // 3. Legal Hold Management: QA, Document Controller, Admin
+  const canManageLegalHold = ['Admin', 'QA Manager', 'QA', 'Document Controller'].includes(userRole);
+  // 4. Retention Policy Configuration: QA, Admin only
+  const canEditPolicy = ['Admin', 'QA Manager', 'QA'].includes(userRole);
+
   // Active Tab: 'review' | 'destruction' | 'log' | 'policy'
   const [activeTab, setActiveTab] = useState('review');
 
@@ -72,6 +84,10 @@ export const ReviewRetention = () => {
   const [showReviewPassword, setShowReviewPassword] = useState(false);
 
   const openReviewModal = (doc) => {
+    if (!canPerformReview) {
+      toast.error(`Access Denied: Your active role '${userRole || 'Viewer'}' cannot sign periodic reviews. Requires QA, Custodian, or Document Controller.`);
+      return;
+    }
     setReviewModalDoc(doc);
     setReviewExtensionMonths(12);
     setSignatureMeaning('Reviewed');
@@ -294,6 +310,10 @@ export const ReviewRetention = () => {
 
   // Handler: Toggle Legal Hold
   const handleToggleLegalHold = async (doc) => {
+    if (!canManageLegalHold) {
+      toast.error(`Access Denied: Role '${userRole || 'Viewer'}' cannot manage regulatory legal holds. Requires QA or Document Controller.`);
+      return;
+    }
     const newState = !doc.legalHold;
     const confirmMsg = newState
       ? `Place active 21 CFR Part 11 Regulatory Legal Hold on ${doc.documentNumber}? (Destruction and alteration will be strictly prohibited).`
@@ -315,6 +335,10 @@ export const ReviewRetention = () => {
   // Handler: Execute Destruction Sign-Off
   const handleConfirmDestruction = async () => {
     if (!destructionModalDoc) return;
+    if (!canAuthorizeDestruction) {
+      toast.error(`Access Denied: Role '${userRole || 'Viewer'}' cannot authorize document destruction. Requires QA or Document Controller.`);
+      return;
+    }
     if (destructionModalDoc.legalHold) {
       toast.error('Document is under active Legal Hold and cannot be destroyed.');
       return;
@@ -348,6 +372,10 @@ export const ReviewRetention = () => {
   // Handler: Save Updated Retention Policy
   const handleSavePolicy = async () => {
     if (!editPolicyItem) return;
+    if (!canEditPolicy) {
+      toast.error(`Access Denied: Role '${userRole || 'Viewer'}' cannot update retention policy. Requires QA or Admin.`);
+      return;
+    }
     try {
       setSavingPolicy(true);
       const res = await masterDataService.updateDocumentType(editPolicyItem._id, {
@@ -379,11 +407,28 @@ export const ReviewRetention = () => {
             </h1>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Periodic review reminders, retention policy per document type, legal hold and controlled destruction.          </p>
+            Periodic review reminders, retention policy per document type, legal hold and controlled destruction.
+          </p>
         </div>
 
-        {/* Global Quick Metrics */}
+        {/* Global Quick Metrics & User Role RBAC Badge */}
         <div className="flex items-center gap-2 overflow-x-auto">
+          {/* User Active Role Pill */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs text-xs">
+            <ShieldCheck className={`w-3.5 h-3.5 ${canPerformReview ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
+            <span className="text-slate-500 dark:text-slate-400">Role:</span>
+            <span className="font-bold text-slate-800 dark:text-slate-100">{userRole || 'Viewer'}</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+              canAuthorizeDestruction
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                : canPerformReview
+                ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+            }`}>
+              {canAuthorizeDestruction ? 'Full Authority' : canPerformReview ? 'Review Sign-off' : 'Read-Only'}
+            </span>
+          </div>
+
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs text-xs">
             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
             <span className="text-slate-500 dark:text-slate-400">Overdue Reviews:</span>
@@ -645,13 +690,22 @@ export const ReviewRetention = () => {
 
                         {/* ACTION */}
                         <td className="py-4 px-6 text-right whitespace-nowrap">
-                          <button
-                            type="button"
-                            onClick={() => openReviewModal(doc)}
-                            className="inline-flex items-center gap-1 px-4 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 text-xs font-semibold shadow-2xs transition cursor-pointer"
-                          >
-                            Mark reviewed — no change
-                          </button>
+                          {canPerformReview ? (
+                            <button
+                              type="button"
+                              onClick={() => openReviewModal(doc)}
+                              className="inline-flex items-center gap-1 px-4 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 text-xs font-semibold shadow-2xs transition cursor-pointer"
+                            >
+                              Mark reviewed — no change
+                            </button>
+                          ) : (
+                            <span
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 text-xs font-medium cursor-not-allowed select-none"
+                              title={`Periodic review sign-off restricted. Current role: '${userRole || 'Viewer'}'. Requires QA, Custodian, or Document Controller.`}
+                            >
+                              <Lock className="w-3 h-3 text-slate-400" /> Review Locked
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );
@@ -745,13 +799,22 @@ export const ReviewRetention = () => {
                         )}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => openReviewModal(doc)}
-                        className="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 text-xs font-semibold shadow-2xs transition cursor-pointer"
-                      >
-                        Mark reviewed — no change
-                      </button>
+                      {canPerformReview ? (
+                        <button
+                          type="button"
+                          onClick={() => openReviewModal(doc)}
+                          className="inline-flex items-center justify-center gap-1 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 text-xs font-semibold shadow-2xs transition cursor-pointer"
+                        >
+                          Mark reviewed — no change
+                        </button>
+                      ) : (
+                        <span
+                          className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 text-xs font-medium cursor-not-allowed select-none"
+                          title={`Periodic review sign-off restricted. Current role: '${userRole || 'Viewer'}'. Requires QA, Custodian, or Document Controller.`}
+                        >
+                          <Lock className="w-3 h-3 text-slate-400" /> Review Locked
+                        </span>
+                      )}
                     </div>
                   </div>
                 );
@@ -841,25 +904,45 @@ export const ReviewRetention = () => {
 
                         {/* LEGAL HOLD */}
                         <td className="py-4 px-4 whitespace-nowrap">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleLegalHold(doc)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-pointer transition ${doc.legalHold
-                              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-orange-400'
-                              }`}
-                            title="Click to toggle regulatory legal hold"
-                          >
-                            {doc.legalHold ? (
-                              <>
-                                <Lock className="w-3 h-3 text-rose-600" /> Active Legal Hold
-                              </>
-                            ) : (
-                              <>
-                                <ShieldCheck className="w-3 h-3 text-emerald-600" /> Standard
-                              </>
-                            )}
-                          </button>
+                          {canManageLegalHold ? (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleLegalHold(doc)}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-pointer transition ${doc.legalHold
+                                ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-orange-400'
+                                }`}
+                              title="Click to toggle regulatory legal hold"
+                            >
+                              {doc.legalHold ? (
+                                <>
+                                  <Lock className="w-3 h-3 text-rose-600" /> Active Legal Hold
+                                </>
+                              ) : (
+                                <>
+                                  <ShieldCheck className="w-3 h-3 text-emerald-600" /> Standard
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-default select-none ${doc.legalHold
+                                ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                                }`}
+                              title={`Legal hold modification restricted. Current role: '${userRole || 'Viewer'}'. Requires QA or Document Controller.`}
+                            >
+                              {doc.legalHold ? (
+                                <>
+                                  <Lock className="w-3 h-3 text-rose-600" /> Active Legal Hold
+                                </>
+                              ) : (
+                                <>
+                                  <ShieldCheck className="w-3 h-3 text-slate-400" /> Standard
+                                </>
+                              )}
+                            </span>
+                          )}
                         </td>
 
                         {/* ACTION */}
@@ -871,7 +954,7 @@ export const ReviewRetention = () => {
                             >
                               Destruction locked
                             </span>
-                          ) : (
+                          ) : canAuthorizeDestruction ? (
                             <button
                               type="button"
                               onClick={() => {
@@ -884,6 +967,13 @@ export const ReviewRetention = () => {
                             >
                               <Trash2 className="w-3.5 h-3.5" /> Authorize Disposal
                             </button>
+                          ) : (
+                            <span
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 text-xs font-medium cursor-not-allowed select-none"
+                              title={`Destruction restricted. Current role: '${userRole || 'Viewer'}'. Requires QA or Document Controller.`}
+                            >
+                              <Lock className="w-3 h-3 text-slate-400" /> Disposal Locked
+                            </span>
                           )}
                         </td>
                       </tr>
@@ -926,24 +1016,44 @@ export const ReviewRetention = () => {
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleLegalHold(doc)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border cursor-pointer transition ${doc.legalHold
-                            ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-orange-400'
-                            }`}
-                        >
-                          {doc.legalHold ? (
-                            <>
-                              <Lock className="w-3 h-3 text-rose-600" /> Active Legal Hold
-                            </>
-                          ) : (
-                            <>
-                              <ShieldCheck className="w-3 h-3 text-emerald-600" /> Standard
-                            </>
-                          )}
-                        </button>
+                        {canManageLegalHold ? (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleLegalHold(doc)}
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border cursor-pointer transition ${doc.legalHold
+                              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-orange-400'
+                              }`}
+                          >
+                            {doc.legalHold ? (
+                              <>
+                                <Lock className="w-3 h-3 text-rose-600" /> Active Legal Hold
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheck className="w-3 h-3 text-emerald-600" /> Standard
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border cursor-default select-none ${doc.legalHold
+                              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                              }`}
+                            title={`Legal hold modification restricted. Current role: '${userRole || 'Viewer'}'. Requires QA or Document Controller.`}
+                          >
+                            {doc.legalHold ? (
+                              <>
+                                <Lock className="w-3 h-3 text-rose-600" /> Active Legal Hold
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheck className="w-3 h-3 text-slate-400" /> Standard
+                              </>
+                            )}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -971,7 +1081,7 @@ export const ReviewRetention = () => {
                         <span className="text-xs text-rose-500 font-medium italic">
                           Destruction locked under legal hold
                         </span>
-                      ) : (
+                      ) : canAuthorizeDestruction ? (
                         <button
                           type="button"
                           onClick={() => {
@@ -984,6 +1094,13 @@ export const ReviewRetention = () => {
                         >
                           <Trash2 className="w-3.5 h-3.5" /> Authorize Disposal
                         </button>
+                      ) : (
+                        <span
+                          className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 text-xs font-medium cursor-not-allowed select-none"
+                          title={`Destruction restricted. Current role: '${userRole || 'Viewer'}'. Requires QA or Document Controller.`}
+                        >
+                          <Lock className="w-3 h-3 text-slate-400" /> Disposal Locked
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1155,17 +1272,26 @@ export const ReviewRetention = () => {
                       </td>
 
                       <td className="py-3.5 px-6 text-right whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditPolicyItem(type);
-                            setPolicyRetentionYears(type.retentionYears || 5);
-                            setPolicyReviewMonths(type.reviewIntervalMonths || 12);
-                          }}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-orange-600 text-xs font-semibold transition cursor-pointer"
-                        >
-                          <Edit2 className="w-3 h-3" /> Edit Policy
-                        </button>
+                        {canEditPolicy ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditPolicyItem(type);
+                              setPolicyRetentionYears(type.retentionYears || 5);
+                              setPolicyReviewMonths(type.reviewIntervalMonths || 12);
+                            }}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-orange-600 text-xs font-semibold transition cursor-pointer"
+                          >
+                            <Edit2 className="w-3 h-3" /> Edit Policy
+                          </button>
+                        ) : (
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 cursor-not-allowed select-none"
+                            title={`Policy editing restricted to QA and Admin. Current role: '${userRole || 'Viewer'}'`}
+                          >
+                            <Lock className="w-2.5 h-2.5 text-slate-400" /> QA Only
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -1198,6 +1324,13 @@ export const ReviewRetention = () => {
               <X className="w-4 h-4" />
             </button>
           </div>
+
+          {/* Role Access Restriction Warning if applicable */}
+          {!canPerformReview && (
+            <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-medium">
+              <strong>Role Access Restricted:</strong> Your role ({userRole || 'Viewer'}) is not authorized to sign periodic reviews. Requires QA, Custodian, or Document Controller.
+            </div>
+          )}
 
           {/* Document and Review Cycle */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -1266,7 +1399,7 @@ export const ReviewRetention = () => {
                   disabled
                   value={
                     user
-                      ? `${user.name} (${user.employeeId || user.username || user.email || "U1"})`
+                      ? `${user.name} — ${userRole || 'Signer'} (${user.employeeId || user.username || user.email || "U1"})`
                       : "Authorized Signer"
                   }
                   className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100/70 dark:bg-slate-800/60 text-slate-800 dark:text-slate-200 text-xs font-medium cursor-not-allowed"
@@ -1356,7 +1489,7 @@ export const ReviewRetention = () => {
 
               <button
                 type="submit"
-                disabled={submittingReview || !reviewPassword}
+                disabled={!canPerformReview || submittingReview || !reviewPassword}
                 className="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold transition disabled:opacity-50 flex items-center gap-2"
               >
                 {submittingReview ? (
@@ -1418,7 +1551,28 @@ export const ReviewRetention = () => {
               </div>
             </div>
 
+            {/* Role restriction banner if user lacks destruction authorization */}
+            {!canAuthorizeDestruction && (
+              <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-medium">
+                <strong>Authorization Restricted:</strong> Your role ({userRole || 'Viewer'}) is not authorized to decommission GxP records. Requires QA, Document Controller, or Admin.
+              </div>
+            )}
+
             <div className="space-y-3 text-xs">
+              {/* Authorizing Official */}
+              <div>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
+                  Primary Authorizing Official
+                </label>
+                <input
+                  type="text"
+                  readOnly
+                  disabled
+                  value={`${user?.name || 'Document Controller'} — ${userRole || 'Authorized Official'}`}
+                  className="w-full py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100/70 dark:bg-slate-800/60 text-slate-800 dark:text-slate-200 font-medium text-xs cursor-not-allowed"
+                />
+              </div>
+
               <div>
                 <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Disposal Reason
@@ -1476,7 +1630,7 @@ export const ReviewRetention = () => {
               </button>
               <button
                 type="button"
-                disabled={submittingDestruction}
+                disabled={!canAuthorizeDestruction || submittingDestruction}
                 onClick={handleConfirmDestruction}
                 className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
               >

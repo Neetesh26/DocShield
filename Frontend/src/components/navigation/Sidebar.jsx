@@ -126,13 +126,17 @@ export const isRouteAllowedForRole = (itemPath, role) => {
     return allowed.includes(itemPath);
   }
 
-  if (role === 'User / Viewer' || role === 'Viewer' || role === 'Employee') {
+  if (role === 'User' || role === 'User / Viewer' || role === 'Viewer' || role === 'Employee') {
     const allowed = [
       '/workspace/dashboard',
       '/workspace/search',
       '/workspace/repository',
+      '/workspace/scan-qr',
+      '/physical/storage-map',
+      '/physical/checkout',
       '/workflow/tasks',
-      '/workflow/requests'
+      '/workflow/requests',
+      '/governance/settings'
     ];
     return allowed.includes(itemPath);
   }
@@ -143,7 +147,7 @@ export const isRouteAllowedForRole = (itemPath, role) => {
 export const Sidebar = () => {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
-  const userRole = user?.role || 'Employee';
+  const userRole = user?.role || 'User';
 
   // Toggle Collapse State (persists in localStorage)
   const [isCollapsed, setIsCollapsed] = useState(() => {

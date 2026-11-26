@@ -87,9 +87,9 @@ export const Login = () => {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center justify-center gap-2">
               VidyaGxP
-              <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
+              {/* <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
                 GxP
-              </span>
+              </span> */}
             </h1>
             <p className="text-xs text-slate-500 font-medium mt-1">
               Pharmaceutical Document Security & Repository

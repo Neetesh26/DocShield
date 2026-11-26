@@ -21,7 +21,8 @@ import {
   MessageSquare,
   ChevronLeft,
   X,
-  FileCheck2
+  FileCheck2,
+  Lock
 } from 'lucide-react';
 import { documentService, requestService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
@@ -167,6 +168,16 @@ export const DocumentDetails = () => {
 
   const { document: doc, versions = [], requests = [], auditLogs = [], relatedDocs = [] } = docData;
 
+  const currentUserId = String(user?._id || user?.id || '');
+  const isRestrictedUser = ['User', 'User / Viewer', 'Viewer', 'Employee'].includes(user?.role);
+  const hasApprovedDownload = requests.some(
+    (r) =>
+      r.requestType === 'Download' &&
+      r.status === 'Approved' &&
+      String(r.requester?._id || r.requester) === currentUserId
+  );
+  const canDownloadPdf = !isRestrictedUser || hasApprovedDownload;
+
   const now = new Date();
   const isReviewPast = doc.reviewDate && new Date(doc.reviewDate) < now;
   const isExpiryPast = doc.expiryDate && new Date(doc.expiryDate) < now;
@@ -252,7 +263,7 @@ export const DocumentDetails = () => {
             className="flex items-center gap-1.5 px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
           >
             <Printer className="w-3.5 h-3.5" />
-            Request Print / Checkout
+            Request Print / Download
           </button>
         </div>
       </div>
@@ -304,20 +315,43 @@ export const DocumentDetails = () => {
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 text-xs">
             <span className="font-semibold text-slate-700">Official Controlled Document Preview</span>
             <div className="flex items-center gap-2">
-              <a
-                href={doc.fileUrl}
-                download={doc.fileName}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium border border-slate-300"
-              >
-                <Download className="w-3.5 h-3.5" /> Download Authorized PDF
-              </a>
+              {canDownloadPdf ? (
+                <a
+                  href={doc.fileUrl}
+                  download={doc.fileName}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium border border-slate-300"
+                >
+                  <Download className="w-3.5 h-3.5" /> Download Authorized PDF
+                </a>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRequestType('Download');
+                      setShowRequestModal(true);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded text-xs font-semibold border border-orange-200 transition"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Request Download
+                  </button>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium border border-slate-200">
+                    <Lock className="w-3 h-3" /> View only
+                  </span>
+                </>
+              )}
             </div>
           </div>
-          <div className="w-full h-[650px] bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
+          <div
+            onContextMenu={(e) => {
+              if (!canDownloadPdf) e.preventDefault();
+            }}
+            className="w-full h-[650px] bg-slate-100 rounded-xl overflow-hidden border border-slate-200"
+          >
             <iframe
-              src={doc.fileUrl}
+              src={canDownloadPdf ? doc.fileUrl : `${doc.fileUrl}#toolbar=0&navpanes=0`}
               title="Document PDF"
               className="w-full h-full border-0"
             />
