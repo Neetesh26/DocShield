@@ -17,14 +17,21 @@ export const MyTasks = () => {
     const fetchTasks = async () => {
       try {
         setLoading(true);
+        const checkoutParams = (user?.role === 'Admin' || user?.role === 'QA Manager')
+          ? { status: 'Active' }
+          : { user: user?._id, status: 'Active' };
+
         const [appRes, hndRes, chkRes] = await Promise.all([
           approvalService.getApprovals({ status: 'Pending' }),
           handoverService.getHandovers({ myOnly: true, status: 'Pending Acceptance' }),
-          checkoutService.getCheckouts({ user: user?._id, status: 'Active' })
+          checkoutService.getCheckouts(checkoutParams)
         ]);
         if (appRes.success) setApprovals(appRes.data || []);
         if (hndRes.success) setHandovers(hndRes.data || []);
-        if (chkRes.success) setCheckouts(chkRes.data || []);
+        if (chkRes.success) {
+          const records = Array.isArray(chkRes.data) ? chkRes.data : (chkRes.data?.records || []);
+          setCheckouts(records);
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -154,13 +161,22 @@ export const MyTasks = () => {
                 <div
                   key={chk._id}
                   onClick={() => navigate('/physical/checkout')}
-                  className="p-3 rounded-xl border border-slate-200 hover:border-amber-500 cursor-pointer bg-slate-50/50 hover:bg-amber-50/20 transition text-xs space-y-1"
+                  className={`p-3 rounded-xl border cursor-pointer transition text-xs space-y-1 ${
+                    chk.isOverdue 
+                      ? 'border-rose-200 bg-rose-50/30 hover:border-rose-400' 
+                      : 'border-slate-200 hover:border-amber-500 bg-slate-50/50 hover:bg-amber-50/20'
+                  }`}
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-mono font-bold text-slate-800">{chk.document?.documentNumber}</span>
-                    <span className="font-mono text-[10px] text-amber-700">Due: {new Date(chk.expectedReturnDate).toLocaleDateString()}</span>
+                    <span className={`font-mono text-[10px] font-semibold ${chk.isOverdue ? 'text-rose-600' : 'text-amber-700'}`}>
+                      {chk.badge?.label || `Due: ${new Date(chk.expectedReturnDate).toLocaleDateString()}`}
+                    </span>
                   </div>
                   <p className="text-slate-600 text-[11px] truncate">{chk.document?.title}</p>
+                  {chk.user?.name && (
+                    <p className="text-slate-400 text-[10px]">Borrower: {chk.user.name}</p>
+                  )}
                 </div>
               ))
             )}

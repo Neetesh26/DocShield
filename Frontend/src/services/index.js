@@ -64,7 +64,7 @@ export const approvalService = {
 
 export const checkoutService = {
   getCheckouts: async (params = {}) => {
-    const res = await api.get('/checkouts', { params });
+    const res = await api.get('/checkouts', { params: { ...params, _t: Date.now() } });
     return res.data;
   },
   checkout: async (data) => {
