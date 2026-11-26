@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
+import logo from '/assets/logo.png';
 
 const navigationGroups = [
   {
@@ -142,7 +143,7 @@ export const isRouteAllowedForRole = (itemPath, role) => {
 export const Sidebar = () => {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
-  const userRole = user?.role || 'User / Viewer';
+  const userRole = user?.role || 'Employee';
 
   // Toggle Collapse State (persists in localStorage)
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -176,17 +177,14 @@ export const Sidebar = () => {
         {!isCollapsed ? (
           <>
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 shadow-xs shrink-0">
-                <Shield className="w-5 h-5 text-orange-500" />
+              <div className="w-9 h-9 rounded-lg bg-slate-300 border-slate-800 flex items-center justify-center text-orange-500 shadow-xs shrink-0">
+                <img src={logo} alt="DocShield Logo" />
               </div>
               <div className="min-w-0">
                 <div className="font-bold text-slate-900 dark:text-white tracking-tight text-base flex items-center gap-1.5 truncate">
                   VidyaGxP
-                  <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-950/80 text-orange-800 dark:text-orange-400 border border-orange-200 dark:border-orange-800 font-mono">
-                    GxP
-                  </span>
                 </div>
-                <div className="text-[11px] text-orange-600 dark:text-orange-400 font-semibold tracking-tight truncate">
+                <div className="text-[11px] text-orange-600 dark:text-orange-400 font-extrabold tracking-tight truncate">
                   Pharma Vault
                 </div>
               </div>

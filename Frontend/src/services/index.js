@@ -64,15 +64,19 @@ export const approvalService = {
 
 export const checkoutService = {
   getCheckouts: async (params = {}) => {
-    const res = await api.get('/checkouts', { params });
+    const res = await api.get('/checkouts', { params: { ...params, _t: Date.now() } });
     return res.data;
   },
   checkout: async (data) => {
     const res = await api.post('/checkouts', data);
     return res.data;
   },
-  returnDocument: async (id, conditionOnReturn, remarks) => {
-    const res = await api.post(`/checkouts/${id}/return`, { conditionOnReturn, remarks });
+  returnDocument: async (id, conditionOnReturn, remarks, binScanned) => {
+    const res = await api.post(`/checkouts/${id}/return`, { conditionOnReturn, remarks, binScanned });
+    return res.data;
+  },
+  remindBorrower: async (id) => {
+    const res = await api.post(`/checkouts/${id}/remind`);
     return res.data;
   }
 };
@@ -168,6 +172,10 @@ export const masterDataService = {
   },
   createDocumentType: async (data) => {
     const res = await api.post('/master-data/document-types', data);
+    return res.data;
+  },
+  updateDocumentType: async (id, data) => {
+    const res = await api.put(`/master-data/document-types/${id}`, data);
     return res.data;
   },
   createStorageLocation: async (data) => {

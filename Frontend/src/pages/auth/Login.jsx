@@ -16,7 +16,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Button3D } from '../../components/common/Button3D';
 
 export const Login = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const { setThemePreference } = useTheme();
   const navigate = useNavigate();
 
@@ -24,6 +24,13 @@ export const Login = () => {
     // Reset to clean corporate light mode for the login portal
     setThemePreference('light');
   }, [setThemePreference]);
+
+  useEffect(() => {
+    // If user is already authenticated and verified, redirect to dashboard
+    if (isAuthenticated) {
+      navigate('/workspace/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

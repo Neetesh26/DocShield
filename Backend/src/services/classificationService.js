@@ -13,7 +13,13 @@ export const classifyDocument = ({ documentNumber = '', title = '', text = '', d
   let suggestedTags = ['GxP', 'Compliance'];
   let confidence = 0.85;
 
-  if (docNoUpper.startsWith('BMR') || (combined.includes('batch manufacturing') && !combined.includes('procedure for'))) {
+  if (docNoUpper.startsWith('HO') || docNoUpper.startsWith('HND') || combined.includes('handover note') || combined.includes('custody handover') || combined.includes('physical handover')) {
+    documentType = 'Custody Handover Note';
+    folder = 'Custody & Handovers';
+    category = 'Physical Custody';
+    suggestedTags.push('Handover', 'ChainOfCustody', 'VaultTransfer');
+    confidence = 0.95;
+  } else if (docNoUpper.startsWith('BMR') || (combined.includes('batch manufacturing') && !combined.includes('procedure for'))) {
     documentType = 'Batch Manufacturing Record (BMR)';
     folder = 'Manufacturing Execution';
     category = 'Production Record';

@@ -256,9 +256,12 @@ export const MasterData = () => {
       case 'Admin':
         return 'bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800';
       case 'QA':
+      case 'QA Manager':
         return 'bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-800';
       case 'Document Controller':
         return 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800';
+      case 'Custodian':
+        return 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
       case 'Department Head':
         return 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800';
       default:
@@ -267,6 +270,7 @@ export const MasterData = () => {
   };
 
   return (
+    <>
     <div className="space-y-6 animate-fade-in">
       
       {/* Executive Header */}
@@ -276,14 +280,7 @@ export const MasterData = () => {
             <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
               Master Data Governance
             </h1>
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300 border border-orange-200 dark:border-orange-800">
-              <ShieldCheck className="w-3 h-3 text-orange-600 dark:text-orange-400" />
-              21 CFR Part 11 Validated
-            </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Configure pharmaceutical organizational units, document numbering schemes, physical vault coordinates, and personnel directory.
-          </p>
         </div>
 
         {/* Global Action Button */}
@@ -757,6 +754,7 @@ export const MasterData = () => {
         )}
 
       </div>
+    </div>
 
       {/* ========================================================
           MODAL: ADD DEPARTMENT
@@ -1134,7 +1132,9 @@ export const MasterData = () => {
                   >
                     <option value="Admin">Admin</option>
                     <option value="QA">QA</option>
+                    <option value="QA Manager">QA Manager</option>
                     <option value="Document Controller">Document Controller</option>
+                    <option value="Custodian">Custodian</option>
                     <option value="Department Head">Department Head</option>
                     <option value="Employee">Employee</option>
                   </select>
@@ -1205,7 +1205,6 @@ export const MasterData = () => {
           </div>
         </div>
       )}
-
-    </div>
+    </>
   );
 };

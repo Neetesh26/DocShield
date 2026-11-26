@@ -8,10 +8,9 @@ const api = axios.create({
   }
 });
 
-// Attach JWT token to requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('docushield_token');
+    const token = sessionStorage.getItem('docushield_token') || localStorage.getItem('docushield_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -20,12 +19,17 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response error handler
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Clear token and redirect to login if session expired
+    const isSignatureAction =
+      error.config?.url?.includes('periodic-review') ||
+      error.config?.url?.includes('destruction') ||
+      error.config?.url?.includes('approve');
+
+    if (error.response && error.response.status === 401 && !isSignatureAction) {
+      sessionStorage.removeItem('docushield_token');
+      sessionStorage.removeItem('docushield_user');
       localStorage.removeItem('docushield_token');
       localStorage.removeItem('docushield_user');
       if (window.location.pathname !== '/login') {

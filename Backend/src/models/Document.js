@@ -168,6 +168,15 @@ const documentSchema = new mongoose.Schema({
     type: Number,
     default: 5
   },
+  retentionDestruction: {
+    isDestroyed: { type: Boolean, default: false },
+    destroyedAt: { type: Date, default: null },
+    destroyedBy: { type: String, default: '' },
+    witness: { type: String, default: '' },
+    reason: { type: String, default: '' },
+    method: { type: String, default: '' },
+    certificateNumber: { type: String, default: '' }
+  },
   archiveDate: {
     type: Date,
     default: null

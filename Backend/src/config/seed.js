@@ -156,47 +156,47 @@ export const seedDatabase = async () => {
         designation: 'QC Analytical Records Custodian',
         phone: '+91 98201 10005'
       },
-      {
-        name: 'Amit Kumar',
-        email: 'amit.kumar@docushield.com',
-        password: demoPassword,
-        role: ROLES.VIEWER,
-        department: 'Operations & R&D',
-        employeeId: 'EMP-USR-006',
-        designation: 'Manufacturing Associate / Viewer',
-        phone: '+91 98201 10006'
-      },
+      // {
+      //   name: 'Amit Kumar',
+      //   email: 'amit.kumar@docushield.com',
+      //   password: demoPassword,
+      //   role: ROLES.EMPLOYEE,
+      //   department: 'Operations & R&D',
+      //   employeeId: 'EMP-USR-006',
+      //   designation: 'Manufacturing Associate',
+      //   phone: '+91 98201 10006'
+      // },
       // Convenience aliases for legacy credentials
-      {
-        name: 'Anita Sharma (Admin Alias)',
-        email: 'admin@docushield.com',
-        password: demoPassword,
-        role: ROLES.ADMIN,
-        department: 'Executive Administration',
-        employeeId: 'EMP-ADM-ALIAS',
-        designation: 'System Administrator',
-        phone: '+91 98201 10001'
-      },
-      {
-        name: 'Dr. Meera Iyer (QA Alias)',
-        email: 'qa@docushield.com',
-        password: demoPassword,
-        role: ROLES.QA_MANAGER,
-        department: 'Quality Assurance',
-        employeeId: 'EMP-QA-ALIAS',
-        designation: 'Head of QA',
-        phone: '+91 98201 10002'
-      },
-      {
-        name: 'Suresh Patil (DC Alias)',
-        email: 'doccontrol@docushield.com',
-        password: demoPassword,
-        role: ROLES.DOCUMENT_CONTROLLER,
-        department: 'Document Control',
-        employeeId: 'EMP-DC-ALIAS',
-        designation: 'Document Controller',
-        phone: '+91 98201 10003'
-      }
+      // {
+      //   name: 'Anita Sharma (Admin Alias)',
+      //   email: 'admin@docushield.com',
+      //   password: demoPassword,
+      //   role: ROLES.ADMIN,
+      //   department: 'Executive Administration',
+      //   employeeId: 'EMP-ADM-ALIAS',
+      //   designation: 'System Administrator',
+      //   phone: '+91 98201 10001'
+      // },
+      // {
+      //   name: 'Dr. Meera Iyer (QA Alias)',
+      //   email: 'qa@docushield.com',
+      //   password: demoPassword,
+      //   role: ROLES.QA_MANAGER,
+      //   department: 'Quality Assurance',
+      //   employeeId: 'EMP-QA-ALIAS',
+      //   designation: 'Head of QA',
+      //   phone: '+91 98201 10002'
+      // },
+      // {
+      //   name: 'Suresh Patil (DC Alias)',
+      //   email: 'doccontrol@docushield.com',
+      //   password: demoPassword,
+      //   role: ROLES.DOCUMENT_CONTROLLER,
+      //   department: 'Document Control',
+      //   employeeId: 'EMP-DC-ALIAS',
+      //   designation: 'Document Controller',
+      //   phone: '+91 98201 10003'
+      // }
     ]);
 
     const [adminUser, qaUser, docCtrlUser, deptHeadUser, analystUser, viewerUser] = users;
@@ -218,7 +218,8 @@ export const seedDatabase = async () => {
       { name: 'Batch Packaging Record (BPR)', code: 'BPR', prefix: 'BPR', retentionYears: 10, reviewIntervalMonths: 24, requiresPhysicalTracking: true },
       { name: 'Validation Protocol / Report', code: 'VAL', prefix: 'VAL', retentionYears: 10, reviewIntervalMonths: 24, requiresPhysicalTracking: true },
       { name: 'Specification (SPEC)', code: 'SPEC', prefix: 'SPEC', retentionYears: 7, reviewIntervalMonths: 12, requiresPhysicalTracking: true },
-      { name: 'Analytical Method (ATM)', code: 'ATM', prefix: 'ATM', retentionYears: 7, reviewIntervalMonths: 12, requiresPhysicalTracking: true }
+      { name: 'Analytical Method (ATM)', code: 'ATM', prefix: 'ATM', retentionYears: 7, reviewIntervalMonths: 12, requiresPhysicalTracking: true },
+      { name: 'Custody Handover Note', code: 'HND', prefix: 'HND', retentionYears: 5, reviewIntervalMonths: 12, requiresPhysicalTracking: true }
     ]);
 
     console.log('[Seed] Creating hierarchical physical storage locations across Plant-1 and Plant-2...');
@@ -642,21 +643,200 @@ export const seedDatabase = async () => {
       actionDate: new Date()
     });
 
-    console.log('[Seed] Creating sample checkout record...');
-    await CheckoutRecord.create({
-      checkoutNumber: 'CHK-2026-0001',
-      document: createdDocs[1]._id,
-      user: deptHeadUser._id,
-      department: 'Production',
-      purpose: 'Production Execution for Paracetamol Batch',
-      checkoutDate: new Date(),
-      expectedReturnDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-      status: 'Active',
-      approvedBy: qaUser._id,
-      conditionOnCheckout: 'Good'
+    console.log('[Seed] Creating sample checkout records matching register...');
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    // 1. SOP/IT/002 - Priya Nair, Issued: 23 Nov 2026, 16:34 by Anita Sharma, Due: 30 Nov 2026 (Due in 5d)
+    const docIT = await Document.create({
+      documentNumber: 'SOP/IT/002',
+      title: 'User Access Management for Computerised Systems',
+      version: '02',
+      documentType: 'Standard Operating Procedure (SOP)',
+      department: 'Quality Assurance',
+      status: DOCUMENT_STATUSES.EFFECTIVE,
+      physicalStatus: PHYSICAL_STATUSES.CHECKED_OUT,
+      uploadedBy: adminUser._id,
+      currentCustodian: adminUser._id,
+      storageLocation: loc1._id,
+      fileUrl: '/uploads/sample_sop_it_0005.pdf',
+      fileName: 'SOP_IT_002.pdf',
+      fileSize: 15400,
+      fileMimeType: 'application/pdf',
+      tags: ['GxP', 'Validated']
     });
 
-    await Document.findByIdAndUpdate(createdDocs[1]._id, { physicalStatus: PHYSICAL_STATUSES.CHECKED_OUT });
+    const docQC = await Document.create({
+      documentNumber: 'SOP/QC/004',
+      title: 'Operation and Calibration of HPLC',
+      version: '03',
+      documentType: 'Standard Operating Procedure (SOP)',
+      department: 'Quality Control',
+      status: DOCUMENT_STATUSES.EFFECTIVE,
+      physicalStatus: PHYSICAL_STATUSES.CHECKED_OUT,
+      uploadedBy: adminUser._id,
+      currentCustodian: analystUser._id,
+      storageLocation: loc5._id,
+      fileUrl: '/uploads/sample_sop_qa_0042.pdf',
+      fileName: 'SOP_QC_004.pdf',
+      fileSize: 16200,
+      fileMimeType: 'application/pdf',
+      tags: ['GxP', 'Validated']
+    });
+
+    const docPRD = await Document.create({
+      documentNumber: 'SOP/PRD/014',
+      title: 'Operation of Tablet Compression Machine',
+      version: '01',
+      documentType: 'Standard Operating Procedure (SOP)',
+      department: 'Production',
+      status: DOCUMENT_STATUSES.EFFECTIVE,
+      physicalStatus: PHYSICAL_STATUSES.CHECKED_OUT,
+      uploadedBy: adminUser._id,
+      currentCustodian: deptHeadUser._id,
+      storageLocation: loc3._id,
+      fileUrl: '/uploads/sample_bmr_tb_2024.pdf',
+      fileName: 'SOP_PRD_014.pdf',
+      fileSize: 14200,
+      fileMimeType: 'application/pdf',
+      tags: ['GxP', 'Validated']
+    });
+
+    const docBMR = await Document.create({
+      documentNumber: 'BMR/PRD/500/26A004',
+      title: 'Batch Manufacturing Record - Paracetamol 500mg Tablets - Batch 26A004',
+      version: '01',
+      documentType: 'Batch Manufacturing Record (BMR)',
+      department: 'Production',
+      status: DOCUMENT_STATUSES.EFFECTIVE,
+      physicalStatus: PHYSICAL_STATUSES.CHECKED_OUT,
+      uploadedBy: adminUser._id,
+      currentCustodian: deptHeadUser._id,
+      storageLocation: loc3._id,
+      fileUrl: '/uploads/sample_bmr_tb_2024.pdf',
+      fileName: 'BMR_PRD_500_26A004.pdf',
+      fileSize: 22100,
+      fileMimeType: 'application/pdf',
+      tags: ['GxP', 'Validated']
+    });
+
+    const docQA01 = await Document.create({
+      documentNumber: 'SOP/QA/001',
+      title: 'Document Lifecycle Management and SOP Archival',
+      version: '04',
+      documentType: 'Standard Operating Procedure (SOP)',
+      department: 'Quality Assurance',
+      status: DOCUMENT_STATUSES.EFFECTIVE,
+      physicalStatus: PHYSICAL_STATUSES.STORED,
+      uploadedBy: adminUser._id,
+      currentCustodian: qaUser._id,
+      storageLocation: loc1._id,
+      fileUrl: '/uploads/sample_sop_qa_0018.pdf',
+      fileName: 'SOP_QA_001.pdf',
+      fileSize: 19500,
+      fileMimeType: 'application/pdf',
+      tags: ['GxP', 'Validated']
+    });
+
+    const docVAL01 = await Document.create({
+      documentNumber: 'VAL/IT/2026/01',
+      title: 'ERP Computer System Validation Master Plan',
+      version: '01',
+      documentType: 'Validation Protocol / Report',
+      department: 'Quality Assurance',
+      status: DOCUMENT_STATUSES.EFFECTIVE,
+      physicalStatus: PHYSICAL_STATUSES.STORED,
+      uploadedBy: adminUser._id,
+      currentCustodian: adminUser._id,
+      storageLocation: loc1._id,
+      fileUrl: '/uploads/sample_val_pr_0045.pdf',
+      fileName: 'VAL_IT_2026_01.pdf',
+      fileSize: 24500,
+      fileMimeType: 'application/pdf',
+      tags: ['GxP', 'Validated']
+    });
+
+    await CheckoutRecord.create([
+      {
+        checkoutNumber: 'CHK-2026-0001',
+        document: docIT._id,
+        user: analystUser._id, // Priya Nair
+        department: 'Quality Control',
+        purpose: 'Handover HO-0006: na',
+        checkoutDate: new Date('2026-11-23T16:34:00.000Z'),
+        expectedReturnDate: new Date(now.getTime() + 5 * dayMs),
+        status: 'Active',
+        approvedBy: adminUser._id,
+        conditionOnCheckout: 'Good'
+      },
+      {
+        checkoutNumber: 'CHK-2026-0002',
+        document: docQC._id,
+        user: viewerUser._id, // Amit Kumar
+        department: 'Operations & R&D',
+        purpose: 'HPLC calibration activity',
+        checkoutDate: new Date('2026-11-19T16:14:00.000Z'),
+        expectedReturnDate: new Date(now.getTime() - 2 * dayMs),
+        status: 'Active',
+        approvedBy: docCtrlUser._id,
+        conditionOnCheckout: 'Good'
+      },
+      {
+        checkoutNumber: 'CHK-2026-0003',
+        document: docPRD._id,
+        user: deptHeadUser._id, // Rahul Verma
+        department: 'Production',
+        purpose: 'Shop-floor reference during compression training',
+        checkoutDate: new Date('2026-11-18T16:14:00.000Z'),
+        expectedReturnDate: new Date(now.getTime() + 4 * 60 * 60 * 1000), // Today
+        status: 'Active',
+        approvedBy: docCtrlUser._id,
+        conditionOnCheckout: 'Good'
+      },
+      {
+        checkoutNumber: 'CHK-2026-0004',
+        document: docBMR._id,
+        user: deptHeadUser._id, // Rahul Verma
+        department: 'Production',
+        purpose: 'Batch record review for APQR',
+        checkoutDate: new Date('2026-11-09T16:14:00.000Z'),
+        expectedReturnDate: new Date(now.getTime() - 9 * dayMs),
+        status: 'Active',
+        approvedBy: docCtrlUser._id,
+        conditionOnCheckout: 'Good'
+      },
+      {
+        checkoutNumber: 'CHK-2026-0005',
+        document: docQA01._id,
+        user: analystUser._id, // Priya Nair
+        department: 'Quality Control',
+        purpose: 'Annual internal compliance audit verification',
+        checkoutDate: new Date('2026-11-01T10:00:00.000Z'),
+        expectedReturnDate: new Date('2026-11-08T18:00:00.000Z'),
+        actualReturnDate: new Date('2026-11-07T15:30:00.000Z'),
+        status: 'Returned',
+        approvedBy: adminUser._id,
+        returnVerifiedBy: docCtrlUser._id,
+        conditionOnCheckout: 'Good',
+        conditionOnReturn: 'Good',
+        remarks: 'Verified bin QR return scan. Physical binder spine intact.'
+      },
+      {
+        checkoutNumber: 'CHK-2026-0006',
+        document: docVAL01._id,
+        user: viewerUser._id, // Amit Kumar
+        department: 'Operations & R&D',
+        purpose: 'Software qualification protocol execution',
+        checkoutDate: new Date('2026-11-05T11:20:00.000Z'),
+        expectedReturnDate: new Date('2026-11-12T18:00:00.000Z'),
+        actualReturnDate: new Date('2026-11-11T14:15:00.000Z'),
+        status: 'Returned',
+        approvedBy: docCtrlUser._id,
+        returnVerifiedBy: docCtrlUser._id,
+        conditionOnCheckout: 'Good',
+        conditionOnReturn: 'Good',
+        remarks: 'Returned to IT archival cabinet.'
+      }
+    ]);
 
     console.log('[Seed] Creating sample custody handover...');
     await Handover.create({
@@ -758,14 +938,14 @@ export const seedDatabase = async () => {
       }
     ]);
 
-    console.log('[Seed] Database seeding successfully completed!');
-    console.log('Demo Login Credentials (6 Quick Sign-In Users):');
-    console.log('1. Anita Sharma (Admin): anita.sharma@docushield.com / DocuShield@2026');
-    console.log('2. Dr. Meera Iyer (QA Manager): meera.iyer@docushield.com / DocuShield@2026');
-    console.log('3. Suresh Patil (Document Controller): suresh.patil@docushield.com / DocuShield@2026');
-    console.log('4. Rahul Verma (Custodian): rahul.verma@docushield.com / DocuShield@2026');
-    console.log('5. Priya Nair (Custodian): priya.nair@docushield.com / DocuShield@2026');
-    console.log('6. Amit Kumar (User / Viewer): amit.kumar@docushield.com / DocuShield@2026');
+    // console.log('[Seed] Database seeding successfully completed!');
+    // console.log('Demo Login Credentials (6 Quick Sign-In Users):');
+    // console.log('1. Anita Sharma (Admin): anita.sharma@docushield.com / DocuShield@2026');
+    // console.log('2. Dr. Meera Iyer (QA Manager): meera.iyer@docushield.com / DocuShield@2026');
+    // console.log('3. Suresh Patil (Document Controller): suresh.patil@docushield.com / DocuShield@2026');
+    // console.log('4. Rahul Verma (Custodian): rahul.verma@docushield.com / DocuShield@2026');
+    // console.log('5. Priya Nair (Custodian): priya.nair@docushield.com / DocuShield@2026');
+    // console.log('6. Amit Kumar (User / Viewer): amit.kumar@docushield.com / DocuShield@2026');
 
     process.exit(0);
   } catch (error) {

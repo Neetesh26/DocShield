@@ -21,6 +21,8 @@ export const authService = {
     try {
       await api.post('/auth/logout');
     } finally {
+      sessionStorage.removeItem('docushield_token');
+      sessionStorage.removeItem('docushield_user');
       localStorage.removeItem('docushield_token');
       localStorage.removeItem('docushield_user');
     }

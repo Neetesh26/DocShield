@@ -17,6 +17,8 @@ import {
   Info,
   Check,
   Eye,
+  EyeOff,
+  Lock,
   FileCheck2
 } from 'lucide-react';
 import { documentService, storageService, masterDataService } from '../../services';
@@ -76,7 +78,11 @@ export const UploadWizard = () => {
   const [fileNumber, setFileNumber] = useState('');
   const [custodyRemarks, setCustodyRemarks] = useState('');
 
-  // Step 4: Final electronic signature
+  // Step 4: Final 21 CFR Part 11 electronic signature
+  const [signatureMeaning, setSignatureMeaning] = useState('Author / Ingestion Attestation');
+  const [signaturePassword, setSignaturePassword] = useState('');
+  const [signatureReason, setSignatureReason] = useState('Initial registration and physical vault archival of GxP master record');
+  const [showPassword, setShowPassword] = useState(false);
   const [signatureChecked, setSignatureChecked] = useState(false);
   const [completedDoc, setCompletedDoc] = useState(null);
 
@@ -190,9 +196,20 @@ export const UploadWizard = () => {
   };
 
   // Step 4: Submit Final Ingestion
-  const handleFinalSubmit = async () => {
+  const handleFinalSubmit = async (e) => {
+    if (e) e.preventDefault();
+
+    if (!signaturePassword || !signaturePassword.trim()) {
+      const msg = 'Security password is required for 21 CFR Part 11 electronic signature authentication.';
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
     if (!signatureChecked) {
-      setError('You must check the 21 CFR Part 11 Electronic Signature confirmation before submitting.');
+      const msg = 'You must confirm the 21 CFR Part 11 Electronic Signature legal declaration before submitting.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -227,6 +244,9 @@ export const UploadWizard = () => {
         tags: metadata.tags.split(',').map(t => t.trim()).filter(Boolean),
         folder: metadata.folder,
         description: metadata.description,
+        password: signaturePassword.trim(),
+        signatureMeaning,
+        reason: signatureReason.trim() || 'Initial GxP master registration & archival',
         extractedMetadata: {
           rawValues: metadata,
           confidenceScores
@@ -236,7 +256,7 @@ export const UploadWizard = () => {
       const res = await documentService.createDocument(payload);
       if (res.success && res.data) {
         setCompletedDoc(res.data);
-        toast.success(`Document ${res.data.documentNumber || metadata.documentNumber} uploaded and archived successfully!`);
+        toast.success(`Document ${res.data.documentNumber || metadata.documentNumber} electronically signed & archived!`);
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to finalize document ingestion.';
@@ -351,7 +371,7 @@ export const UploadWizard = () => {
           <div>
             <h1 className="text-lg font-bold text-slate-900 tracking-tight">GxP Document Ingestion Pipeline</h1>
             <p className="text-xs text-slate-500">
-              Four-step regulated ingestion with intelligent OCR extraction and physical location assignment.
+              Scan → Auto-extract header → Auto-classify → Store physically → E-Sign.    
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold text-orange-700 bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200">
@@ -582,6 +602,7 @@ export const UploadWizard = () => {
                     <option value="Validation Protocol / Report">Validation Protocol / Report</option>
                     <option value="Specification (SPEC)">Specification (SPEC)</option>
                     <option value="Analytical Method (ATM)">Analytical Method (ATM)</option>
+                    <option value="Custody Handover Note">Custody Handover Note</option>
                   </select>
                 </div>
 
@@ -944,33 +965,111 @@ export const UploadWizard = () => {
             </div>
           </div>
 
-          {/* Electronic Signature Box */}
-          <div className="p-5 border-2 border-orange-200 rounded-2xl bg-orange-50/30 space-y-3">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-orange-700" />
-              <h3 className="text-xs font-bold text-orange-950 uppercase tracking-wide">
-                21 CFR Part 11 Electronic Signature Confirmation
-              </h3>
+          {/* 21 CFR Part 11 Electronic Signature Box */}
+          <div className="p-6 border-2 border-orange-200 dark:border-orange-800/80 rounded-2xl bg-gradient-to-b from-orange-50/40 via-white to-orange-50/20 dark:from-slate-850 dark:via-slate-900 dark:to-slate-850 space-y-4 shadow-sm">
+            <div className="flex items-center gap-2 pb-2 border-b border-orange-100 dark:border-orange-900/40">
+              <div className="w-7 h-7 rounded-lg bg-orange-600 text-white flex items-center justify-center shadow-xs">
+                <Lock className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-orange-950 dark:text-orange-400 uppercase tracking-wide">
+                  21 CFR Part 11 Electronic Signature Attestation
+                </h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  By signing, you confirm this action is attributable to you and legally equivalent to your handwritten signature.
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              By checking the box below, I verify under penalty of regulatory non-compliance that the metadata and physical location registered for document <strong className="font-mono">{metadata.documentNumber}</strong> are accurate, truthful, and authorized in accordance with standard pharmaceutical quality management practices.
-            </p>
-            <div className="pt-2 flex items-center gap-3">
+
+            {/* Signer & Meaning of Signature */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Signer (Attributable Operator)
+                </label>
+                <input
+                  type="text"
+                  readOnly
+                  disabled
+                  value={`${user?.name || 'Authorized Operator'} (${user?.employeeId || user?.email || 'EMP-AM-01'})`}
+                  className="w-full px-3 py-2 text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-not-allowed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Meaning of Signature *
+                </label>
+                <select
+                  value={signatureMeaning}
+                  onChange={(e) => setSignatureMeaning(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 font-medium cursor-pointer"
+                >
+                  <option value="Author / Ingestion Attestation">Author / Ingestion Attestation</option>
+                  <option value="Reviewer Verification">Reviewer Verification</option>
+                  <option value="Release & Approval for Archival">Release & Approval for Archival</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Reason for change / Ingestion Justification */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Ingestion Justification / Reason for Ingestion *
+              </label>
+              <textarea
+                rows="2"
+                value={signatureReason}
+                onChange={(e) => setSignatureReason(e.target.value)}
+                placeholder="State regulatory or operational justification for registering this GxP record..."
+                className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+              />
+            </div>
+
+            {/* Password Re-authentication Field */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Security Password (Live Re-Authentication) *
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={signaturePassword}
+                  onChange={(e) => setSignaturePassword(e.target.value)}
+                  placeholder="Enter your account password to verify identity..."
+                  className="w-full px-3 py-2 pr-10 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                Strict 21 CFR Part 11: Real password verification required to authenticate this digital record.
+              </p>
+            </div>
+
+            {/* Legal Confirmation Checkbox */}
+            <div className="pt-2 border-t border-orange-100 dark:border-orange-900/40 flex items-start gap-3">
               <input
                 id="sign-check"
                 type="checkbox"
                 checked={signatureChecked}
                 onChange={(e) => setSignatureChecked(e.target.checked)}
-                className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 cursor-pointer"
+                className="w-4 h-4 mt-0.5 text-orange-600 rounded border-slate-300 dark:border-slate-700 focus:ring-orange-500 cursor-pointer"
               />
-              <label htmlFor="sign-check" className="text-xs font-semibold text-slate-800 cursor-pointer">
-                I, {user?.name || 'Authorized Operator'} ({user?.employeeId || 'EMP'}), digitally sign and authorize this ingestion.
+              <label htmlFor="sign-check" className="text-xs font-medium text-slate-800 dark:text-slate-200 cursor-pointer leading-relaxed">
+                I, <strong>{user?.name || 'Authorized Operator'}</strong> ({user?.employeeId || 'EMP'}), verify under penalty of regulatory non-compliance that the metadata and physical location registered for document <strong className="font-mono text-orange-700 dark:text-orange-400">{metadata.documentNumber}</strong> are accurate, truthful, and authorized.
               </label>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
             <Button3D
               type="button"
               variant="light"
@@ -983,10 +1082,10 @@ export const UploadWizard = () => {
               type="button"
               variant="primary"
               size="md"
-              disabled={!signatureChecked || loading}
+              disabled={!signatureChecked || !signaturePassword.trim() || loading}
               onClick={handleFinalSubmit}
             >
-              {loading ? 'Committing 21 CFR Transaction...' : 'Complete Ingestion & Generate QR Code'}
+              {loading ? 'Verifying 21 CFR Signature...' : 'Sign & Complete Ingestion'}
               <Check className="w-4 h-4 ml-1.5" />
             </Button3D>
           </div>

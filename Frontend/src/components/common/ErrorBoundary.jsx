@@ -35,6 +35,8 @@ export class ErrorBoundary extends React.Component {
             <div className="flex gap-3">
               <button
                 onClick={() => {
+                  sessionStorage.removeItem('docushield_user');
+                  sessionStorage.removeItem('docushield_token');
                   localStorage.removeItem('docushield_user');
                   localStorage.removeItem('docushield_token');
                   window.location.href = '/login';

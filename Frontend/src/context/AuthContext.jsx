@@ -6,17 +6,21 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
-      const saved = localStorage.getItem('docushield_user');
+      // Clean up any legacy persistent tokens from localStorage
+      localStorage.removeItem('docushield_user');
+      localStorage.removeItem('docushield_token');
+
+      const saved = sessionStorage.getItem('docushield_user');
       if (!saved || saved === 'undefined' || saved === 'null') return null;
       return JSON.parse(saved);
     } catch (e) {
-      console.warn('Error reading docushield_user from localStorage:', e);
+      console.warn('Error reading docushield_user from sessionStorage:', e);
       return null;
     }
   });
   const [token, setToken] = useState(() => {
     try {
-      const savedToken = localStorage.getItem('docushield_token');
+      const savedToken = sessionStorage.getItem('docushield_token');
       if (!savedToken || savedToken === 'undefined' || savedToken === 'null') return null;
       return savedToken;
     } catch {
@@ -31,17 +35,29 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Session verification timeout')), 3500)
+            setTimeout(() => reject(new Error('Session verification timeout')), 3000)
           );
           const res = await Promise.race([authService.getMe(), timeoutPromise]);
           if (isMounted && res && res.success && res.data?.user) {
             setUser(res.data.user);
-            localStorage.setItem('docushield_user', JSON.stringify(res.data.user));
+            sessionStorage.setItem('docushield_user', JSON.stringify(res.data.user));
+          } else {
+            throw new Error('Session invalid');
           }
         } catch (err) {
-          console.warn('Session verification failed, signing out', err);
-          if (isMounted && err?.response?.status === 401) {
-            logout();
+          console.warn('Session verification failed or server is offline, routing to login:', err.message);
+          // When server is offline or session is invalid, reset authentication so the app defaults to /login
+          if (isMounted) {
+            setUser(null);
+            setToken(null);
+            try {
+              sessionStorage.removeItem('docushield_token');
+              sessionStorage.removeItem('docushield_user');
+              localStorage.removeItem('docushield_token');
+              localStorage.removeItem('docushield_user');
+            } catch (e) {
+              // ignore
+            }
           }
         }
       }
@@ -61,8 +77,11 @@ export const AuthProvider = ({ children }) => {
     if (res.success && res.data) {
       setUser(res.data.user);
       setToken(res.data.token);
-      localStorage.setItem('docushield_token', res.data.token);
-      localStorage.setItem('docushield_user', JSON.stringify(res.data.user));
+      sessionStorage.setItem('docushield_token', res.data.token);
+      sessionStorage.setItem('docushield_user', JSON.stringify(res.data.user));
+      // Clean up any persistent token
+      localStorage.removeItem('docushield_token');
+      localStorage.removeItem('docushield_user');
       return { success: true };
     }
     return { success: false, message: res.message || 'Login failed' };
@@ -73,8 +92,11 @@ export const AuthProvider = ({ children }) => {
     if (res.success && res.data) {
       setUser(res.data.user);
       setToken(res.data.token);
-      localStorage.setItem('docushield_token', res.data.token);
-      localStorage.setItem('docushield_user', JSON.stringify(res.data.user));
+      sessionStorage.setItem('docushield_token', res.data.token);
+      sessionStorage.setItem('docushield_user', JSON.stringify(res.data.user));
+      // Clean up any persistent token
+      localStorage.removeItem('docushield_token');
+      localStorage.removeItem('docushield_user');
       return { success: true };
     }
     return { success: false, message: res.message || 'Registration failed' };
@@ -82,9 +104,10 @@ export const AuthProvider = ({ children }) => {
 
   const clearLocalStorage = () => {
     try {
-      localStorage.clear();
-      sessionStorage.clear();
-      document.documentElement.classList.remove('dark');
+      sessionStorage.removeItem('docushield_token');
+      sessionStorage.removeItem('docushield_user');
+      localStorage.removeItem('docushield_token');
+      localStorage.removeItem('docushield_user');
     } catch (e) {
       // ignore
     }
@@ -110,7 +133,7 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (updatedUserData) => {
     setUser((prev) => {
       const merged = { ...prev, ...updatedUserData };
-      localStorage.setItem('docushield_user', JSON.stringify(merged));
+      sessionStorage.setItem('docushield_user', JSON.stringify(merged));
       return merged;
     });
   };

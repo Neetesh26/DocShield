@@ -114,10 +114,16 @@ export const Repository = () => {
     localStorage.setItem('vidyagxp_repo_view_mode', mode);
   };
 
-  const getStatusBadge = (st) => {
+  const getStatusBadge = (st, item = null) => {
+    const isLapsed = item && ((item.reviewDate && new Date(item.reviewDate) < new Date()) || (item.expiryDate && new Date(item.expiryDate) < new Date()));
+    if (st === 'Expired' || isLapsed) {
+      return 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-800 font-bold';
+    }
     switch (st) {
       case 'Effective':
         return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
+      case 'Expired':
+        return 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-800 font-bold';
       case 'Draft':
         return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700';
       case 'In Review':
@@ -164,7 +170,7 @@ export const Repository = () => {
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Regulated repository of pharmaceutical standard procedures, batch records, specifications, and validation reports.
+            Browse auto-classified folders
           </p>
         </div>
 
@@ -216,7 +222,7 @@ export const Repository = () => {
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by Document Number (e.g. SOP-QA-0042), title, product, batch #, or tag..."
+              placeholder="Search "
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-8 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600"
@@ -259,6 +265,7 @@ export const Repository = () => {
             >
               <option value="">All Statuses</option>
               <option value="Effective">Effective</option>
+              <option value="Expired">Expired</option>
               <option value="Draft">Draft</option>
               <option value="In Review">In Review</option>
               <option value="Pending Approval">Pending Approval</option>
@@ -395,8 +402,8 @@ export const Repository = () => {
 
                 {/* Status Badges */}
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getStatusBadge(doc.status)}`}>
-                    {doc.status}
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getStatusBadge(doc.status, doc)}`}>
+                    {doc.status === 'Expired' || ((doc.reviewDate && new Date(doc.reviewDate) < new Date()) || (doc.expiryDate && new Date(doc.expiryDate) < new Date())) ? 'Expired' : doc.status}
                   </span>
                   <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getPhysicalStatusBadge(doc.physicalStatus)}`}>
                     {doc.physicalStatus}
