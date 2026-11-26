@@ -22,8 +22,11 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { storageService, documentService } from '../../services';
+import { useAuth } from '../../context/AuthContext';
 
 export const StorageMap = () => {
+  const { user } = useAuth();
+  const canRelocateDocs = ['Admin', 'QA', 'QA Manager', 'Document Controller'].includes(user?.role);
   const navigate = useNavigate();
   const [locations, setLocations] = useState([]);
   const [hierarchy, setHierarchy] = useState({});
@@ -561,12 +564,14 @@ export const StorageMap = () => {
                       </div>
 
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          onClick={() => setMoveDoc(doc)}
-                          className="px-2 py-1 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded text-[10px] font-semibold border border-slate-200 transition"
-                        >
-                          Relocate
-                        </button>
+                        {canRelocateDocs && (
+                          <button
+                            onClick={() => setMoveDoc(doc)}
+                            className="px-2 py-1 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded text-[10px] font-semibold border border-slate-200 transition"
+                          >
+                            Relocate
+                          </button>
+                        )}
                         <button
                           onClick={() => navigate(`/documents/${doc._id}`)}
                           className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-semibold transition"

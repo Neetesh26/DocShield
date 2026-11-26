@@ -186,6 +186,16 @@ export const createCheckout = async (req, res, next) => {
     doc.physicalStatus = PHYSICAL_STATUSES.CHECKED_OUT;
     await doc.save();
 
+    if (String(borrowerUser._id) !== String(req.user._id)) {
+      await Notification.create({
+        recipient: borrowerUser._id,
+        title: `Physical Binder Issued: ${doc.documentNumber}`,
+        message: `${req.user.name} issued physical binder ${doc.documentNumber} (${doc.title}) to you. Due back on ${new Date(expectedReturnDate).toLocaleDateString()}.`,
+        type: 'info',
+        link: '/physical/checkout'
+      });
+    }
+
     await logAuditEvent({
       user: req.user,
       action: AUDIT_ACTIONS.CHECKOUT,

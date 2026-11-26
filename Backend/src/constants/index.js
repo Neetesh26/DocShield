@@ -5,6 +5,7 @@ export const ROLES = {
   DOCUMENT_CONTROLLER: 'Document Controller',
   CUSTODIAN: 'Custodian',
   DEPARTMENT_HEAD: 'Department Head',
+  USER: 'User',
   VIEWER: 'User / Viewer',
   EMPLOYEE: 'Employee'
 };

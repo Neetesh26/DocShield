@@ -69,7 +69,7 @@ export const MasterData = () => {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('DocuShield@2026');
-  const [userRole, setUserRole] = useState('Employee');
+  const [userRole, setUserRole] = useState('User');
   const [userDepartment, setUserDepartment] = useState('Quality Assurance');
   const [userEmployeeId, setUserEmployeeId] = useState('');
   const [userDesignation, setUserDesignation] = useState('');
@@ -251,6 +251,10 @@ export const MasterData = () => {
   }, [data.users, searchFilter]);
 
   // Role Badge Styling Helper
+  const formatRoleLabel = (role) => (
+    ['Employee', 'User / Viewer', 'Viewer'].includes(role) ? 'User' : role
+  );
+
   const getRoleBadge = (role) => {
     switch (role) {
       case 'Admin':
@@ -734,7 +738,7 @@ export const MasterData = () => {
                           </td>
                           <td className="py-3 px-4 whitespace-nowrap">
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getRoleBadge(u.role)}`}>
-                              {u.role}
+                              {formatRoleLabel(u.role)}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
@@ -1136,7 +1140,7 @@ export const MasterData = () => {
                     <option value="Document Controller">Document Controller</option>
                     <option value="Custodian">Custodian</option>
                     <option value="Department Head">Department Head</option>
-                    <option value="Employee">Employee</option>
+                    <option value="User">User</option>
                   </select>
                 </div>
                 <div>

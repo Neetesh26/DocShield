@@ -56,7 +56,7 @@ export const createUser = async (req, res, next) => {
 
     // Validate role
     const validRoles = Object.values(ROLES);
-    const assignedRole = role && validRoles.includes(role) ? role : ROLES.EMPLOYEE;
+    const assignedRole = role && validRoles.includes(role) ? role : ROLES.USER;
 
     const newUser = new User({
       name: name.trim(),
