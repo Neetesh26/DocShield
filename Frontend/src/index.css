@@ -423,6 +423,7 @@ html.dark .recharts-default-tooltip {
 /* 12. Modals & Dialog Backdrops */
 .fixed.inset-0 {
   margin: 0 !important;
+  inset: 0 !important;
 }
 
 html.dark .bg-slate-900\/60 {
