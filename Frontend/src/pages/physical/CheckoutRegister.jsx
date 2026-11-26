@@ -659,9 +659,8 @@ export const CheckoutRegister = () => {
         </div>
       )}
 
-      {/* MODAL 2: Return (scan) Modal with Bin Verification */}
       {showReturnModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed top-10 inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>

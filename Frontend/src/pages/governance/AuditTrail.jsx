@@ -148,6 +148,93 @@ export const AuditTrail = () => {
     }
   };
 
+  const formatFieldLabel = (key) => {
+    const customLabels = {
+      documentNumber: 'Document Number',
+      documentNo: 'Document Number',
+      effectiveDate: 'Effective Date',
+      reviewDate: 'Review Date',
+      expiryDate: 'Expiry Date',
+      preparedBy: 'Prepared By',
+      reviewedBy: 'Reviewed By',
+      approvedBy: 'Approved By',
+      batchNumber: 'Batch Number',
+      userEmail: 'User Email',
+      userName: 'User Name',
+      userRole: 'User Role',
+      signerName: 'Signer Name',
+      signatureMeaning: 'Signature Meaning',
+      reason: 'Reason',
+      status: 'Status',
+      version: 'Version',
+      title: 'Title',
+      department: 'Department',
+      retentionYears: 'Retention Years',
+      securityClassification: 'Classification',
+      rackNumber: 'Rack Number',
+      boxNumber: 'Box Number',
+      folderCode: 'Folder Code',
+      alcoaScore: 'ALCOA+ Score',
+      confidenceScore: 'Confidence',
+      totalDocuments: 'Total Documents'
+    };
+    if (customLabels[key]) return customLabels[key];
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/[_-]/g, ' ')
+      .trim()
+      .replace(/^\w/, (c) => c.toUpperCase());
+  };
+
+  const renderFormattedDetail = (val, fallback = 'None / Initial Record') => {
+    if (val === null || val === undefined || val === '') {
+      return <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">{fallback}</span>;
+    }
+    if (typeof val === 'boolean') {
+      return (
+        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
+          val ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400'
+        }`}>
+          {val ? 'Active / True' : 'Inactive / False'}
+        </span>
+      );
+    }
+    if (typeof val === 'number') {
+      return <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">{val}</span>;
+    }
+    if (typeof val === 'string') {
+      return <span className="text-xs font-medium text-slate-800 dark:text-slate-200 break-words">{val}</span>;
+    }
+    if (typeof val === 'object') {
+      const entries = Object.entries(val);
+      if (entries.length === 0) {
+        return <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">{fallback}</span>;
+      }
+      return (
+        <div className="space-y-1 w-full">
+          {entries.map(([k, v]) => (
+            <div
+              key={k}
+              className="flex items-start justify-between gap-2 py-1 px-2 rounded-md bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px]"
+            >
+              <span className="text-slate-500 dark:text-slate-400 font-medium shrink-0">
+                {formatFieldLabel(k)}
+              </span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200 text-right break-words max-w-[65%]">
+                {typeof v === 'object' && v !== null
+                  ? Array.isArray(v)
+                    ? v.join(', ')
+                    : Object.entries(v).map(([subK, subV]) => `${formatFieldLabel(subK)}: ${String(subV)}`).join(' | ')
+                  : String(v)}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return <span className="text-xs text-slate-800 dark:text-slate-200">{String(val)}</span>;
+  };
+
   const renderValueCell = (val) => {
     if (val === null || val === undefined || val === '') {
       return <span className="text-slate-400 dark:text-slate-500 font-mono text-[11px] italic">None / Initial</span>;
@@ -165,8 +252,9 @@ export const AuditTrail = () => {
       return (
         <div className="space-y-0.5 max-w-[180px]">
           {entries.slice(0, 2).map(([k, v]) => (
-            <div key={k} className="text-[10px] font-mono truncate text-slate-600 dark:text-slate-400">
-              <span className="font-semibold text-slate-800 dark:text-slate-200">{k}:</span> {typeof v === 'object' ? JSON.stringify(v) : String(v)}
+            <div key={k} className="text-[10px] truncate text-slate-600 dark:text-slate-400">
+              <span className="font-semibold text-slate-800 dark:text-slate-200">{formatFieldLabel(k)}:</span>{' '}
+              {typeof v === 'object' && v !== null ? Object.values(v).join(', ') : String(v)}
             </div>
           ))}
           {entries.length > 2 && (
@@ -633,129 +721,161 @@ export const AuditTrail = () => {
         </div>
       </div>
       {selectedEntry && (
-        <div className="fixed inset-0  top-10 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden space-y-4 p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-orange-600 text-white flex items-center justify-center shadow-xs">
-                  <ShieldCheck className="w-4 h-4" />
+        <div className="fixed inset-0 top-10 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden p-5 space-y-3.5 max-h-[86vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-orange-600 text-white flex items-center justify-center shadow-xs">
+                  <ShieldCheck className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    Audit Trail
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-none">
+                    Audit Trail Record
                   </h3>
+                  {/* <p className="text-[10px] text-slate-400 mt-0.5">
+                    ALCOA+ 21 CFR Part 11 Event Details
+                  </p> */}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedEntry(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                aria-label="Close"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
+            {/* Core Info: Who & What */}
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 block">
-                  1. Who performed the action?
+                  1. Operator (Who)
                 </span>
-                <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                <div className="font-bold text-slate-900 dark:text-slate-100 text-xs truncate">
                   {selectedEntry.userName || 'System Agent'}
                 </div>
-                <div className="flex items-center gap-2 pt-0.5">
-                  <span className="px-2 py-0.5 rounded-md bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 font-mono text-[10px]">
+                <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                  <span className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                     Role: {selectedEntry.userRole || 'Automated'}
                   </span>
                   {selectedEntry.signature?.signerName && (
-                    <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 font-mono text-[10px] font-bold flex items-center gap-1">
-                      <Lock className="w-3 h-3" /> E-Signed
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-0.5">
+                      <Lock className="w-2.5 h-2.5" /> E-Signed
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 block">
-                  2. What action was performed?
+                  2. Action (What)
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className={`font-mono text-xs font-bold px-2.5 py-0.5 rounded-md border ${getActionBadgeClass(selectedEntry.action)}`}>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${getActionBadgeClass(selectedEntry.action)}`}>
                     {selectedEntry.action}
                   </span>
-                  <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600">
+                  <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300">
                     {selectedEntry.entity}
                   </span>
                 </div>
                 {selectedEntry.entityId && (
                   <p className="text-[10px] font-mono text-slate-400 truncate">
-                    Target ID: {selectedEntry.entityId}
+                    Target: {selectedEntry.entityId}
                   </p>
                 )}
               </div>
+            </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
+            {/* Core Info: When & Why */}
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 block">
-                  3. When was it performed?
+                  3. Timestamp (When)
                 </span>
-                <div className="font-mono font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-orange-500" />
-                  <span>{formatIST(selectedEntry.timestamp)}</span>
-                  <span className="text-[9px] px-1 rounded bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300">IST</span>
+                <div className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1 text-xs">
+                  <Clock className="w-3 h-3 text-orange-500 shrink-0" />
+                  <span className="truncate">{formatIST(selectedEntry.timestamp)}</span>
+                  <span className="text-[9px] px-1 rounded bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 font-bold">IST</span>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
+              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 block">
-                  6. Why was change made? (Justification)
+                  4. Reason / Justification
                 </span>
-                <div className="font-medium text-slate-800 dark:text-slate-200 leading-snug">
+                <div className="font-medium text-slate-800 dark:text-slate-200 text-xs line-clamp-2" title={selectedEntry.reason}>
                   {selectedEntry.reason || 'Standard validated GxP operation / Initial creation'}
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
-                  4. What was the previous value?
-                </span>
-                <div className="font-mono text-xs bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 overflow-x-auto max-h-24">
-                  {selectedEntry.previousValue !== null && selectedEntry.previousValue !== undefined
-                    ? typeof selectedEntry.previousValue === 'object'
-                      ? JSON.stringify(selectedEntry.previousValue, null, 2)
-                      : String(selectedEntry.previousValue)
-                    : 'None / Initial Registration'}
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
-                  5. What is the new value?
-                </span>
-                <div className="font-mono text-xs bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 overflow-x-auto max-h-24">
-                  {selectedEntry.newValue !== null && selectedEntry.newValue !== undefined
-                    ? typeof selectedEntry.newValue === 'object'
-                      ? JSON.stringify(selectedEntry.newValue, null, 2)
-                      : String(selectedEntry.newValue)
-                    : 'Recorded / State Applied'}
                 </div>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-1">
+            {/* Value Changes: Previous vs New (Proper Formatted Data, Not Code) */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+                Audit Trail Value Changes
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide block">
+                    Previous Value
+                  </span>
+                  <div className="max-h-32 overflow-y-auto">
+                    {renderFormattedDetail(selectedEntry.previousValue, 'None / Initial Registration')}
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-orange-50/40 dark:bg-orange-950/20 border border-orange-200/70 dark:border-orange-800/40 space-y-1">
+                  <span className="text-[10px] font-bold text-orange-600/80 dark:text-orange-400/80 uppercase tracking-wide block">
+                    New Value
+                  </span>
+                  <div className="max-h-32 overflow-y-auto">
+                    {renderFormattedDetail(selectedEntry.newValue, 'Recorded / State Applied')}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Electronic Signature Certificate (if present) */}
+            {selectedEntry.signature?.signerName && (
+              <div className="p-2.5 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 space-y-1 text-xs">
+                <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-bold text-[11px]">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>21 CFR Part 11 Electronic Signature Certificate</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 text-[11px] pt-0.5 text-slate-700 dark:text-slate-300">
+                  <div>
+                    <span className="text-slate-400 font-medium">Signer: </span>
+                    <span className="font-semibold">{selectedEntry.signature.signerName}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-medium">Meaning: </span>
+                    <span className="font-semibold">{selectedEntry.signature.meaning || 'Author'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Narrative Summary */}
+            <div className="p-2.5 rounded-xl bg-slate-50/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 space-y-0.5">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                Audit Trail Event Narrative
+                Event Narrative
               </span>
               <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                 {selectedEntry.details}
               </p>
             </div>
-            <div className="pt-2 flex justify-end">
+
+            {/* Footer */}
+            <div className="pt-1 flex items-center justify-end border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setSelectedEntry(null)}
-                className="px-4 py-2 bg-slate-900 dark:bg-slate-700 hover:bg-orange-600 text-white text-xs font-semibold rounded-xl transition cursor-pointer shadow-xs"
+                className="px-4 py-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-orange-600 dark:hover:bg-orange-500 text-white text-xs font-semibold rounded-lg transition cursor-pointer shadow-xs"
               >
-                Close Inspector
+                Close
               </button>
             </div>
           </div>
