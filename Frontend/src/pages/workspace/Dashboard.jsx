@@ -55,6 +55,58 @@ const DONUT_PALETTE = [
   '#334155'  // Deep Slate
 ];
 
+// Precision SVG Micro-Sparklines for Dashboard KPI Cards
+const SPARKLINES = {
+  totalDocs: (color) => (
+    <svg viewBox="0 0 48 18" className="w-12 h-5 overflow-visible" fill="none">
+      <path d="M1 15 L10 13 L19 14 L28 8 L37 9 L47 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={color} />
+      <circle cx="47" cy="2" r="2.5" className={color} fill="currentColor" />
+    </svg>
+  ),
+  effective: (color) => (
+    <svg viewBox="0 0 48 18" className="w-12 h-5 overflow-visible" fill="none">
+      <path d="M1 12 L10 11 L19 9 L28 6 L37 5 L47 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={color} />
+      <circle cx="47" cy="3" r="2.5" className={color} fill="currentColor" />
+    </svg>
+  ),
+  approvals: (color) => (
+    <svg viewBox="0 0 48 18" className="w-12 h-5 overflow-visible" fill="none">
+      <path d="M1 6 L10 12 L19 5 L28 14 L37 7 L47 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={color} />
+      <circle cx="47" cy="11" r="2.5" className={color} fill="currentColor" />
+    </svg>
+  ),
+  requests: (color) => (
+    <svg viewBox="0 0 48 18" className="w-12 h-5 overflow-visible" fill="none">
+      <path d="M1 14 L10 11 L19 12 L28 7 L37 8 L47 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={color} />
+      <circle cx="47" cy="4" r="2.5" className={color} fill="currentColor" />
+    </svg>
+  ),
+  review: (color) => (
+    <svg viewBox="0 0 48 18" className="w-12 h-5 overflow-visible" fill="none">
+      <path d="M1 13 L10 14 L19 10 L28 12 L37 5 L47 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={color} />
+      <circle cx="47" cy="7" r="2.5" className={color} fill="currentColor" />
+    </svg>
+  ),
+  overdue: (color) => (
+    <svg viewBox="0 0 48 18" className="w-12 h-5 overflow-visible" fill="none">
+      <path d="M1 14 L10 14 L19 13 L28 14 L37 14 L47 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={color} />
+      <circle cx="47" cy="14" r="2.5" className={color} fill="currentColor" />
+    </svg>
+  ),
+  handovers: (color) => (
+    <svg viewBox="0 0 48 18" className="w-12 h-5 overflow-visible" fill="none">
+      <path d="M1 11 L10 7 L19 12 L28 8 L37 13 L47 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={color} />
+      <circle cx="47" cy="9" r="2.5" className={color} fill="currentColor" />
+    </svg>
+  ),
+  uploaded: (color) => (
+    <svg viewBox="0 0 48 18" className="w-12 h-5 overflow-visible" fill="none">
+      <path d="M1 16 L10 13 L19 11 L28 7 L37 6 L47 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={color} />
+      <circle cx="47" cy="2" r="2.5" className={color} fill="currentColor" />
+    </svg>
+  )
+};
+
 export const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -144,79 +196,127 @@ export const Dashboard = () => {
     );
   }
 
-  // 8 Fully Clickable KPI Cards mapping directly to database fields
+  // 8 Fully Clickable KPI Cards mapping directly to database fields with executive styling
   const allStatCards = [
     {
       label: 'Total Documents',
       value: stats?.totalDocuments ?? 0,
       icon: FileText,
-      color: 'text-orange-700',
-      bg: 'bg-orange-50',
+      sparkKey: 'totalDocs',
+      sparkColor: 'text-orange-500',
+      pulseColor: 'bg-orange-500',
+      bgLight: 'bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800/60',
+      accentBorder: 'hover:border-orange-400/80 dark:hover:border-orange-500/60',
+      ambientGlow: 'bg-orange-500/10 dark:bg-orange-500/15',
+      badgeText: 'Vault Active',
+      badgeColor: 'text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/50 border-orange-200 dark:border-orange-800/60',
       link: '/workspace/repository',
-      desc: ''
+      desc: 'Master Document Vault'
     },
     {
       label: 'Effective Documents',
       value: stats?.effectiveDocuments ?? 0,
       icon: CheckCircle,
-      color: 'text-amber-700',
-      bg: 'bg-amber-50',
+      sparkKey: 'effective',
+      sparkColor: 'text-emerald-500',
+      pulseColor: 'bg-emerald-500',
+      bgLight: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60',
+      accentBorder: 'hover:border-emerald-400/80 dark:hover:border-emerald-500/60',
+      ambientGlow: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+      badgeText: 'GxP Validated',
+      badgeColor: 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800/60',
       link: '/workspace/repository?status=Effective',
-      desc: ''
+      desc: 'Active Validated SOPs'
     },
     {
       label: 'Pending Approvals',
       value: stats?.pendingApprovals ?? 0,
       icon: Clock,
-      color: 'text-amber-700',
-      bg: 'bg-amber-50',
+      sparkKey: 'approvals',
+      sparkColor: 'text-amber-500',
+      pulseColor: 'bg-amber-500',
+      bgLight: 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/60',
+      accentBorder: 'hover:border-amber-400/80 dark:hover:border-amber-500/60',
+      ambientGlow: 'bg-amber-500/10 dark:bg-amber-500/15',
+      badgeText: 'Action Required',
+      badgeColor: 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800/60',
       link: '/workflow/approvals',
-      desc: ''
+      desc: 'QA Electronic Sign-off'
     },
     {
       label: 'Pending Requests',
       value: stats?.pendingRequests ?? 0,
       icon: FileCheck,
-      color: 'text-orange-800',
-      bg: 'bg-orange-50',
+      sparkKey: 'requests',
+      sparkColor: 'text-violet-500',
+      pulseColor: 'bg-violet-500',
+      bgLight: 'bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/60',
+      accentBorder: 'hover:border-violet-400/80 dark:hover:border-violet-500/60',
+      ambientGlow: 'bg-violet-500/10 dark:bg-violet-500/15',
+      badgeText: 'In Workflow',
+      badgeColor: 'text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/50 border-violet-200 dark:border-violet-800/60',
       link: '/workflow/requests',
-      desc: ''
+      desc: 'Physical Access Queue'
     },
     {
       label: 'Due for Review',
       value: stats?.dueForReview ?? 0,
       icon: Calendar,
-      color: 'text-rose-700',
-      bg: 'bg-rose-50',
+      sparkKey: 'review',
+      sparkColor: 'text-rose-500',
+      pulseColor: 'bg-rose-500',
+      bgLight: 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/60',
+      accentBorder: 'hover:border-rose-400/80 dark:hover:border-rose-500/60',
+      ambientGlow: 'bg-rose-500/10 dark:bg-rose-500/15',
+      badgeText: 'Lifecycle Due',
+      badgeColor: 'text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800/60',
       link: '/workflow/review-retention',
-      desc: ''
+      desc: 'Periodic SOP Cycles'
     },
     {
       label: 'Overdue Checkouts',
       value: stats?.overdueCheckouts ?? 0,
       icon: AlertTriangle,
-      color: 'text-rose-800',
-      bg: 'bg-rose-50',
+      sparkKey: 'overdue',
+      sparkColor: 'text-red-500',
+      pulseColor: 'bg-red-500',
+      bgLight: 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/60',
+      accentBorder: 'hover:border-red-400/80 dark:hover:border-red-500/60',
+      ambientGlow: 'bg-red-500/10 dark:bg-red-500/15',
+      badgeText: 'Physical Trace',
+      badgeColor: 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800/60',
       link: '/physical/checkout',
-      desc: ''
+      desc: 'Binder Return Overdue'
     },
     {
       label: 'Pending Handovers',
       value: stats?.pendingHandovers ?? 0,
       icon: ArrowRightLeft,
-      color: 'text-orange-600',
-      bg: 'bg-orange-50',
+      sparkKey: 'handovers',
+      sparkColor: 'text-cyan-500',
+      pulseColor: 'bg-cyan-500',
+      bgLight: 'bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800/60',
+      accentBorder: 'hover:border-cyan-400/80 dark:hover:border-cyan-500/60',
+      ambientGlow: 'bg-cyan-500/10 dark:bg-cyan-500/15',
+      badgeText: 'Chain of Custody',
+      badgeColor: 'text-cyan-700 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/50 border-cyan-200 dark:border-cyan-800/60',
       link: '/physical/custody',
-      desc: ''
+      desc: 'Transfer Attestation'
     },
     {
       label: 'Uploaded Recently',
       value: stats?.uploadedRecently ?? 0,
       icon: TrendingUp,
-      color: 'text-amber-800',
-      bg: 'bg-amber-50',
+      sparkKey: 'uploaded',
+      sparkColor: 'text-teal-500',
+      pulseColor: 'bg-teal-500',
+      bgLight: 'bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 border-teal-200 dark:border-teal-800/60',
+      accentBorder: 'hover:border-teal-400/80 dark:hover:border-teal-500/60',
+      ambientGlow: 'bg-teal-500/10 dark:bg-teal-500/15',
+      badgeText: 'Last 30 Days',
+      badgeColor: 'text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 border-teal-200 dark:border-teal-800/60',
       link: '/workspace/repository?sort=newest',
-      desc: ''
+      desc: 'Latest Ingestions'
     }
   ];
 
@@ -276,18 +376,19 @@ export const Dashboard = () => {
     <div className="space-y-6">
       
       {/* Greeting & Date Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-200 gap-3">
+      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-200/90 dark:border-slate-800 gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               Welcome back, {user?.name || 'Quality Officer'}
             </h1>
-            <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 font-mono">
+            <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-400 border border-orange-200 dark:border-orange-800/60 font-mono shadow-2xs">
               {user?.role || 'Admin'}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {todayStr}
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-orange-600" />
+            <span>{todayStr}</span>
           </p>
         </div>
         
@@ -319,10 +420,10 @@ export const Dashboard = () => {
       </div>
 
       {/* Advanced Repository Search Bar in Dashboard (Live Typeahead Search) */}
-      <div className="bg-gradient-to-r from-orange-50/60 via-white to-slate-50/60 p-4 rounded-2xl border border-orange-200/80 shadow-xs space-y-2.5 relative" ref={typeaheadRef}>
-        <form onSubmit={handleDashboardAiSearch} className="space-y-2.5">
+      <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-[0_12px_32px_-8px_rgba(15,23,42,0.06)] dark:shadow-[0_12px_36px_-8px_rgba(0,0,0,0.4)] p-4 sm:p-5 space-y-3 overflow-hidden" ref={typeaheadRef}>
+        <form onSubmit={handleDashboardAiSearch} className="space-y-3">
           <div className="relative flex items-center">
-            <div className="absolute left-4 text-orange-600 pointer-events-none flex items-center gap-1.5">
+            <div className="absolute left-4 text-orange-600 dark:text-orange-400 pointer-events-none flex items-center gap-1.5">
               <Search className="w-4 h-4" />
             </div>
             <input
@@ -333,8 +434,8 @@ export const Dashboard = () => {
                 setShowTypeahead(true);
               }}
               onFocus={() => setShowTypeahead(true)}
-              placeholder="Search repository"
-              className="w-full pl-11 pr-28 py-2.5 text-xs md:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-600 font-medium text-slate-800 placeholder:text-slate-400 transition shadow-2xs"
+              placeholder="Search repository by document name, protocol, batch number, or custodian..."
+              className="w-full pl-11 pr-28 py-2.5 text-xs md:text-sm bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition shadow-2xs"
             />
             <div className="absolute right-1.5">
               <Button3D
@@ -350,13 +451,13 @@ export const Dashboard = () => {
 
           {/* Live Autocomplete Typeahead Dropdown */}
           {showTypeahead && typeaheadMatches.length > 0 && (
-            <div className="absolute left-4 right-4 top-[56px] bg-white border border-orange-200 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100">
-              <div className="p-2.5 bg-orange-50/80 border-b border-orange-100 flex items-center justify-between text-[11px] font-semibold text-orange-900">
+            <div className="absolute left-4 right-4 top-[64px] bg-white dark:bg-slate-900 border border-orange-200 dark:border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 animate-dropdown">
+              <div className="p-2.5 bg-orange-50/80 dark:bg-orange-950/60 border-b border-orange-100 dark:border-orange-900/60 flex items-center justify-between text-[11px] font-semibold text-orange-900 dark:text-orange-300">
                 <span className="flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5 text-orange-600" />
                   Indexed Records Matching Query:
                 </span>
-                <span className="text-[10px] text-orange-700 font-mono">
+                <span className="text-[10px] text-orange-700 dark:text-orange-400 font-mono">
                   {typeaheadMatches.length} Matches
                 </span>
               </div>
@@ -368,18 +469,18 @@ export const Dashboard = () => {
                       setShowTypeahead(false);
                       navigate(`/documents/${doc._id}`);
                     }}
-                    className="p-2.5 hover:bg-orange-50/60 transition cursor-pointer flex items-center justify-between gap-3 text-xs"
+                    className="p-2.5 hover:bg-orange-50/60 dark:hover:bg-slate-800 transition cursor-pointer flex items-center justify-between gap-3 text-xs"
                   >
                     <div className="flex items-start gap-2.5 min-w-0">
                       <FileCheck className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-orange-800">{doc.documentNumber}</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-medium">
+                          <span className="font-mono font-bold text-orange-800 dark:text-orange-400">{doc.documentNumber}</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">
                             {doc.department}
                           </span>
                         </div>
-                        <p className="text-slate-700 font-medium truncate mt-0.5 text-[11px]">{doc.title}</p>
+                        <p className="text-slate-700 dark:text-slate-300 font-medium truncate mt-0.5 text-[11px]">{doc.title}</p>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-orange-500 shrink-0" />
@@ -391,8 +492,8 @@ export const Dashboard = () => {
 
           {/* 1-Click Fast Inquiries & Database Document Identifiers */}
           {aiSuggestionChips.length > 0 && (
-            <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-0.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-1">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
                 <Compass className="w-3 h-3 text-orange-600" /> Quick Inquiries:
               </span>
               {aiSuggestionChips.map((chip, idx) => (
@@ -403,13 +504,13 @@ export const Dashboard = () => {
                     setDashboardAiQuery(chip.query);
                     handleDashboardAiSearch(null, chip.query);
                   }}
-                  className="shrink-0 px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-800 hover:bg-orange-50 hover:border-orange-300 transition text-[11px] font-medium shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                  className="shrink-0 px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-orange-950/40 hover:border-orange-300 dark:hover:border-orange-800 transition-all text-[11px] font-medium shadow-2xs flex items-center gap-1.5 cursor-pointer hover:scale-105 active:scale-95"
                   title={chip.title || chip.query}
                 >
                   <Zap className="w-2.5 h-2.5 text-orange-600 shrink-0" />
-                  <span className="font-semibold text-slate-800">{chip.label}</span>
+                  <span className="font-semibold">{chip.label}</span>
                   {chip.badge && (
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-orange-50 text-orange-700 font-mono font-semibold">
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400 font-mono font-semibold">
                       {chip.badge}
                     </span>
                   )}
@@ -420,55 +521,103 @@ export const Dashboard = () => {
         </form>
       </div>
 
-      {/* 8 Statistics Metric Cards - Strictly Fetched from Database */}
+      {/* 8 Statistics Metric Cards - Unique Executive Design Without Top Line Gradient */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((card, i) => {
           const Icon = card.icon;
+          const Sparkline = SPARKLINES[card.sparkKey];
           return (
             <div
               key={i}
               onClick={() => navigate(card.link)}
-              className="group p-4 bg-white rounded-xl border border-slate-200 shadow-xs hover:border-orange-300 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer relative overflow-hidden"
+              className={`group relative p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-spring cursor-pointer overflow-hidden ${card.accentBorder}`}
               title={`Click to open ${card.label}`}
             >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-600 group-hover:text-orange-700 transition">
-                  {card.label}
-                </span>
-                <div className={`w-8 h-8 rounded-lg ${card.bg} ${card.color} flex items-center justify-center transition group-hover:scale-110 shadow-xs`}>
+              {/* Ghost Watermark Background Icon */}
+              <Icon className="absolute -right-3 -bottom-3 w-28 h-28 text-slate-900/[0.03] dark:text-white/[0.03] pointer-events-none group-hover:scale-115 group-hover:rotate-6 transition-all duration-500 ease-spring" />
+
+              {/* Ambient Glow Background on Hover */}
+              <div className={`absolute -right-6 -bottom-6 w-28 h-28 rounded-full ${card.ambientGlow} blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
+
+              {/* Top Row: Title with Pulse Beacon + Icon Badge */}
+              <div className="relative z-10 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${card.pulseColor} opacity-75`} />
+                    <span className={`relative inline-flex rounded-full h-2 w-2 ${card.pulseColor}`} />
+                  </span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors truncate">
+                    {card.label}
+                  </span>
+                </div>
+                <div className={`w-8 h-8 rounded-xl ${card.bgLight} border flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-xs shrink-0`}>
                   <Icon className="w-4 h-4" />
                 </div>
               </div>
-              <div className="mt-2 text-2xl font-black text-slate-900 tracking-tight flex items-baseline justify-between">
-                <span>{card.value}</span>
-                <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-orange-600 transition" />
+
+              {/* Middle Row: Large Stat Counter & Micro Sparkline */}
+              <div className="relative z-10 mt-3 flex items-end justify-between gap-2">
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors font-mono">
+                  {card.value}
+                </span>
+                <div className="flex items-center gap-2">
+                  {Sparkline && Sparkline(card.sparkColor)}
+                  <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-orange-600 group-hover:text-white text-slate-400 dark:text-slate-500 flex items-center justify-center transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shadow-2xs">
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
               </div>
-              <p className="text-[10px] text-slate-400 mt-1 truncate">{card.desc}</p>
+
+              {/* Bottom Row: Micro GxP Status Pill */}
+              <div className="relative z-10 mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px]">
+                <span className={`px-2 py-0.5 rounded-md font-mono font-bold border ${card.badgeColor}`}>
+                  {card.badgeText}
+                </span>
+                <span className="text-slate-400 dark:text-slate-500 font-medium group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors flex items-center gap-0.5">
+                  View <ChevronRight className="w-3 h-3" />
+                </span>
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* Quick Action Bar - Tactile Clickable */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-3">
-          QUICK LAUNCH ACTIONS
-        </span>
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2">
+      {/* Quick Action Executive Launchpad */}
+      <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-[0_12px_32px_-8px_rgba(15,23,42,0.06)] dark:shadow-[0_12px_36px_-8px_rgba(0,0,0,0.4)] p-4 sm:p-5 transition-all">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3.5">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 flex items-center justify-center">
+              <Zap className="w-3.5 h-3.5 text-orange-600" />
+            </div>
+            <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              Quick Operations Launchpad
+            </span>
+          </div>
+          <span className="text-[10px] text-slate-400 font-medium">1-Click Fast Navigation</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2.5">
           {quickActions.map((act, i) => {
             const Icon = act.icon;
             return (
               <button
                 key={i}
+                type="button"
                 onClick={() => navigate(act.path)}
-                className={`p-2.5 rounded-xl border text-center flex flex-col items-center justify-center gap-1.5 transition active:translate-y-[2px] cursor-pointer ${
+                className={`group p-3 rounded-xl border text-center flex flex-col items-center justify-center gap-2 transition-all duration-200 hover:-translate-y-1 hover:shadow-md active:scale-95 cursor-pointer ${
                   act.primary
-                    ? 'bg-orange-50 border-orange-200 text-orange-900 hover:bg-orange-100 font-semibold shadow-xs'
-                    : 'border-slate-200 hover:bg-orange-50/50 hover:border-orange-200 text-slate-700 font-medium'
+                    ? 'bg-gradient-to-b from-orange-50 to-orange-100/70 dark:from-orange-950/40 dark:to-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-900 dark:text-orange-200 font-bold shadow-xs hover:border-orange-400'
+                    : 'bg-white dark:bg-slate-800/60 border-slate-200/90 dark:border-slate-700/80 hover:bg-orange-50/40 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold hover:border-orange-300 dark:hover:border-orange-500/50 shadow-2xs'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${act.primary ? 'text-orange-700' : 'text-slate-500'}`} />
-                <span className="text-[11px] leading-tight">{act.label}</span>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110 shadow-2xs ${
+                  act.primary
+                    ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-orange-500/30'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 group-hover:bg-orange-100 dark:group-hover:bg-orange-950/60 group-hover:text-orange-600 dark:group-hover:text-orange-400'
+                }`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] leading-snug truncate max-w-full">{act.label}</span>
               </button>
             );
           })}
@@ -479,20 +628,23 @@ export const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* CHART 1: Documents by Type (Donut Chart strictly from API charts.byType) */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-slate-900 tracking-tight">Documents by Type</h2>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-orange-50 text-orange-800 border border-orange-200 font-semibold">
+        <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-[0_12px_32px_-8px_rgba(15,23,42,0.08),0_4px_12px_-4px_rgba(15,23,42,0.03)] dark:shadow-[0_12px_36px_-8px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-300 p-5 flex flex-col justify-between hover:shadow-xl group">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 flex items-center justify-center shadow-xs">
+                <PieChart className="w-3.5 h-3.5" />
+              </div>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">Documents by Type</h2>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-orange-50 dark:bg-orange-950/60 text-orange-800 dark:text-orange-400 border border-orange-200 dark:border-orange-800 font-semibold shadow-2xs">
                 {stats?.totalDocuments ?? 0} Total
               </span>
             </div>
             <button
               onClick={() => navigate('/workspace/repository')}
-              className="text-xs font-semibold text-orange-700 hover:text-orange-800 hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-orange-700 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 hover:underline flex items-center gap-1 cursor-pointer"
               title="Browse all documents in repository"
             >
-              Browse
+              Browse &rarr;
             </button>
           </div>
 
@@ -591,15 +743,20 @@ export const Dashboard = () => {
         </div>
 
         {/* CHART 2: Uploads Over Time (Spline Area Chart strictly from API charts.uploadTrends) */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h2 className="text-sm font-bold text-slate-900 tracking-tight">Uploads over time</h2>
+        <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-[0_12px_32px_-8px_rgba(15,23,42,0.08),0_4px_12px_-4px_rgba(15,23,42,0.03)] dark:shadow-[0_12px_36px_-8px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-300 p-5 flex flex-col justify-between hover:shadow-xl group">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center shadow-xs">
+                <TrendingUp className="w-3.5 h-3.5" />
+              </div>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">Uploads over time</h2>
+            </div>
             <span
               onClick={() => navigate('/workspace/repository?sort=createdAt')}
-              className="text-xs text-slate-400 font-medium cursor-pointer hover:text-orange-600 transition"
+              className="text-xs text-slate-400 dark:text-slate-500 font-medium cursor-pointer hover:text-orange-600 dark:hover:text-orange-400 transition"
               title="Click to view chronological archive"
             >
-              last 12 months
+              last 12 months &rarr;
             </span>
           </div>
 
