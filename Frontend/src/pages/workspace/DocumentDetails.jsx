@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { documentService, requestService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import { AiDocumentAssistant } from '../../components/documents/AiDocumentAssistant';
 
 export const DocumentDetails = () => {
   const { id } = useParams();
@@ -312,52 +313,58 @@ export const DocumentDetails = () => {
         })}
       </div>
 
-      {/* TAB 1: PDF VIEWER */}
+      {/* TAB 1: PDF VIEWER + AI DOCUMENT ASSISTANT */}
       {activeTab === 'viewer' && (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 text-xs">
-            <span className="font-semibold text-slate-700">Official Controlled Document Preview</span>
-            <div className="flex items-center gap-2">
-              {canDownloadPdf ? (
-                <a
-                  href={doc.fileUrl}
-                  download={doc.fileName}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-semibold shadow-sm transition"
-                >
-                  <Download className="w-3.5 h-3.5" /> Download Authorized PDF
-                </a>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRequestType('Download');
-                      setShowRequestModal(true);
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded text-xs font-semibold border border-orange-200 transition"
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 text-xs">
+              <span className="font-semibold text-slate-700">Official Controlled Document Preview</span>
+              <div className="flex items-center gap-2">
+                {canDownloadPdf ? (
+                  <a
+                    href={doc.fileUrl}
+                    download={doc.fileName}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-medium border border-slate-300"
                   >
-                    <Download className="w-3.5 h-3.5" /> Request Download
-                  </button>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium border border-slate-200">
-                    <Lock className="w-3 h-3" /> View only
-                  </span>
-                </>
-              )}
+                    <Download className="w-3.5 h-3.5" /> Download Authorized PDF
+                  </a>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRequestType('Download');
+                        setShowRequestModal(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded text-xs font-semibold border border-orange-200 transition"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Request Download
+                    </button>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium border border-slate-200">
+                      <Lock className="w-3 h-3" /> View only
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div
+              onContextMenu={(e) => {
+                if (!canDownloadPdf) e.preventDefault();
+              }}
+              className="w-full h-[650px] bg-slate-100 rounded-xl overflow-hidden border border-slate-200"
+            >
+              <iframe
+                src={canDownloadPdf ? doc.fileUrl : `${doc.fileUrl}#toolbar=0&navpanes=0`}
+                title="Document PDF"
+                className="w-full h-full border-0"
+              />
             </div>
           </div>
-          <div
-            onContextMenu={(e) => {
-              if (!canDownloadPdf) e.preventDefault();
-            }}
-            className="w-full h-[650px] bg-slate-100 rounded-xl overflow-hidden border border-slate-200"
-          >
-            <iframe
-              src={canDownloadPdf ? doc.fileUrl : `${doc.fileUrl}#toolbar=0&navpanes=0`}
-              title="Document PDF"
-              className="w-full h-full border-0"
-            />
+
+          <div className="lg:col-span-4">
+            <AiDocumentAssistant documentId={id} doc={doc} />
           </div>
         </div>
       )}
