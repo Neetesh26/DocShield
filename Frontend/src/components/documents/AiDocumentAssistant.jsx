@@ -89,7 +89,7 @@ export const AiDocumentAssistant = ({ documentId, doc }) => {
   const suggestedQuestions = getSuggestedQuestions(doc);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-orange-100 dark:border-slate-800 shadow-sm flex flex-col h-[740px] overflow-hidden">
+    <div className="bg-orange-50 dark:bg-slate-900 rounded-2xl border  border-orange-300 dark:border-slate-900 shadow-lg flex flex-col h-[740px] overflow-hidden">
 
       {/* Header */}
       <div className="px-4 py-3.5 border-b border-orange-100 dark:border-slate-800 bg-orange-50/50 dark:bg-slate-900">
