@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   Search,
@@ -174,51 +174,59 @@ export const Sidebar = () => {
 
   return (
     <aside
-      className={`bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 flex flex-col h-screen select-none border-r border-slate-200 dark:border-slate-800 shrink-0 shadow-xs transition-all duration-300 ease-in-out ${
+      className={`bg-gradient-to-b from-orange-100/85 via-amber-95/50 to-white dark:from-slate-900 dark:via-orange-950/20 dark:to-slate-900 text-slate-700 dark:text-slate-300 flex flex-col h-screen select-none border-r border-orange-2  300/80 dark:border-slate-800 shrink-0 shadow-xs transition-all duration-300 ease-in-out ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
       {/* Brand Header */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors duration-200">
+      <div className="h-16 px-4 flex items-center justify-between border-b border-orange-250/80 dark:border-slate-800 bg-transparent transition-colors duration-200">
         {!isCollapsed ? (
           <>
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-lg bg-slate-300 border-slate-800 flex items-center justify-center text-orange-500 shadow-xs shrink-0">
+            <Link
+              to="/workspace/dashboard"
+              title="VidyaGxP Pharma Vault - Go to Dashboard"
+              className="flex items-center gap-3 min-w-0 group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-lg bg-slate-300 border-slate-800 flex items-center justify-center text-orange-500 shadow-xs shrink-0 group-hover:scale-105 transition-transform duration-200">
                 <img src={logo} alt="DocShield Logo" />
               </div>
               <div className="min-w-0">
-                <div className="font-bold text-slate-900 dark:text-white tracking-tight text-base flex items-center gap-1.5 truncate">
+                <div className="font-bold text-slate-900 dark:text-white tracking-tight text-base flex items-center gap-1.5 truncate group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                   VidyaGxP
                 </div>
                 <div className="text-[11px] text-orange-600 dark:text-orange-400 font-extrabold tracking-tight truncate">
                   Pharma Vault
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Collapse Button Symbol */}
             <button
               type="button"
               onClick={toggleSidebar}
               title="Collapse Sidebar (Symbols Only)"
-              className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
+              className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-100/60 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
             >
               <PanelLeftClose className="w-4 h-4" />
             </button>
           </>
         ) : (
-          /* Collapsed Header with Click to Expand */
-          <div className="w-full flex items-center justify-center">
+          /* Collapsed Header with Click to Redirect & Expand */
+          <div className="w-full flex items-center justify-center relative group">
+            <Link
+              to="/workspace/dashboard"
+              title="Go to Dashboard"
+              className="w-10 h-10 rounded-xl bg-slate-300 border border-slate-400/40 dark:border-slate-800 flex items-center justify-center text-orange-500 shadow-xs hover:scale-105 transition-transform cursor-pointer"
+            >
+              <img src={logo} alt="DocShield Logo" className="w-6 h-6" />
+            </Link>
             <button
               type="button"
               onClick={toggleSidebar}
               title="Expand Sidebar"
-              className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 shadow-xs hover:bg-slate-800 transition cursor-pointer relative group"
+              className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-center text-[9px] shadow-xs cursor-pointer transition-colors"
             >
-              <img src={logo} alt="DocShield Logo" className="w-6 h-6" />
-              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white flex items-center justify-center text-[9px] shadow-xs">
-                <PanelLeftOpen className="w-2.5 h-2.5" />
-              </span>
+              <PanelLeftOpen className="w-2.5 h-2.5" />
             </button>
           </div>
         )}
@@ -279,12 +287,12 @@ export const Sidebar = () => {
       </div>
 
       {/* Bottom Quick Toggle Control */}
-      <div className="p-2.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex items-center justify-center transition-colors duration-200">
+      <div className="p-2.5 border-t border-orange-200/50 dark:border-slate-800 bg-orange-50/40 dark:bg-slate-900/40 flex items-center justify-center transition-colors duration-200">
         <button
           type="button"
           onClick={toggleSidebar}
           title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-          className={`flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-orange-900 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition cursor-pointer ${
+          className={`flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-orange-950 dark:hover:text-orange-300 hover:bg-orange-100/60 dark:hover:bg-slate-800 border border-orange-200/60 dark:border-slate-700/80 transition cursor-pointer ${
             isCollapsed ? 'w-10 h-9' : 'w-full px-3'
           }`}
         >
