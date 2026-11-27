@@ -215,7 +215,7 @@ export const Sidebar = () => {
               title="Expand Sidebar"
               className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-orange-500 shadow-xs hover:bg-slate-800 transition cursor-pointer relative group"
             >
-              <Shield className="w-5 h-5 text-orange-500" />
+              <img src={logo} alt="DocShield Logo" className="w-6 h-6" />
               <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white flex items-center justify-center text-[9px] shadow-xs">
                 <PanelLeftOpen className="w-2.5 h-2.5" />
               </span>
