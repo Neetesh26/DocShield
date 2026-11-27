@@ -141,7 +141,7 @@ export const Button3D = ({
       ) : (
         <>
           {icon && iconPosition === 'left' && <span className="shrink-0">{icon}</span>}
-          <span>{children}</span>
+          <span className="inline-flex items-center justify-center">{children}</span>
           {icon && iconPosition === 'right' && <span className="shrink-0">{icon}</span>}
         </>
       )}
