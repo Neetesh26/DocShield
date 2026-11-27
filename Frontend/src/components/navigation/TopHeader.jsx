@@ -15,18 +15,22 @@ import {
   Sun,
   Settings,
   ExternalLink,
-  X
+  X,
+  Languages,
+  Check
 } from 'lucide-react';
 
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Button3D } from '../common/Button3D';
 
 export const TopHeader = ({ onOpenScanner }) => {
 
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme, setThemePreference } = useTheme();
+  const { language, setLanguage, t, supportedLanguages, currentLanguageMeta } = useLanguage();
 
   const {
     notifications,
@@ -44,17 +48,26 @@ export const TopHeader = ({ onOpenScanner }) => {
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
 
   // ---------------- REFS ----------------
 
   const notifRef = useRef(null);
   const userRef = useRef(null);
+  const langRef = useRef(null);
 
   // ---------------- OUTSIDE CLICK ----------------
 
   useEffect(() => {
 
     const handleClickOutside = (event) => {
+
+      if (
+        langRef.current &&
+        !langRef.current.contains(event.target)
+      ) {
+        setShowLangMenu(false);
+      }
 
       if (
         notifRef.current &&
@@ -146,11 +159,11 @@ export const TopHeader = ({ onOpenScanner }) => {
 
           <input
             type="text"
-            placeholder={`Search repository ${
+            placeholder={
               searchMode === 'All'
-                ? ' '
-                : searchMode + '...'
-            }`}
+                ? t('SearchPlaceholder', 'Search documents, batches, racks, custodians...')
+                : `${t('Search', 'Search')} ${searchMode}...`
+            }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="
@@ -216,21 +229,93 @@ export const TopHeader = ({ onOpenScanner }) => {
           }}
           variant="light"
           size="sm"
-          title="Scan Document QR Code"
+          title={t('Scan QR', 'Scan Document QR Code')}
         >
           <QrCode className="w-4 h-4 text-orange-600 dark:text-orange-400 inline" />
           <span className="hidden sm:inline">
-            Scan QR
+            {t('Scan QR', 'Scan QR')}
           </span>
         </Button3D>
+
+        {/* LANGUAGE TRANSLATION (Leftside of Dark Mode) */}
+
+        <div className="relative" ref={langRef}>
+          <button
+            type="button"
+            onClick={() => {
+              setShowLangMenu(!showLangMenu);
+              setShowNotifications(false);
+              setShowUserMenu(false);
+            }}
+            aria-label={t('ChangeLanguage', 'Change Language')}
+            title={`${t('SelectLanguage', 'Select Language')}: ${currentLanguageMeta.name}`}
+            className="
+              p-2
+              text-slate-600 dark:text-slate-300
+              hover:text-orange-600 dark:hover:text-orange-400
+              hover:bg-slate-100 dark:hover:bg-slate-800
+              rounded-lg
+              transition-all duration-200 cursor-pointer
+              flex items-center gap-1.5
+            "
+          >
+            <Languages className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <span className="text-[11px] font-bold tracking-wider hidden sm:inline font-mono">
+              {currentLanguageMeta.flag} {currentLanguageMeta.code.toUpperCase()}
+            </span>
+          </button>
+
+          {showLangMenu && (
+            <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <Languages className="w-3.5 h-3.5 text-orange-600" />
+                  {t('SelectLanguage', 'Select Language')}
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {language.toUpperCase()}
+                </span>
+              </div>
+              <div className="py-1 space-y-0.5 max-h-64 overflow-y-auto">
+                {supportedLanguages.map((langItem) => {
+                  const isSelected = language === langItem.code;
+                  return (
+                    <button
+                      key={langItem.code}
+                      type="button"
+                      onClick={() => {
+                        setLanguage(langItem.code);
+                        setShowLangMenu(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer ${
+                        isSelected
+                          ? 'bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 font-bold border border-orange-200/80 dark:border-orange-800/60'
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-base leading-none">{langItem.flag}</span>
+                        <div className="text-left">
+                          <div className="leading-tight font-semibold">{langItem.nativeName}</div>
+                          <div className="text-[10px] text-slate-400">{langItem.name}</div>
+                        </div>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 text-orange-600 dark:text-orange-400" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* DARK / LIGHT MODE */}
 
         <button
           type="button"
           onClick={toggleTheme}
-          aria-label={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label={isDarkMode ? t('SwitchToLight', 'Switch to Light Mode') : t('SwitchToDark', 'Switch to Dark Mode')}
+          title={isDarkMode ? t('SwitchToLight', 'Switch to Light Mode') : t('SwitchToDark', 'Switch to Dark Mode')}
           className="
             p-2
             text-slate-600 dark:text-slate-300

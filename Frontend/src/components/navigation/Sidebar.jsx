@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
+import { useLanguage } from '../../context/LanguageContext';
 import logo from '/assets/logo.png';
 
 const navigationGroups = [
@@ -147,6 +148,7 @@ export const isRouteAllowedForRole = (itemPath, role) => {
 export const Sidebar = () => {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
+  const { t } = useLanguage();
   const userRole = user?.role || 'User';
 
   // Toggle Collapse State (persists in localStorage)
@@ -228,20 +230,21 @@ export const Sidebar = () => {
           <div key={group.title}>
             {!isCollapsed ? (
               <div className="px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase mb-2">
-                {group.title}
+                {t(group.title, group.title)}
               </div>
             ) : (
-              <div className="h-px bg-slate-200 dark:bg-slate-800 my-2.5 mx-2" title={group.title} />
+              <div className="h-px bg-slate-200 dark:bg-slate-800 my-2.5 mx-2" title={t(group.title, group.title)} />
             )}
 
             <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
+                const translatedName = t(item.name, item.name);
                 return (
                   <NavLink
                     key={item.path}
                     to={item.path}
-                    title={isCollapsed ? item.name : undefined}
+                    title={isCollapsed ? translatedName : undefined}
                     className={({ isActive }) => `
                       flex items-center transition-all rounded-xl
                       ${isCollapsed ? 'justify-center w-12 h-10 mx-auto' : 'justify-between px-3 py-2 text-[13px] font-medium'}
@@ -255,7 +258,7 @@ export const Sidebar = () => {
                   >
                     <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
                       <Icon className="w-4 h-4 shrink-0" />
-                      {!isCollapsed && <span>{item.name}</span>}
+                      {!isCollapsed && <span>{translatedName}</span>}
                     </div>
 
                     {item.hasBadge && unreadCount > 0 && (
