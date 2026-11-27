@@ -18,7 +18,7 @@ const approvalSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['Print Request', 'Download Request', 'Controlled-Copy', 'Checkout Request', 'Return Verification', 'Custody Transfer', 'Document Release'],
+    enum: ['Print Request', 'Download Request', 'Controlled-Copy', 'Controlled-Copy Request', 'Checkout Request', 'Return Verification', 'Custody Transfer', 'Document Release', 'Document Change Request'],
     required: true
   },
   approver: {

@@ -171,6 +171,7 @@ export const DocumentDetails = () => {
 
   const currentUserId = String(user?._id || user?.id || '');
   const isRestrictedUser = ['User', 'User / Viewer', 'Viewer', 'Employee'].includes(user?.role);
+  const isProfessionalRole = ['Admin', 'QA', 'QA Manager', 'Document Controller'].includes(user?.role);
   const hasApprovedDownload = requests.some(
     (r) =>
       r.requestType === 'Download' &&
@@ -247,25 +248,27 @@ export const DocumentDetails = () => {
         <div className="flex items-center gap-2 flex-wrap shrink-0">
           <button
             onClick={() => setShowWhereIsItModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg border border-slate-300 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-semibold rounded-lg border border-orange-200 shadow-2xs transition cursor-pointer"
           >
             <MapPin className="w-3.5 h-3.5 text-orange-600" />
             Where is it?
           </button>
           <button
             onClick={() => setShowQrModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg border border-slate-300 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0b192c] hover:bg-[#1a2d47] text-white text-xs font-semibold rounded-lg shadow-xs transition cursor-pointer"
           >
-            <QrCode className="w-3.5 h-3.5 text-slate-600" />
+            <QrCode className="w-3.5 h-3.5 text-orange-400" />
             Label
           </button>
-          <button
-            onClick={() => setShowRequestModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            Request Print / Download
-          </button>
+          {!isProfessionalRole && (
+            <button
+              onClick={() => setShowRequestModal(true)}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              {isRestrictedUser ? 'Request Print / Download' : 'Request Print / Checkout'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -666,12 +669,14 @@ export const DocumentDetails = () => {
             <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
               Document Requests & Checkouts
             </h2>
-            <button
-              onClick={() => setShowRequestModal(true)}
-              className="text-xs font-semibold text-orange-600 hover:underline"
-            >
-              + Submit New Request
-            </button>
+            {!isProfessionalRole && (
+              <button
+                onClick={() => setShowRequestModal(true)}
+                className="text-xs font-semibold text-orange-600 hover:underline"
+              >
+                + Submit New Request
+              </button>
+            )}
           </div>
 
           <div className="overflow-x-auto">

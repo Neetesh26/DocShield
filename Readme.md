@@ -102,19 +102,6 @@ MAX_FILE_SIZE_MB=25
    ```
 
 ---
-
-## 4. Demo User Credentials (1-Click Login Enabled)
-
-| Role | Name | Email | Password | Permissions |
-| :--- | :--- | :--- | :--- | :--- |
-| **Admin** | Dr. Sarah Jenkins | `admin@docushield.com` | `DocuShield@2026` | Full system governance, master data, user administration |
-| **QA Lead** | Michael Chang | `qa@docushield.com` | `DocuShield@2026` | Approvals, GxP audits, master data, checkout reviews |
-| **Document Controller** | Elena Rostova | `doccontrol@docushield.com` | `DocuShield@2026` | Repository management, document revisions, vault assignments |
-| **Department Head** | Dr. Rajesh Patel | `depthead@docushield.com` | `DocuShield@2026` | Departmental approvals, checkout requests, custody transfers |
-| **Employee / Analyst** | Emily Davis | `analyst@docushield.com` | `DocuShield@2026` | Document search, view, request issuance, handover receipt |
-
----
-
 ## 5. API Architecture Reference
 
 ### Authentication

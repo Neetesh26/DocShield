@@ -5,7 +5,17 @@ import Notification from '../models/Notification.js';
 import User from '../models/User.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 import { logAuditEvent } from '../services/auditService.js';
-import { AUDIT_ACTIONS, REQUEST_STATUSES, ROLES } from '../constants/index.js';
+import { AUDIT_ACTIONS, REQUEST_STATUSES, REQUEST_TYPES, ROLES } from '../constants/index.js';
+
+const APPROVAL_TYPE_MAP = {
+  [REQUEST_TYPES.PRINT]: 'Print Request',
+  [REQUEST_TYPES.DOWNLOAD]: 'Download Request',
+  [REQUEST_TYPES.CONTROLLED_COPY]: 'Controlled-Copy',
+  [REQUEST_TYPES.CHECKOUT]: 'Checkout Request',
+  [REQUEST_TYPES.RETURN]: 'Return Verification',
+  [REQUEST_TYPES.CUSTODY_CHANGE]: 'Custody Transfer',
+  [REQUEST_TYPES.DOCUMENT_CHANGE]: 'Document Change Request'
+};
 
 export const createRequest = async (req, res, next) => {
   try {
@@ -22,6 +32,10 @@ export const createRequest = async (req, res, next) => {
 
     if (!documentId || !requestType || !reason) {
       return sendError(res, 'Document ID, request type, and justification reason are mandatory', 400);
+    }
+
+    if (!Object.values(REQUEST_TYPES).includes(requestType)) {
+      return sendError(res, `Invalid request type: ${requestType}`, 400);
     }
 
     const doc = await Document.findById(documentId);
@@ -48,18 +62,26 @@ export const createRequest = async (req, res, next) => {
       status: REQUEST_STATUSES.PENDING
     });
 
-    await newRequest.save();
-
-    // Create an associated Approval task for QA / Doc Controller
+    // Build & validate associated Approval task before persisting so partial records cannot occur
     const approval = new Approval({
       request: newRequest._id,
       document: doc._id,
-      type: `${requestType} Request`,
+      type: APPROVAL_TYPE_MAP[requestType] || 'Print Request',
       approver: req.user._id, // Will be acted on by authorized QA
       status: 'Pending',
       comments: `Request ${requestNumber} submitted by ${req.user.name}`
     });
-    await approval.save();
+
+    await newRequest.validate();
+    await approval.validate();
+
+    await newRequest.save();
+    try {
+      await approval.save();
+    } catch (approvalErr) {
+      await DocumentRequest.deleteOne({ _id: newRequest._id });
+      throw approvalErr;
+    }
 
     // Notify QA Users
     const qaUsers = await User.find({ role: { $in: [ROLES.QA, ROLES.QA_MANAGER, ROLES.DOCUMENT_CONTROLLER, ROLES.ADMIN] } }).limit(5);
