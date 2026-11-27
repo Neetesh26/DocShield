@@ -97,7 +97,7 @@ export const AiDocumentAssistant = ({ documentId, doc }) => {
           <Sparkles className="w-4 h-4 text-orange-500 dark:text-orange-400 shrink-0" />
           <span>AI Document Assistant</span>
         </div>
-
+    
         <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
           Ask in English or Hinglish · Document-grounded AI
         </p>

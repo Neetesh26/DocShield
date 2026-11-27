@@ -246,8 +246,8 @@ export const Sidebar = () => {
                     to={item.path}
                     title={isCollapsed ? translatedName : undefined}
                     className={({ isActive }) => `
-                      flex items-center transition-all rounded-xl
-                      ${isCollapsed ? 'justify-center w-12 h-10 mx-auto' : 'justify-between px-3 py-2 text-[13px] font-medium'}
+                      group flex items-center transition-all duration-200 ease-spring rounded-xl active:scale-[0.98]
+                      ${isCollapsed ? 'justify-center w-12 h-10 mx-auto' : 'justify-between px-3 py-2 text-[13px] font-medium hover:translate-x-1'}
                       ${
                         isActive
                           ? 'bg-orange-50 dark:bg-orange-500/15 text-orange-950 dark:text-orange-300 font-bold border-l-4 border-orange-600 shadow-2xs'
@@ -257,17 +257,17 @@ export const Sidebar = () => {
                     `}
                   >
                     <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-                      <Icon className="w-4 h-4 shrink-0" />
+                      <Icon className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
                       {!isCollapsed && <span>{translatedName}</span>}
                     </div>
 
                     {item.hasBadge && unreadCount > 0 && (
                       !isCollapsed ? (
-                        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white animate-pulse-glow">
                           {unreadCount}
                         </span>
                       ) : (
-                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white dark:ring-slate-900" />
+                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white dark:ring-slate-900 animate-pulse" />
                       )
                     )}
                   </NavLink>
