@@ -22,7 +22,7 @@ export const askDocumentAssistant = async (req, res, next) => {
       // Promptly inform that LLM configuration is required without faking
       return sendSuccess(res, 'AI Assistant Status', {
         configured: false,
-        message: 'AI Assistant Provider is not configured. To enable live LLM document analysis, configure GEMINI_API_KEY or OPENAI_API_KEY in backend/.env.',
+        message: 'currently our model is under the development phase and not yet available for use. Please check back later.',
         documentContext: {
           documentNumber: doc.documentNumber,
           title: doc.title,
