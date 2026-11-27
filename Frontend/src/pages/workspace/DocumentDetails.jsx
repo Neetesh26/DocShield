@@ -168,7 +168,8 @@ export const DocumentDetails = () => {
   }
 
   const { document: doc, versions = [], requests = [], auditLogs = [], relatedDocs = [] } = docData;
-
+  console.log("docdoc",doc);
+  
   const currentUserId = String(user?._id || user?.id || '');
   const isRestrictedUser = ['User', 'User / Viewer', 'Viewer', 'Employee'].includes(user?.role);
   const isProfessionalRole = ['Admin', 'QA', 'QA Manager', 'Document Controller'].includes(user?.role);
@@ -892,28 +893,46 @@ export const DocumentDetails = () => {
                 <span className="font-mono text-slate-800">{doc.boxNumber} / {doc.fileNumber}</span>
               </div>
             </div>
-
+                       
             {/* Visual rack illustration */}
-            <div className="p-4 bg-[#0F172A] rounded-xl text-white text-center space-y-2">
-              <span className="text-[11px] font-mono text-orange-400 block uppercase">
-                Rack Visual Locator
-              </span>
-              <div className="grid grid-cols-4 gap-1.5 max-w-xs mx-auto py-2">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((bin) => (
-                  <div
-                    key={bin}
-                    className={`h-10 rounded border flex items-center justify-center text-[10px] font-mono ${
-                      bin === 2 ? 'bg-orange-500 border-orange-300 text-slate-900 font-bold shadow-md' : 'bg-slate-800 border-slate-700 text-slate-400'
-                    }`}
-                  >
-                    Bin {bin} {bin === 2 ? '★' : ''}
+            {(() => {
+              const binMatch = String(
+                doc.storageLocation?.bin || doc.storageLocation?.code?.split('/BIN-')[1] || ''
+              ).match(/(\d+)/);
+              const targetBin = binMatch ? parseInt(binMatch[1], 10) : null;
+              const shelfMatch = String(
+                doc.storageLocation?.shelf || doc.storageLocation?.code?.match(/\/SH-([^/]+)/)?.[1] || '1'
+              ).match(/(\d+)/);
+              const targetShelf = shelfMatch ? parseInt(shelfMatch[1], 10) : 1;
+              const binsList = targetBin && targetBin > 8 ? [1, 2, 3, 4, 5, 6, 7, targetBin] : [1, 2, 3, 4, 5, 6, 7, 8];
+
+              return (
+                <div className="p-4 bg-[#0F172A] rounded-xl text-white text-center space-y-2">
+                  <span className="text-[11px] font-mono text-orange-400 block uppercase">
+                    Rack Visual Locator
+                  </span>
+                  <div className="grid grid-cols-4 gap-1.5 max-w-xs mx-auto py-2">
+                    {binsList.map((bin) => (
+                      <div
+                        key={bin}
+                        className={`h-10 rounded border flex items-center justify-center text-[10px] font-mono ${
+                          bin === targetBin
+                            ? 'bg-orange-500 border-orange-300 text-slate-900 font-bold shadow-md'
+                            : 'bg-slate-800 border-slate-700 text-slate-400'
+                        }`}
+                      >
+                        Bin {bin} {bin === targetBin ? '★' : ''}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <span className="text-[10px] text-slate-400 block">
-                Target File highlighted at Bin 2 on Shelf 1.
-              </span>
-            </div>
+                  <span className="text-[10px] text-slate-400 block">
+                    {targetBin
+                      ? `Target File highlighted at Bin ${targetBin} on Shelf ${targetShelf}.`
+                      : 'Storage bin coordinate not assigned.'}
+                  </span>
+                </div>
+              );
+            })()}
 
             <button
               onClick={() => setShowWhereIsItModal(false)}
