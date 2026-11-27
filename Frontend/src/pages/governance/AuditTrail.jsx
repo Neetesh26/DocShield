@@ -674,7 +674,7 @@ export const AuditTrail = () => {
         <div className="p-3.5 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-900/60">
           <div>
             Showing <strong className="text-slate-800 dark:text-slate-200">{logs.length}</strong> of{' '}
-            <strong className="text-slate-800 dark:text-slate-200">{total}</strong> immutable 21 CFR Part 11 records
+            <strong className="text-slate-800 dark:text-slate-200">{total}</strong>
           </div>
 
           <div className="flex items-center gap-3">
