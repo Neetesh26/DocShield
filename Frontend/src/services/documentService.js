@@ -48,7 +48,7 @@ export const documentService = {
   },
 
   askAssistant: async (documentId, prompt, mode = 'qa') => {
-    const response = await api.post('/assistant/chat', { documentId, prompt, mode });
+    const response = await api.post('/assistant/chat', { documentId, prompt, mode }, { timeout: 35000 });
     return response.data;
   },
 
