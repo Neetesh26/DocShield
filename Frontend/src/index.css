@@ -525,7 +525,7 @@ html.dark .card-hover-effect:hover {
 /* 3. Ultra Smooth Page Transitions */
 .page-transition-enter {
   animation: pageEnter 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: opacity, transform;
+  will-change: opacity;
 }
 
 /* 4. Frosted Glassmorphism Surfaces */

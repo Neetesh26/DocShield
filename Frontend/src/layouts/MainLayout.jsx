@@ -24,7 +24,7 @@ export const MainLayout = () => {
         <main className="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-950 transition-colors duration-200 print:p-0 print:m-0 print:overflow-visible print:bg-white print:h-auto print:block">
           <div
             key={location.pathname}
-            className="max-w-7xl mx-auto print:max-w-none print:w-full animate-page-enter"
+            className="max-w-7xl mx-auto print:max-w-none print:w-full"
           >
             <Outlet />
           </div>
