@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   CalendarClock,
@@ -1306,9 +1307,9 @@ export const ReviewRetention = () => {
       {/* MODAL: PERIODIC REVIEW 21 CFR PART 11 ELECTRONIC SIGNATURE */}
       {/* ======================================================== */}
 
-      {reviewModalDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop-blur animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-4 sm:p-5 shadow-2xl space-y-3 animate-modal-pop">
+      {reviewModalDoc && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg p-4 sm:p-5 shadow-2xl space-y-3 animate-fade-in my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
 
           {/* Header */}
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
@@ -1508,16 +1509,17 @@ export const ReviewRetention = () => {
             </div>
           </form>
         </div>
-        </div>
+        </div>,
+        document.body
       )}
 
 
       {/* ======================================================== */}
       {/* MODAL: AUTHORIZE DESTRUCTION (DUAL SIGN-OFF)            */}
       {/* ======================================================== */}
-      {destructionModalDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-blur animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-modal-pop">
+      {destructionModalDoc && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-fade-in my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center">
@@ -1647,15 +1649,16 @@ export const ReviewRetention = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ======================================================== */}
       {/* MODAL: CERTIFICATE OF DESTRUCTION VIEWER                 */}
       {/* ======================================================== */}
-      {viewCertificateDoc && (
-        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full p-8 shadow-2xl space-y-6">
+      {viewCertificateDoc && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full p-8 shadow-2xl space-y-6 animate-fade-in my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 flex items-center justify-center">
@@ -1753,15 +1756,16 @@ export const ReviewRetention = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ======================================================== */}
       {/* MODAL: EDIT RETENTION POLICY MATRIX                      */}
       {/* ======================================================== */}
-      {editPolicyItem && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      {editPolicyItem && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-fade-in my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                 Update Policy: {editPolicyItem.name}
@@ -1830,7 +1834,8 @@ export const ReviewRetention = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
