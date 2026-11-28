@@ -721,8 +721,8 @@ export const AuditTrail = () => {
         </div>
       </div>
       {selectedEntry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden p-5 space-y-3.5 max-h-[86vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-blur animate-fade-in">
+          <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden p-5 space-y-3.5 max-h-[86vh] overflow-y-auto animate-modal-pop">
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">

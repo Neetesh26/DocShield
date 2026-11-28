@@ -1307,7 +1307,8 @@ export const ReviewRetention = () => {
       {/* ======================================================== */}
 
       {reviewModalDoc && (
-        <div className="fixed inset-0 bg-slate-950/30 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-4 sm:p-5 shadow-2xl space-y-3 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop-blur animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-4 sm:p-5 shadow-2xl space-y-3 animate-modal-pop">
 
           {/* Header */}
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
@@ -1515,8 +1516,8 @@ export const ReviewRetention = () => {
       {/* MODAL: AUTHORIZE DESTRUCTION (DUAL SIGN-OFF)            */}
       {/* ======================================================== */}
       {destructionModalDoc && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-blur animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-modal-pop">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center">
