@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   FileText,
@@ -779,26 +780,37 @@ export const DocumentDetails = () => {
       )}
 
       {/* MODAL 1: Request Print / Checkout */}
-      {showRequestModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900">Request Document Action</h3>
-              <button onClick={() => setShowRequestModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+      {showRequestModal && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6 space-y-4 shadow-2xl my-auto max-h-[calc(100vh-2rem)] overflow-y-auto animate-modal-pop">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 flex items-center justify-center">
+                  <Printer className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Request Document Action</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRequestModal(false)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
 
             {requestSuccess ? (
-              <div className="p-4 bg-orange-50 text-orange-800 border border-orange-200 rounded-xl text-xs text-center font-medium">
+              <div className="p-4 bg-orange-50 dark:bg-orange-950/40 text-orange-800 dark:text-orange-300 border border-orange-200 dark:border-orange-800 rounded-xl text-xs text-center font-medium">
                 {requestSuccess}
               </div>
             ) : (
               <form onSubmit={handleCreateRequest} className="space-y-4 text-xs">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Request Type</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Request Type</label>
                   <select
                     value={requestType}
                     onChange={(e) => setRequestType(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg bg-white"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
                   >
                     <option value="Print">Controlled Print Copy</option>
                     <option value="Download">Controlled Electronic Download</option>
@@ -809,23 +821,23 @@ export const DocumentDetails = () => {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Regulatory Justification Reason *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Regulatory Justification Reason *</label>
                   <textarea
                     rows="3"
                     required
                     value={requestReason}
                     onChange={(e) => setRequestReason(e.target.value)}
                     placeholder="State GxP operational justification (e.g. required for batch testing run)"
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 placeholder:text-slate-400"
                   ></textarea>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Urgency</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Urgency</label>
                   <select
                     value={requestUrgency}
                     onChange={(e) => setRequestUrgency(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg bg-white"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
                   >
                     <option value="Normal">Normal</option>
                     <option value="Urgent">Urgent (Production Critical)</option>
@@ -833,17 +845,17 @@ export const DocumentDetails = () => {
                   </select>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <button
                     type="button"
                     onClick={() => setShowRequestModal(false)}
-                    className="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700"
+                    className="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition font-medium cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-1.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg"
+                    className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl shadow-xs hover:shadow transition cursor-pointer"
                   >
                     Submit Request
                   </button>
@@ -851,45 +863,52 @@ export const DocumentDetails = () => {
               </form>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL 2: Where Is It? (3D / Coordinate Locator) */}
-      {showWhereIsItModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+      {showWhereIsItModal && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 space-y-4 shadow-2xl my-auto max-h-[calc(100vh-2rem)] overflow-y-auto animate-modal-pop">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-orange-600" />
-                <h3 className="text-sm font-bold text-slate-900">Physical Coordinate Locator</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Physical Coordinate Locator</h3>
               </div>
-              <button onClick={() => setShowWhereIsItModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+              <button
+                type="button"
+                onClick={() => setShowWhereIsItModal(false)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 text-xs">
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl space-y-3 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-500">Document Number:</span>
-                <span className="font-mono font-bold text-orange-700">{doc.documentNumber}</span>
+                <span className="text-slate-500 dark:text-slate-400">Document Number:</span>
+                <span className="font-mono font-bold text-orange-700 dark:text-orange-400">{doc.documentNumber}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Target Facility:</span>
-                <span className="font-semibold text-slate-800">{doc.storageLocation?.building}</span>
+                <span className="text-slate-500 dark:text-slate-400">Target Facility:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{doc.storageLocation?.building}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Archive Vault / Area:</span>
-                <span className="font-semibold text-slate-800">{doc.storageLocation?.area}</span>
+                <span className="text-slate-500 dark:text-slate-400">Archive Vault / Area:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{doc.storageLocation?.area}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Room:</span>
-                <span className="font-mono text-slate-800">{doc.storageLocation?.room}</span>
+                <span className="text-slate-500 dark:text-slate-400">Room:</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200">{doc.storageLocation?.room}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Exact Shelf Coordinate:</span>
-                <span className="font-mono font-bold text-orange-700">{doc.storageLocation?.code}</span>
+                <span className="text-slate-500 dark:text-slate-400">Exact Shelf Coordinate:</span>
+                <span className="font-mono font-bold text-orange-700 dark:text-orange-400">{doc.storageLocation?.code}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Box & File Tag:</span>
-                <span className="font-mono text-slate-800">{doc.boxNumber} / {doc.fileNumber}</span>
+                <span className="text-slate-500 dark:text-slate-400">Box & File Tag:</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200">{doc.boxNumber} / {doc.fileNumber}</span>
               </div>
             </div>
 
@@ -916,41 +935,51 @@ export const DocumentDetails = () => {
             </div>
 
             <button
+              type="button"
               onClick={() => setShowWhereIsItModal(false)}
-              className="w-full py-2 bg-slate-800 text-white rounded-lg text-xs font-semibold"
+              className="w-full py-2 bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
             >
               Close Locator
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL 3: Printable QR Label */}
-      {showQrModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 max-w-sm w-full p-6 text-center space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span className="text-xs font-bold text-slate-800">Physical Binder Label</span>
-              <button onClick={() => setShowQrModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+      {showQrModal && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-sm w-full p-6 text-center space-y-4 shadow-2xl my-auto max-h-[calc(100vh-2rem)] overflow-y-auto animate-modal-pop">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Physical Binder Label</span>
+              <button
+                type="button"
+                onClick={() => setShowQrModal(false)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
             {doc.qrCodeImage ? (
-              <img src={doc.qrCodeImage} alt="QR Code" className="w-44 h-44 mx-auto border p-2 rounded-xl" />
+              <img src={doc.qrCodeImage} alt="QR Code" className="w-44 h-44 mx-auto border border-slate-200 dark:border-slate-700 p-2 rounded-xl bg-white" />
             ) : (
-              <div className="w-44 h-44 bg-slate-100 flex items-center justify-center mx-auto text-xs text-slate-400">QR code unavailable</div>
+              <div className="w-44 h-44 bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-xs text-slate-400 rounded-xl">QR code unavailable</div>
             )}
-            <div className="text-left bg-slate-50 p-3 rounded-lg text-xs space-y-1">
-              <div><strong className="text-slate-700">Doc #:</strong> <span className="font-mono">{doc.documentNumber}</span></div>
-              <div className="truncate"><strong className="text-slate-700">Title:</strong> {doc.title}</div>
-              <div><strong className="text-slate-700">Location:</strong> <span className="font-mono">{doc.storageLocation?.code}</span></div>
+            <div className="text-left bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl text-xs space-y-1 border border-slate-200/80 dark:border-slate-700">
+              <div><strong className="text-slate-700 dark:text-slate-300">Doc #:</strong> <span className="font-mono text-orange-600 dark:text-orange-400 font-bold">{doc.documentNumber}</span></div>
+              <div className="truncate"><strong className="text-slate-700 dark:text-slate-300">Title:</strong> <span className="text-slate-800 dark:text-slate-200">{doc.title}</span></div>
+              <div><strong className="text-slate-700 dark:text-slate-300">Location:</strong> <span className="font-mono text-slate-800 dark:text-slate-200">{doc.storageLocation?.code}</span></div>
             </div>
             <button
+              type="button"
               onClick={() => window.print()}
-              className="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5"
+              className="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs hover:shadow transition cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" /> Print Binder Spine Label
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

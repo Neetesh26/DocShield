@@ -1,13 +1,15 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from '../components/navigation/Sidebar';
 import { TopHeader } from '../components/navigation/TopHeader';
 
 export const MainLayout = () => {
+  const location = useLocation();
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200 print:h-auto print:w-full print:overflow-visible print:bg-white print:block">
       {/* Sidebar - Strictly hidden in print/PDF */}
-      <div className="print:hidden shrink-0">
+      <div className="print:hidden shrink-0 transition-all duration-300 ease-spring">
         <Sidebar />
       </div>
 
@@ -20,7 +22,10 @@ export const MainLayout = () => {
 
         {/* Scrollable Workspace */}
         <main className="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-950 transition-colors duration-200 print:p-0 print:m-0 print:overflow-visible print:bg-white print:h-auto print:block">
-          <div className="max-w-7xl mx-auto print:max-w-none print:w-full">
+          <div
+            key={location.pathname}
+            className="max-w-7xl mx-auto print:max-w-none print:w-full"
+          >
             <Outlet />
           </div>
         </main>
@@ -28,4 +33,3 @@ export const MainLayout = () => {
     </div>
   );
 };
-

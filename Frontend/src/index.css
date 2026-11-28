@@ -480,5 +480,216 @@ html.dark .report-card-glow:hover {
   box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(249, 115, 22, 0.2);
 }
 
+/* ============================================================
+   ULTRA ENTERPRISE ANIMATIONS, TRANSITIONS & MICRO-INTERACTIONS
+   Executive Pharmaceutical SaaS Look & Feel
+   ============================================================ */
+
+/* 1. Global Interactive Micro-Spring for Buttons & Clickables */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+.btn-interactive {
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active,
+.btn-interactive:not(:disabled):active {
+  transform: scale(0.975);
+}
+
+/* 2. Professional Card Elevation & Border Illumination */
+.pro-card,
+.card-hover-effect {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.pro-card:hover,
+.card-hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+}
+
+html.dark .pro-card:hover,
+html.dark .card-hover-effect:hover {
+  box-shadow: 0 14px 35px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(249, 115, 22, 0.2);
+}
+
+/* 3. Ultra Smooth Page Transitions */
+.page-transition-enter {
+  animation: pageEnter 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity;
+}
+
+/* 4. Frosted Glassmorphism Surfaces */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+html.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(30, 41, 59, 0.8);
+}
+
+/* 5. Smooth Table Row Hover Sweep */
+table tbody tr {
+  transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+table tbody tr:hover {
+  background-color: rgba(241, 245, 249, 0.7);
+}
+
+html.dark table tbody tr:hover {
+  background-color: rgba(30, 41, 59, 0.7) !important;
+}
+
+/* 6. Form Field Focus Glow & Smooth Bloom */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  transition: border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: #ea580c !important;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.18), 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 7. Modal Dialogs & Backdrops Smooth Pop */
+.modal-backdrop-blur {
+  background-color: rgba(2, 6, 23, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-content-pop {
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* 8. Dropdown Smooth Cascade */
+.dropdown-pop {
+  animation: dropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top right;
+  will-change: transform, opacity;
+}
+
+/* 9. High-Tech Shimmer Skeleton & Barcode Scanner Animation */
+@keyframes shimmerWave {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: #f1f5f9;
+}
+
+html.dark .skeleton-shimmer {
+  background-color: #1e293b;
+}
+
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmerWave 1.8s infinite;
+}
+
+html.dark .skeleton-shimmer::after {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* 10. Live Status Dots & Radar Ping */
+.status-beacon-emerald {
+  position: relative;
+}
+.status-beacon-emerald::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background-color: #10b981;
+  opacity: 0.75;
+  animation: statusPing 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.status-beacon-amber {
+  position: relative;
+}
+.status-beacon-amber::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background-color: #f59e0b;
+  opacity: 0.75;
+  animation: statusPing 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.status-beacon-rose {
+  position: relative;
+}
+.status-beacon-rose::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background-color: #f43f5e;
+  opacity: 0.75;
+  animation: statusPing 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* 11. Subtle Badge Glows */
+.badge-glow-emerald {
+  box-shadow: 0 0 10px -2px rgba(16, 185, 129, 0.4);
+}
+.badge-glow-orange {
+  box-shadow: 0 0 10px -2px rgba(234, 88, 12, 0.4);
+}
+.badge-glow-amber {
+  box-shadow: 0 0 10px -2px rgba(245, 158, 11, 0.4);
+}
+
+/* 12. Tab Switch Underline Slider Glow */
+.tab-active-glow {
+  box-shadow: 0 2px 10px -1px rgba(234, 88, 12, 0.5);
+}
+
+
 
 

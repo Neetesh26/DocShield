@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FileText, Plus, Clock, CheckCircle, XCircle, Search, Filter } from 'lucide-react';
 import { requestService, documentService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
@@ -203,12 +204,12 @@ export const Requests = () => {
       </div>
 
       {/* New Request Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900">New Document Request</h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+      {showModal && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl my-auto max-h-[calc(100vh-2rem)] overflow-y-auto animate-modal-pop">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">New Document Request</h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">✕</button>
             </div>
 
             <form onSubmit={handleCreateSubmit} className="space-y-3 text-xs">
@@ -285,7 +286,8 @@ export const Requests = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {/* Cancel Request Confirmation Modal */}
       {cancelTarget && (

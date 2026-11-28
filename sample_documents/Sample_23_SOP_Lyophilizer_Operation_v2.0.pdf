@@ -1,0 +1,61 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1515 >>
+stream
+BT /F1 10 Tf 50 750 Td 14 TL
+(VIDYAGXP PHARMACEUTICAL QUALITY MANAGEMENT SYSTEM) Tj T*
+(CONFIDENTIAL - REGULATORY COMPLIANCE GXP DOCUMENT) Tj T*
+(========================================================================) Tj T*
+(Document No: SOP-PRD-023) Tj T*
+(Document Type: Standard Operating Procedure [SOP]) Tj T*
+(Title: Standard Operating Procedure for Freeze Dryer SIP and CIP Automatic Cycles) Tj T*
+(Version: 2.0) Tj T*
+(Department: Production) Tj T*
+(Product: Sterile Lyophilized Vials) Tj T*
+(Batch No: LYO-PRD-2026-023) Tj T*
+(Effective Date: 2026-05-20) Tj T*
+(Review Date: 2028-05-20) Tj T*
+(Expiry Date: 2031-05-20) Tj T*
+(Prepared By: Neha Joshi) Tj T*
+(Reviewed By: Amit Deshmukh) Tj T*
+(Approved By: Dr. Anita Sharma) Tj T*
+(========================================================================) Tj T*
+(1. PURPOSE AND SCOPE) Tj T*
+(This validated GxP document establishes the authorized regulatory controls for Standard Operating Procedure for Freeze Dryer SIP and CIP Automatic Cycles.) Tj T*
+(Strict adherence to standard operating parameters is mandatory across all manufacturing suites.) Tj T*
+() Tj T*
+(2. REGULATORY AND REVISION NOTES) Tj T*
+(Version 2.0 change description: Updated condenser sublimation endpoint sensor calibration verification.) Tj T*
+() Tj T*
+(3. GXP AUDIT TRAIL AND ATTESTATION) Tj T*
+(This record was generated, reviewed, and authorized in full accordance with FDA 21 CFR Part 11) Tj T*
+(and EU GMP Annex 11 electronic records and data integrity standards.) Tj T*
+ET
+
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000001808 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1878
+%%EOF

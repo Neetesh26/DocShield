@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   UploadCloud,
@@ -21,7 +22,10 @@ import {
   Info,
   Database,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Lock,
+  EyeOff,
+  FileSignature
 } from 'lucide-react';
 import { documentService, masterDataService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
@@ -58,6 +62,13 @@ export const BulkUpload = () => {
 
   const [inspectModalItem, setInspectModalItem] = useState(null);
   const [ingestConfirmModal, setIngestConfirmModal] = useState(false);
+
+  // 21 CFR Part 11 Electronic Signature for Batch Ingestion
+  const [eSignModalOpen, setESignModalOpen] = useState(false);
+  const [eSignPassword, setESignPassword] = useState('');
+  const [showESignPassword, setShowESignPassword] = useState(false);
+  const [eSignMeaning, setESignMeaning] = useState('Author / Ingestion Attestation');
+  const [eSignReason, setESignReason] = useState('Bulk GxP Master Document Ingestion & Physical Vault Archival');
 
   // Load master data on mount
   useEffect(() => {
@@ -146,6 +157,9 @@ export const BulkUpload = () => {
               numPages: res.data.file?.numPages || 1,
               recommendedLocationId: recLocationId,
               recommendedLocationCode: recLocationCode,
+              locationId: q.locationId || recLocationId,
+              locationCode: q.locationCode || recLocationCode,
+              custodianId: q.custodianId || user?._id || (masterData.users[0]?._id ?? ''),
               recommendedReason: rec.reason || '',
               isDuplicate: dup.detected || false,
               duplicateInfo: dup.detected ? dup : null,
@@ -275,16 +289,17 @@ export const BulkUpload = () => {
 
   // Auto-place all unplaced documents
   const handleAutoPlaceAll = () => {
+    const defaultCust = user?._id || (masterData.users.find((u) => u.role === 'Custodian' || u.role === 'Admin')?._id) || (masterData.users[0]?._id ?? '');
     let placedCount = 0;
     setQueue((prev) =>
       prev.map((item) => {
         if (item.isIngested) return item;
-        // If already placed, keep it
-        if (item.locationId) return item;
 
         // Try AI recommended location first
         let targetLocation = null;
-        if (item.recommendedLocationId) {
+        if (item.locationId) {
+          targetLocation = masterData.locations.find((l) => l._id === item.locationId);
+        } else if (item.recommendedLocationId) {
           targetLocation = masterData.locations.find((l) => l._id === item.recommendedLocationId);
         }
 
@@ -300,12 +315,17 @@ export const BulkUpload = () => {
             masterData.locations[0];
         }
 
-        if (targetLocation) {
+        const targetLocationId = targetLocation?._id || item.locationId || masterData.locations[0]?._id;
+        const targetLocationCode = targetLocation?.code || item.locationCode || masterData.locations[0]?.code;
+        const targetCustId = item.custodianId || defaultCust;
+
+        if (targetLocationId || targetCustId) {
           placedCount++;
           const updated = {
             ...item,
-            locationId: targetLocation._id,
-            locationCode: targetLocation.code
+            locationId: targetLocationId,
+            locationCode: targetLocationCode,
+            custodianId: targetCustId
           };
           const stat = calculateItemStatus(updated);
           return { ...updated, status: stat.status, statusText: stat.text };
@@ -315,9 +335,9 @@ export const BulkUpload = () => {
     );
 
     if (placedCount > 0) {
-      toast.success(`✨ Auto-placed ${placedCount} document(s) in optimal vault storage!`);
+      toast.success(`✨ Auto-placed ${placedCount} document(s) in optimal vault storage and assigned custodians!`);
     } else {
-      toast.info('All documents already have storage locations assigned.');
+      toast.info('All documents already have storage locations and custodians assigned.');
     }
   };
 
@@ -391,18 +411,27 @@ export const BulkUpload = () => {
   };
 
   // Ingest batch execution
-  const executeIngest = async (onlyReady = false) => {
+  const executeIngest = async (password, meaning, reason) => {
     setIngestConfirmModal(false);
+    setESignModalOpen(false);
+
+    if (!password || !password.trim()) {
+      toast.error('Security password is required for 21 CFR Part 11 electronic signature authentication.');
+      return;
+    }
+
+    const defaultCust = user?._id || (masterData.users.find((u) => u.role === 'Custodian' || u.role === 'Admin')?._id) || (masterData.users[0]?._id ?? '');
+    const defaultLoc = masterData.locations[0]?._id ?? '';
 
     // Filter documents to ingest
-    const toIngest = queue.filter((item) => {
-      if (item.isIngested || item.isExtracting) return false;
-      if (onlyReady) return item.status === 'ready';
-      return item.locationId && item.custodianId;
-    });
+    const toIngest = queue.filter((item) => !item.isIngested && !item.isExtracting).map(item => ({
+      ...item,
+      locationId: item.locationId || defaultLoc,
+      custodianId: item.custodianId || defaultCust
+    }));
 
     if (toIngest.length === 0) {
-      toast.error('No validated documents ready for ingestion. Assign locations and custodians first.');
+      toast.error('No validated documents ready for ingestion.');
       return;
     }
 
@@ -434,8 +463,8 @@ export const BulkUpload = () => {
           reviewDate: item.reviewDate || null,
           expiryDate: item.expiryDate || null,
           preparedBy: user?.name || 'Document Controller',
-          currentCustodian: item.custodianId,
-          storageLocation: item.locationId,
+          currentCustodian: item.custodianId || defaultCust,
+          storageLocation: item.locationId || defaultLoc,
           boxNumber: 'BX-01',
           fileNumber: `${item.documentNumber}-F1`,
           physicalCopiesCount: 1,
@@ -450,7 +479,10 @@ export const BulkUpload = () => {
           extractedMetadata: {
             rawValues: item.extractedRaw || {},
             confidence: item.confidenceScore
-          }
+          },
+          password: password.trim(),
+          signatureMeaning: meaning || 'Author / Ingestion Attestation',
+          reason: reason || 'Bulk GxP Master Document Ingestion & Physical Vault Archival'
         };
 
         const res = await documentService.createDocument(payload);
@@ -517,25 +549,21 @@ export const BulkUpload = () => {
 
   // Ingest button click handler
   const handleStartIngestClick = () => {
-    const unplacedItems = queue.filter((item) => !item.isIngested && !item.locationId);
-    const readyItems = queue.filter((item) => item.status === 'ready');
-
     if (queue.length === 0) {
       toast.info('Please upload PDF files to populate the queue.');
       return;
     }
 
-    if (readyItems.length === 0 && unplacedItems.length > 0) {
-      // Direct offer to auto-place
-      setIngestConfirmModal(true);
-      return;
+    // Auto-place any unplaced items so location & custodian are ready
+    const unplaced = queue.some((item) => !item.isIngested && (!item.locationId || !item.custodianId));
+    if (unplaced) {
+      handleAutoPlaceAll();
     }
 
-    if (unplacedItems.length > 0) {
-      setIngestConfirmModal(true);
-    } else {
-      executeIngest(false);
-    }
+    // Prompt 21 CFR Part 11 Electronic Signature Modal
+    setESignPassword('');
+    setShowESignPassword(false);
+    setESignModalOpen(true);
   };
 
   // Filtered queue
@@ -988,9 +1016,9 @@ export const BulkUpload = () => {
       )}
 
       {/* MODAL 1: Apply Storage Location in Batch */}
-      {locationModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+      {locationModalOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 animate-fade-in my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-orange-500" />
@@ -1061,13 +1089,14 @@ export const BulkUpload = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL 2: Batch Assign Custodian */}
-      {custodianModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+      {custodianModalOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 animate-fade-in my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <UserIcon className="w-5 h-5 text-orange-500" />
@@ -1136,13 +1165,14 @@ export const BulkUpload = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL 3: Ingestion Confirmation with Smart Auto-Place fallback */}
-      {ingestConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+      {ingestConfirmModal && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 animate-fade-in my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5" />
@@ -1192,13 +1222,14 @@ export const BulkUpload = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* MODAL 4: Inspect / Edit Item Metadata */}
-      {inspectModalItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 max-h-[85vh] overflow-y-auto">
+      {inspectModalItem && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 animate-fade-in my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-orange-500" />
@@ -1363,7 +1394,159 @@ export const BulkUpload = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 21 CFR Part 11 Batch Electronic Signature Modal */}
+      {eSignModalOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full shadow-2xl p-6 space-y-5 animate-fade-in my-auto max-h-[calc(100vh-2rem)] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center shadow-xs">
+                  <FileSignature className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    21 CFR Part 11 Electronic Signature
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Batch Ingestion Attestation & Chain of Custody Binding
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setESignModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Signer Identity Box */}
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 dark:text-slate-400">Signer Identity:</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  {user?.name || 'Anita Sharma'} ({user?.role || 'Admin'})
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 dark:text-slate-400">Pending Ingestion:</span>
+                <span className="font-mono font-bold text-orange-600 dark:text-orange-400">
+                  {queue.filter((q) => !q.isIngested).length} document(s)
+                </span>
+              </div>
+            </div>
+
+            {/* Signature Meaning */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Signature Meaning / Purpose
+              </label>
+              <select
+                value={eSignMeaning}
+                onChange={(e) => setESignMeaning(e.target.value)}
+                className="w-full text-xs py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+              >
+                <option value="Author / Ingestion Attestation">Author / Ingestion Attestation</option>
+                <option value="Review & Vault Registration">Review & Vault Registration</option>
+                <option value="Custodian Transfer & Storage Verification">Custodian Transfer & Storage Verification</option>
+                <option value="Quality Assurance Vault Approval">Quality Assurance Vault Approval</option>
+              </select>
+            </div>
+
+            {/* Justification / Reason */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Audit Trail Justification / Reason
+              </label>
+              <input
+                type="text"
+                value={eSignReason}
+                onChange={(e) => setESignReason(e.target.value)}
+                placeholder="State reason for batch document ingestion"
+                className="w-full text-xs py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+              />
+            </div>
+
+            {/* Password Re-authentication */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Account Password (21 CFR Part 11 Re-auth) <span className="text-rose-500">*</span>
+                </label>
+                <span className="text-[10px] text-slate-400">Required</span>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-3.5 h-3.5" />
+                </div>
+                <input
+                  type={showESignPassword ? 'text' : 'password'}
+                  value={eSignPassword}
+                  onChange={(e) => setESignPassword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && eSignPassword.trim()) {
+                      setESignModalOpen(false);
+                      executeIngest(eSignPassword, eSignMeaning, eSignReason);
+                    }
+                  }}
+                  placeholder="Enter your security password to sign"
+                  autoFocus
+                  className="w-full text-xs pl-9 pr-10 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowESignPassword(!showESignPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer"
+                >
+                  {showESignPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Regulatory Compliance Footnote */}
+            <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/60 text-[11px] text-orange-900 dark:text-orange-200 leading-relaxed flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 shrink-0 text-orange-600 dark:text-orange-400 mt-0.5" />
+              <span>
+                By clicking <strong>Sign & Ingest</strong>, you certify under penalty of perjury that this action is your legally binding signature equivalent to a handwritten signature pursuant to FDA 21 CFR Part 11.
+              </span>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setESignModalOpen(false)}
+                className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!eSignPassword.trim() || isIngestingBatch}
+                onClick={() => {
+                  setESignModalOpen(false);
+                  executeIngest(eSignPassword, eSignMeaning, eSignReason);
+                }}
+                className={`px-5 py-2 text-xs font-bold rounded-xl text-white shadow-sm flex items-center gap-1.5 transition cursor-pointer ${
+                  !eSignPassword.trim() || isIngestingBatch
+                    ? 'bg-orange-400 opacity-60 cursor-not-allowed'
+                    : 'bg-orange-600 hover:bg-orange-700'
+                }`}
+              >
+                <FileSignature className="w-3.5 h-3.5" />
+                Sign & Ingest ({queue.filter((q) => !q.isIngested).length})
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
